@@ -1,4 +1,8 @@
 pipeline {
+  agent {
+    label 't7610'
+  }
+
   stages {
     stage('terraform apply dynamics') {
       steps {
