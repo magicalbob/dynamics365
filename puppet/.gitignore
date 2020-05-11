@@ -1,0 +1,10 @@
+build*log
+build*log.last
+output-*
+puppet.zip
+*.box
+packer_cache
+.vagrant
+files/scripts
+files/software
+vagrant_ip/*.ip

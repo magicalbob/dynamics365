@@ -1,0 +1,12 @@
+<%- | String $safemodeadminpass,
+      String $ad_suffix
+| -%>
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "newforest started"
+
+$SecurePassword = ConvertTo-SecureString -String "<%= $safemodeadminpass %>" -AsPlainText -Force
+
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "newforest got secure password"
+
+Install-ADDSForest -CreateDnsDelegation:$false -DatabasePath "C:\Windows\NTDS" -DomainMode "Win2012R2" -DomainName "<%= $domain %>" -DomainNetbiosName "<%= $hostname.upcase() %><%= $ad_suffix %>" -ForestMode "Win2012R2" -InstallDns:$true -LogPath "C:\Windows\NTDS" -NoRebootOnCompletion:$false -SysvolPath "C:\Windows\SYSVOL" -Force:$true -SafeModeAdministratorPassword $SecurePassword
+
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "newforest installed"

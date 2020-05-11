@@ -1,0 +1,35 @@
+---
+- hostname:     dynad
+  domain:       blue.local.vagrant.vagrant.local
+  memory:       4096
+  cpus:         1
+  box:          dynamics-windows-virtualbox.box
+  box_url:      http://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox.box
+
+- hostname:     dynsql
+  domain:       blue.local.vagrant.vagrant.local
+  memory:       4096
+  cpus:         1
+  box:          dynamics-windows-virtualbox.box
+  box_url:      http://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox.box
+
+- hostname:     dynfe
+  domain:       blue.local.vagrant.vagrant.local
+  memory:       4096
+  cpus:         1
+  box:          dynamics-windows-virtualbox.box
+  box_url:      http://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox.box
+
+- hostname:     dynbe
+  domain:       blue.local.vagrant.vagrant.local
+  memory:       4096
+  cpus:         1
+  box:          dynamics-windows-virtualbox.box
+  box_url:      http://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox.box
+
+- hostname:     dynadm
+  domain:       blue.local.vagrant.vagrant.local
+  memory:       4096
+  cpus:         1
+  box:          dynamics-windows-virtualbox.box
+  box_url:      http://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox.box

@@ -1,0 +1,10 @@
+<%- | String $redis_ip,
+      String $redis_pass
+| -%>
+param($Name)
+
+$prefix=(cat c:\scripts\prefix)
+
+$retVal = (echo "AUTH <%= $redis_pass %>" ` "GET ${prefix}_${Name}" | nc -w 1 <%= $redis_ip %> 6379)
+
+return $retVal[-1]

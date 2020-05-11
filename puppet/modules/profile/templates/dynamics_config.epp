@@ -1,0 +1,104 @@
+<%- | String $crm_license_key,
+      String $preferred_dc,
+      String $sql_server,
+      String $fe_server,
+      String $be_server,
+      String $adm_server,
+      String $reporting_url,
+      String $ou_display,
+      String $ou_name,
+      String $ou_value,
+      String $dynamics_port,
+      String $dynamics_user,
+      String $dynamics_pass,
+      String $sandbox_user,
+      String $sandbox_pass,
+      String $deploy_user,
+      String $deploy_pass,
+      String $async_user,
+      String $async_pass,
+      String $vss_user,
+      String $vss_pass,
+      String $monitor_user,
+      String $monitor_pass
+| -%>
+<CRMSetup>
+<Server>
+<Patch update="false"></Patch>
+<LicenseKey><%= $crm_license_key %></LicenseKey>
+<PreferredDC><%= $preferred_dc %></PreferredDC>
+<SqlServer><%= $sql_server %></SqlServer>
+<% if $hostname == $fe_server { %>
+<Database create="true"/>
+<Roles>
+   <Role name="WebApplicationServer"/>
+   <Role Name="OrganizationWebService" />
+   <Role Name="DiscoveryWebService" />
+   <Role Name="HelpServer" />
+</Roles>
+<% } %>
+<% if $hostname == $be_server { %>
+<Database create="false"/>
+<Roles>
+   <Role Name="AsynchronousProcessingService" />
+   <Role Name="EmailConnector" />
+   <Role Name="SandboxProcessingService" />
+</Roles>
+<Reporting URL="<%= $reporting_url %>"/>
+<% } %>
+<% if $hostname == $adm_server { %>
+<Database create="false"/>
+<Roles>
+   <Role Name="VSSWriter" />
+   <Role Name="DeploymentWebService" />
+   <Role Name="DeploymentTools" />
+</Roles>
+<Reporting URL="<%= $reporting_url %>"/>
+<% } %>
+<OrganizationCollation>Latin1_General_CI_AI</OrganizationCollation>
+<basecurrency isocurrencycode="GBP" currencyname="GB Pound" currencysymbol="£" currencyprecision="2"/>
+<Organization><%= $ou_name %></Organization>
+<OrganizationUniqueName><%= $ou_display %></OrganizationUniqueName>
+<OU><%= $ou_value %></OU>
+<WebsiteUrl create="true" port="<%= $dynamics_port %>">http://localhost:<%= $dynamics_port %></WebsiteUrl>
+<InstallDir>c:\Program Files\Microsoft Dynamics CRM</InstallDir>
+
+<CrmServiceAccount type="DomainUser">
+  <ServiceAccountLogin><%= $dynamics_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $dynamics_pass %></ServiceAccountPassword>
+</CrmServiceAccount>
+
+<SandboxServiceAccount type="DomainUser">
+  <ServiceAccountLogin><%= $sandbox_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $sandbox_pass %></ServiceAccountPassword>
+</SandboxServiceAccount>
+
+<DeploymentServiceAccount type="DomainUser">
+  <ServiceAccountLogin><%= $deploy_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $deploy_pass %></ServiceAccountPassword>
+</DeploymentServiceAccount>
+
+<AsyncServiceAccount type="DomainUser">
+  <ServiceAccountLogin><%= $async_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $async_pass %></ServiceAccountPassword>
+</AsyncServiceAccount>
+
+<VSSWriterServiceAccount type="DomainUser"> 
+  <ServiceAccountLogin><%= $vss_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $vss_pass %></ServiceAccountPassword>
+</VSSWriterServiceAccount>
+
+<MonitoringServiceAccount type="DomainUser">
+  <ServiceAccountLogin><%= $monitor_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $monitor_pass %></ServiceAccountPassword>
+</MonitoringServiceAccount>
+
+<SQM optin="false"/>
+<muoptin optin="false"/>
+
+ <Email>
+  <IncomingExchangeServer name=""/>
+ </Email>
+
+ </Server>
+</CRMSetup>

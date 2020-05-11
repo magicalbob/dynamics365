@@ -1,0 +1,118 @@
+{
+  "variables": {
+    "os_type":        "{{env `OS_TYPE`}}",
+    "iso_url":        "{{env `ISO_URL`}}",
+    "iso_md5":        "{{env `ISO_MD5`}}",
+    "winrm_username": "{{env `WINRM_USERNAME`}}",
+    "winrm_password": "{{env `WINRM_PASSWORD`}}",
+    "disk_size":      "{{env `DISK_SIZE`}}",
+    "build_user":     "{{env `USERNAME`}}"
+  },
+
+  "builders": 
+  [
+    {
+      "headless":          true,
+      "type":              "virtualbox-iso",
+      "vm_name":           "{{user `os_type`}}-{{timestamp}}",
+      "guest_os_type":     "Windows2012_64",
+      "disk_size":         "{{user `disk_size`}}",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--natpf1", "winrm,tcp,,55985,,5985" ],
+        [ "modifyvm", "{{.Name}}", "--memory", "16384" ],
+        [ "modifyvm", "{{.Name}}", "--cpus", "4" ]
+      ],
+      "guest_additions_mode": "disable",
+      "post_shutdown_delay": "2m",
+      "iso_checksum_type": "md5",
+      "iso_url":           "{{user `iso_url`}}",
+      "iso_checksum":      "{{user `iso_md5`}}",
+      "communicator":      "winrm",
+      "winrm_username":    "{{user `winrm_username`}}",
+      "winrm_password":    "{{user `winrm_password`}}",
+      "winrm_timeout":     "5h",
+      "shutdown_command":  "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml",
+      "shutdown_timeout":     "15m",
+      "floppy_files": [
+        "answer_files/AutoUnattend.xml",
+        "scripts/winrm.ps1"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "windows-shell",
+      "inline": [
+        "winrm quickconfig -q",
+        "winrm set winrm/config/service/Auth @{Basic=\"true\"}",
+        "winrm set winrm/config/service @{AllowUnencrypted=\"true\"}",
+        "winrm set winrm/config/winrs @{MaxMemoryPerShellMB=\"1024\"}",
+        "netsh advfirewall set allprofiles state off"
+      ]
+    },
+    {
+      "type": "powershell",
+      "scripts": [
+        "./scripts/power.ps1",
+        "./scripts/defender.cmd",
+        "./scripts/puppet-download.cmd"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "answer_files/AutoUnattend.xml",
+      "destination": "c:\\scripts\\unattend.xml"
+    },
+    {
+      "type": "windows-shell",
+      "inline": [
+        "start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "files/hiera.yaml",
+      "destination": "c:\\ProgramData\\PuppetLabs\\puppet\\etc\\hiera.yaml"
+    },
+    {
+      "type": "file",
+      "source": "puppet.zip",
+      "destination": "c:\\windows\\temp\\puppet.zip"
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "Expand-Archive c:\\windows\\temp\\puppet.zip c:\\ProgramData\\PuppetLabs\\code\\environments\\production",
+        "cmd /c setx FACTERLIB c:\\programdata\\puppetlabs\\facter"
+      ]
+    },
+    {
+      "type": "windows-shell",
+      "scripts": [
+        "./scripts/puppet-apply.cmd"
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
+        "Invoke-WebRequest -Uri https://download.virtualbox.org/virtualbox/6.0.14/VBoxGuestAdditions_6.0.14.iso -Outfile C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
+        "Mount-DiskImage -ImagePath C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
+        "c:\\windows\\system32\\cmd /c E:\\cert\\VBoxCertUtil.exe add-trusted-publisher e:\\cert\\vbox*.cer --root e:\\cert\\vbox*.cer",
+        "c:\\windows\\system32\\cmd /c start /b /wait E:\\VBoxWindowsAdditions.exe /S /force",
+        "Dismount-DiskImage -ImagePath C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
+        "Remove-Item C:\\Users\\Administrator\\VBoxGuestAdditions.iso -Force",
+        "Move-Item -Path c:\\ProgramData\\Puppetlabs\\code -Destination c:\\ProgramData\\Puppetlabs\\code.build -Force",
+        "Remove-Item C:\\Scripts\\prefix -Force"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": false,
+      "compression_level": 9,
+      "output": "dynamics-{{user `os_type`}}-{{.Provider}}.box"
+    }
+  ]
+}

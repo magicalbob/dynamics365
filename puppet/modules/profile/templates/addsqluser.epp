@@ -1,0 +1,64 @@
+<%- | String $sql_server,
+      String $ad_domain,
+      String $ad_suffix
+| -%>
+param($Username, $Password, $Databases)
+
+if ($Databases -eq "") {
+  Write-Host "User $Username is not a database user"
+} else {
+  #import SQL Server module
+  Import-Module SQLPS -DisableNameChecking
+  
+  $instanceName = "<%= $sql_server %>"
+  
+  $loginName = "<%= $ad_domain %><%= $ad_suffix %>\$Username"
+  $dbUserName = $Username
+  $sqlPassword = (ConvertTo-SecureString $Password -AsPlainText -Force)
+  $databasenames = $Databases
+  $roleName = "db_owner"
+  
+  $server = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -ArgumentList $instanceName
+  
+  # drop login if it exists
+  if ($server.Logins.Contains($loginName))
+  {
+    Write-Host("Deleting the existing login $loginName.")
+       $server.Logins[$loginName].Drop()
+  }
+  
+  $login = New-Object `
+  -TypeName Microsoft.SqlServer.Management.Smo.Login `
+  -ArgumentList $server, $loginName
+  $login.LoginType = [Microsoft.SqlServer.Management.Smo.LoginType]::WindowsUser
+  $login.PasswordExpirationEnabled = $false
+  $login.Create($sqlPassword)
+  Write-Host("Login $loginName created successfully.")
+
+  $serverRole = $server.Roles | where {$_.Name -eq 'sysadmin'}
+  $serverRole.AddMember($loginName)
+  Write-Host("Login $loginName added to sysadmin.")
+  
+  foreach($databaseToMap in $databasenames)
+  {
+    $database = $server.Databases[$databaseToMap]
+    if ($database.Users[$dbUserName])
+    {
+      Write-Host("Dropping user $dbUserName on $database.")
+      $database.Users[$dbUserName].Drop()
+    }
+  
+    $dbUser = New-Object `
+    -TypeName Microsoft.SqlServer.Management.Smo.User `
+    -ArgumentList $database, $dbUserName
+    $dbUser.Login = $loginName
+    $dbUser.Create()
+    Write-Host("User $dbUser created successfully.")
+  
+    #assign database role for a new user
+    $dbrole = $database.Roles[$roleName]
+    $dbrole.AddMember($dbUserName)
+    $dbrole.Alter()
+    Write-Host("User $dbUser successfully added to $roleName role.")
+  }
+}

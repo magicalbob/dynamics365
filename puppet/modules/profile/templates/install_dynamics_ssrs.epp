@@ -1,0 +1,66 @@
+<%- | String $sql_server,
+      String $admin_pass,
+      String $fe_server,
+      Optional[String] $quiet_install = '/q',
+      String $dynamics_iso,
+      String $download_url
+| -%>
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics started."
+
+# Check if ssrs already installed
+$ssrsReady=(c:\scripts\flagmanget.ps1 -Name ssrs_ready)
+if ($ssrsReady -eq "true") {
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics ssrs already installed"
+}
+else
+{
+  # Copy dynamics iso to local disk
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy dynamics iso to local disk"
+  Import-Module BitsTransfer
+  $url = "<%= $download_url %><%= $dynamics_iso %>"
+  $output = "c:\scripts\<%= $dynamics_iso %>"
+  Start-BitsTransfer -Source $url -Destination $output
+
+  Do {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics wait until front end node installed"
+    $feReady=(c:\scripts\flagmanget.ps1 -Name <%= $fe_server %>_ready)
+    if ($feReady -ne "true") {
+      Start-Sleep 60
+    }
+  } Until ($feReady -eq "true")
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server front end node has installed"
+
+  # Mount dynamics iso
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy mount dynamic iso"
+  Mount-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>
+
+  # Work out dynamics drive letter and change to it
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy getting iso dir"
+  $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>|Get-Volume).DriveLetter
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy got iso dir $install_drive"
+
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start first srs install"
+  $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\server\amd64\SrsDataConnector\SetupSrsDataConnector.exe <%= $quiet_install %> /config "c:\scripts\srs-install-config.xml" /L c:\windows\temp\install_srs.log')
+  Invoke-Expression $install_command
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics completed first srs install"
+
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics first srs install will have failed, put right files in place now"
+  mkdir "c:\Program Files\Microsoft SQL Server\MSRS13.MSSQLSERVER\Reporting Services\ReportManager"
+  xcopy /s "c:\Program Files\Microsoft SQL Server\MSRS13.MSSQLSERVER\Reporting Services\ReportServer\*" "c:\Program Files\Microsoft SQL Server\MSRS13.MSSQLSERVER\Reporting Services\ReportManager"
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics correct files in place"
+
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start second srs install"
+  # Command already set
+  Invoke-Expression $install_command
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics completed second srs install"
+
+  # Set flag to show that dynamics ready on this node
+  c:\scripts\flagmanset.ps1 -Name ssrs_ready -Value "true"
+
+  # Restart computer post-install
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics restart computer"
+  Restart-Computer -Force
+
+  # Wait for restart to happen
+  Start-Sleep -Seconds 6000
+}

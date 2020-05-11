@@ -1,0 +1,71 @@
+---
+version: 5
+
+admin_password: vagrant
+
+service_users:
+  app:
+    firstname: App
+    lastname:  Dynamics
+    username:  dynapp
+    password:  password123~
+    database:
+    crmgroup:  false
+  deploy:
+    firstname: Deploy
+    lastname:  Dynamics
+    username:  dyndeploy
+    password:  password123~
+    database:
+    crmgroup:  false
+  monitor:
+    firstname: Monitor
+    lastname:  Dynamics
+    username:  dynmon
+    password:  password123~
+    database:
+    crmgroup:  false
+  vss:
+    firstname: VSS
+    lastname:  Dynamics
+    username:  dynvss
+    password:  password123~
+    database:
+    crmgroup:  false
+  async:
+    firstname: Async
+    lastname:  Dynamics
+    username:  dynasync
+    password:  password123~
+    database:
+    crmgroup:  false
+  sandbox:
+    firstname: Sandbox
+    lastname:  Dynamics
+    username:  dynsandbox
+    password:  password123~
+    database:
+    crmgroup:  false
+  sqlsvc:
+    firstname: SQL
+    lastname:  Service
+    username:  sqlsvc
+    password:  password123~
+    database:  
+    crmgroup:  false
+  appuser:
+    firstname: AppUser
+    lastname:  Dynamics
+    username:  dynappuser
+    password:  password123~
+    database:
+    crmgroup:  false
+  svcapp:
+    firstname: SVC
+    lastname:  APP
+    username:  SVCApp
+    password:  password123~
+    database:  DynDev_MSCRM
+    crmgroup:  true
+
+safemodeadminpass: password123~

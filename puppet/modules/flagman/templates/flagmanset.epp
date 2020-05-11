@@ -1,0 +1,12 @@
+<%- | String $redis_ip,
+      String $redis_pass
+| -%>
+param($Name, $Value)
+
+$prefix=(cat c:\scripts\prefix)
+
+$test_result=''
+while (!($test_result -eq $Value)) {
+  echo "AUTH <%= $redis_pass %>" ` "SET ${prefix}_${Name} ${Value}" | nc -w 1 <%= $redis_ip %> 6379
+  $test_result=(/scripts/flagmanget.ps1 -Name $Name)
+}

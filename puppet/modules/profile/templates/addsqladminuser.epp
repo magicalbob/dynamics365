@@ -1,0 +1,36 @@
+<%- | String $sql_server,
+      String $admin_pass
+| -%>
+$Username = "Administrator"
+$Password = "<%= $admin_pass %>"
+
+#import SQL Server module
+Import-Module SQLPS -DisableNameChecking
+
+$instanceName = "<%= $sql_server %>"
+
+$loginName = "<%= $sql_server %>\$Username"
+$dbUserName = $Username
+$sqlPassword = (ConvertTo-SecureString $Password -AsPlainText -Force)
+$roleName = "db_owner"
+
+$server = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -ArgumentList $instanceName
+
+# drop login if it exists
+if ($server.Logins.Contains($loginName))
+{
+  Write-Host("Deleting the existing login $loginName.")
+     $server.Logins[$loginName].Drop()
+}
+
+$login = New-Object `
+-TypeName Microsoft.SqlServer.Management.Smo.Login `
+-ArgumentList $server, $loginName
+$login.LoginType = [Microsoft.SqlServer.Management.Smo.LoginType]::WindowsUser
+$login.PasswordExpirationEnabled = $false
+$login.Create($sqlPassword)
+Write-Host("Login $loginName created successfully.")
+
+$serverRole = $server.Roles | where {$_.Name -eq 'sysadmin'}
+$serverRole.AddMember($loginName)
+Write-Host("Login $loginName added to sysadmin.")

@@ -1,0 +1,3 @@
+[submodule "modules/crmbuzz/files/CRMBuzzPowerTools"]
+	path = modules/crmbuzz/files/CRMBuzzPowerTools
+	url = https://github.com/CRMBuzz/CRMBuzzPowerTools.git

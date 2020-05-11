@@ -1,0 +1,16 @@
+.vagrant
+build.vagrant.log
+build.vagrant.log.last
+dynamics-windows-virtualbox.box
+packer_cache/
+output-virtualbox-iso/
+files/software
+puppet.zip
+prefix
+terraform/.terraform/
+terraform/terraform-provider-virtualbox
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfstate.d
+answer_files/AutoUnattend.xml
+answer_files/AutoUnattend.data.yml

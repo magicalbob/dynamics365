@@ -1,0 +1,20 @@
+{
+  "CHANGELOG.md": "790ae3f4a120a7fb0bdfb4d6bb083aac",
+  "Gemfile": "b41fa04d0bc0ae911416b54de5994f8a",
+  "HISTORY.md": "ccb8c79ee3c62850d9e0bb2d4e8dbd62",
+  "LICENSE": "e092239e8c36c7a11965aabab642090d",
+  "README.md": "4b3b68a9e0571240100f1e370187633f",
+  "Rakefile": "3c6f218e7e63e1a6e24251f365423e49",
+  "examples/init.pp": "b449fd26fbde5aafa9b0aaa4f7ea0f98",
+  "lib/puppet/provider/windows_env/windows_env.rb": "fb4f51136113876f81c817e6850d8247",
+  "lib/puppet/type/windows_env.rb": "42004c491167039a623b68e165c78141",
+  "metadata.json": "cf687c66f2cb979faabbe27cc5c9d4a3",
+  "spec/acceptance/nodesets/ec2/image_templates.yaml": "516f9c4c3407993a100090ce9e1a643c",
+  "spec/acceptance/nodesets/ec2/windows-2016-base-x64.yml": "e9db4dd16c60c52b433694130c2583a0",
+  "spec/acceptance/nodesets/fedora-26-x64.yml": "e7ee1e18590548ff098192c2127c6697",
+  "spec/acceptance/nodesets/fedora-27-x64.yml": "326a10c4eb327ccd85775dfa0f76e5c1",
+  "spec/classes/coverage_spec.rb": "166c74e93a4e70e9de79ae69f3c10e1d",
+  "spec/default_facts.yml": "3da74b0aff340a4fbcca9cc4eba104c1",
+  "spec/spec_helper.rb": "72093296acb026b92861c5ba6d724836",
+  "spec/unit/puppet/type/windows_env_type_spec.rb": "095f1a7ab5095296750222f7e1ebaa21"
+}

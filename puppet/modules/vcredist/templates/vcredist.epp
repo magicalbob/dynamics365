@@ -1,0 +1,6 @@
+Install-PackageProvider -Name NuGet -Force
+Install-Module -Name VcRedist -Force
+Import-Module -Name VcRedist
+New-Item C:\Temp\VcRedist -ItemType Directory
+Get-VcList | Get-VcRedist -Path C:\Temp\VcRedist
+Install-VcRedist -Path C:\Temp\VcRedist -VcList (Get-VcList) -silent

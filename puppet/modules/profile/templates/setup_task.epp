@@ -1,0 +1,3 @@
+<%- | String $user_name
+| -%>
+Register-ScheduledTask -TaskName apply_puppet -Action $(New-ScheduledTaskAction -Execute powershell -argument "-file c:/scripts/apply_puppet.ps1")  -User <%= $user_name %> -Trigger $(New-ScheduledTaskTrigger -Once -At 00:00 -RepetitionInterval (New-TimeSpan -Minutes 1)) -Settings $(New-ScheduledTaskSettingsSet -StartWhenAvailable)

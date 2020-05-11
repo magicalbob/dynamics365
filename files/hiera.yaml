@@ -1,0 +1,11 @@
+---
+version: 5
+defaults:
+  datadir: c:\programdata\puppetlabs\code\environments\production\hieradata
+  data_hash: yaml_data
+hierarchy:
+  - name: Common
+    paths:
+      - account/account.yaml
+      - common.yaml
+      - keys.yaml

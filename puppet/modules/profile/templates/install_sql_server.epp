@@ -1,0 +1,51 @@
+<%- | String $download_url,
+      String $sql_iso,
+      String $ssm_exe,
+      String $ad_domain,
+      String $ad_suffix,
+      String $sql_svc_pass,
+      String $quiet_install = '/q'
+| -%>
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server started."
+
+# Check if SQL Server already installed
+if (where.exe sqlcmd) {
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "SQL Server already installed"
+}
+else
+{
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server copy sql iso to local disk"
+  Import-Module BitsTransfer
+  $url = "<%= $download_url %><%= $sql_iso %>"
+  $output = "c:\scripts\<%= $sql_iso %>"
+  Start-BitsTransfer -Source $url -Destination $output
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server copy sql management tools to local disk"
+  $url = "<%= $download_url %><%= $ssm_exe %>"
+  $output = "c:\scripts\<%= $ssm_exe %>"
+  Start-BitsTransfer -Source $url -Destination $output
+  # Mount sql server iso
+  Mount-DiskImage -ImagePath c:\scripts\<%= $sql_iso %>
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server iso mounted"
+
+  # Work out sql server drive letter and change to it
+  $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $sql_iso %>|Get-Volume).DriveLetter
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server drive $install_drive"
+
+  # Install sql server 
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server start sql server install"
+  $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\setup.exe <%= $quiet_install %> /IACCEPTSQLSERVERLICENSETERMS /ACTION=install /FEATURES=SQLEngine,FullText,RS /INSTANCENAME=MSSQLSERVER /SQLSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /SQLSVCPASSWORD="<%= $sql_svc_pass %>" /SQLSYSADMINACCOUNTS="<%= $ad_domain %><%= $ad_suffix %>\Administrator" /AGTSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /AGTSVCPASSWORD="<%= $sql_svc_pass %>" /AGTSVCSTARTUPTYPE=Automatic /ASSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /ASSVCPASSWORD="<%= $sql_svc_pass %>" /RSSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /RSSVCPASSWORD="<%= $sql_svc_pass %>" /ISSVCAccount="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /ISSVCPASSWORD="<%= $sql_svc_pass %>" /ASSYSADMINACCOUNTS="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /NPENABLED=1 /SAPWD=<%= $sql_svc_pass %>')
+  Invoke-Expression $install_command > c:\windows\temp\sql_install.log
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server install complete $LastExitCode"
+
+  # Set flag to show that sql server ready on this node
+  c:\scripts\flagmanset.ps1 -Name sql_ready -Value "true"
+
+  # Install sql server management tools
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server start sql server management tools install"
+  cmd /r start /b /wait c:\scripts\<%= $ssm_exe %> /install /IACCEPTSQLSERVERLICENSETERMS <% if $quiet_install =~ "/[qQ]" { %>/quiet<% } %> /log c:\Windows\Temp\ssms-install.log
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server management tools install complete"
+
+  # Restart computer post-install
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server restart computer"
+  Restart-Computer -Force
+}

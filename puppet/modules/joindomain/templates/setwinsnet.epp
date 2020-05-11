@@ -1,0 +1,14 @@
+$nics = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE"
+
+$ad_ip=''
+while (!($ad_ip -match "^[\d\.]+$")) {
+  $ad_ip=$(/scripts/flagmanget.ps1 ad_ip)
+}
+
+foreach ($nic in $nics) {
+  $newDNS="$ad_ip", "8.8.8.8"
+  $nic.SetWINSServer("$ad_ip", "$ad_ip")
+  $nic.SetDNSServerSearchOrder($newDNS)
+}
+
+return 0

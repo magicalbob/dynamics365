@@ -1,0 +1,17 @@
+<%- | String $monitor_user,
+      String $monitor_pass,
+      String $sql_server
+| -%>
+<crmsetup>
+<srsdataconnector>
+<configdbserver><%= $sql_server %></configdbserver> 
+<autogroupmanagementoff>0</autogroupmanagementoff>
+<instancename>MSSQLSERVER</instancename>
+<patch update="false" /> 
+<muoptin optin="true" />
+<MonitoringServiceAccount type="DomainUser">
+  <ServiceAccountLogin><%= $monitor_user %></ServiceAccountLogin>
+  <ServiceAccountPassword><%= $monitor_pass %></ServiceAccountPassword>
+</MonitoringServiceAccount>
+</srsdataconnector>
+</crmsetup>

@@ -1,0 +1,27 @@
+<%- | String $dc_string
+| -%>
+param($Username, $Password, $Firstname, $Lastname, $OU, $Domain)
+
+#Check if the user account already exists in AD
+if (Get-ADUser -F {SamAccountName -eq $Username})
+{
+  #If user already exists, output a warning message
+  Write-Warning "A user account $Username already exists in Active Directory."
+}
+else
+{
+  New-ADUser `
+    -SamAccountName $Username `
+    -UserPrincipalName "$Username@$Domain" `
+    -Name "$Firstname $Lastname" `
+    -GivenName "$Firstname" `
+    -Surname "$Lastname" `
+    -Enabled 1 `
+    -ChangePasswordAtLogon 0 `
+    -PasswordNeverExpires 1 `
+    -DisplayName "$Lastname, $Firstname" `
+    -Path "$OU" `
+    -AccountPassword (ConvertTo-SecureString $Password -AsPlainText -Force)
+
+    Add-ADGroupMember -Identity "CN=Administrators,CN=Builtin,<%= $dc_string %>" -Members $Username
+}
