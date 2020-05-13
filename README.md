@@ -1,7 +1,16 @@
+Pre-requisites
+==============
+
+*	packer
+*	virtualbox
+*	terraform
+*	vagrant
+*	mustache
+
 Setup
 =====
 
-Needs packer and VirtualBox to build the base image, and VirtualBox and Vagrant to run the machines from the base image.
+Needs packer and VirtualBox to build the base image, and VirtualBox and terraform/Vagrant to run the machines from the base image.
 
 Packer is set up to use an iso install.
 
@@ -24,7 +33,7 @@ A basic locking system is used by the build scripts, which stops them building i
 Building
 ========
 
-To build the base image just run `./scripts/build-packer.sh`. To get Jenkins to build the packer image add something like this as the 1st stage of the Jenkinsfile::
+To build the base image just run `./scripts/build-packer.sh`. To get Jenkins to build the packer image add something like this as the 1st stage of the Jenkinsfile::```
     stage('packer build dynamics vagrant box') {
       steps {
         script {
@@ -34,6 +43,7 @@ To build the base image just run `./scripts/build-packer.sh`. To get Jenkins to 
         }
       }
     }
+```
 
 To stand up dynamics in Vagrant run `./scripts/build-vagrant.sh`. Vagrant is always a bit flaky.
 
