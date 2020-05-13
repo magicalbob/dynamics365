@@ -33,7 +33,8 @@ A basic locking system is used by the build scripts, which stops them building i
 Building
 ========
 
-To build the base image just run `./scripts/build-packer.sh`. To get Jenkins to build the packer image add something like this as the 1st stage of the Jenkinsfile::```
+To build the base image just run `./scripts/build-packer.sh`. To get Jenkins to build the packer image add something like this as the 1st stage of the Jenkinsfile:
+```
     stage('packer build dynamics vagrant box') {
       steps {
         script {
