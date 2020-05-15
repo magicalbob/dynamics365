@@ -89,23 +89,6 @@ class joindomain(
       provider => powershell
     }
 
-    -> exec { 'remove old apply_puppet task':
-      command => 'c:\windows\system32\cmd.exe /c schtasks /delete /tn apply_puppet /f',
-      path    => $::path
-    }
-
-    -> file { 'script to re-setup apply_puppet task':
-      ensure  => present,
-      path    => 'c:\scripts\resetup_task.ps1',
-      content => epp('profile/setup_task.epp',{ user_name => "${ad_domain}${ad_suffix}\\Administrator" })
-    }
-
-    -> exec { 're-schedule apply puppet':
-      command => 'c:\windows\system32\cmd.exe /c powershell -File c:\scripts\resetup_task.ps1',
-      unless  => 'c:\windows\system32\cmd.exe /c schtasks /query /tn apply_puppet',
-      path    => $::path
-    }
-
     -> exec { 'set default domain to log in as':
       command => "c:\\windows\\system32\\cmd.exe /c Reg Add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v DefaultDomainName /t REG_SZ /d \"${ad_domain}${ad_suffix}\" /f",
       path    => $::path

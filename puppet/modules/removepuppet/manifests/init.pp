@@ -23,7 +23,7 @@ class removepuppet(
 )
 {
   exec { 'remove apply puppet task':
-    command => 'c:\windows\system32\cmd.exe /c schtasks /change /disable /tn apply_puppet',
-    path    => $::path
+    command => 'powershell -command remove-item -force -path c:\programdata\microsoft\windows\startm~1\programs\startup\apply_puppet.cmd',
+    path    => $::path,
   }
 }

@@ -22,9 +22,6 @@ if (!(Test-Path c:\scripts\prefix)) {
 $machine_name = hostname
 if ($machine_name -Like "WIN*") {
   # Make sure flagman in place and prefix set
-  if (!(Test-Path c:\programdata\puppetlabs\code\environments\production)) {
-    mv /programdata/puppetlabs/code.build /programdata/puppetlabs/code
-  }
   puppet apply -e "include flagman"
 
   Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
@@ -75,8 +72,6 @@ if ($machine_name -Like "DYNAD") {
 
 # Set flag that machine build has started, to true, for locking
 c:\scripts\flagmanset.ps1 -Name ${machine_name}_started -Value true
-
-puppet apply --verbose --logdest eventlog -e "include base"
 
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "apply_puppet applying puppet"
 puppet apply --verbose --logdest eventlog c:\programdata\puppetlabs\code\environments\production\manifests\site.pp

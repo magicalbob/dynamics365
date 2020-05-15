@@ -175,15 +175,9 @@ class base(
     })
   }
 
-  -> file { 'script to setup apply_puppet task':
+  -> file { 'script to run apply_puppet task':
     ensure  => present,
-    path    => 'c:\scripts\setup_task.ps1',
-    content => epp('profile/setup_task.epp',{ user_name => 'Administrator' })
-  }
-
-  -> exec { 'schedule apply puppet':
-    command => 'c:\windows\system32\cmd.exe /c powershell -File c:\scripts\setup_task.ps1',
-    unless  => 'c:\windows\system32\cmd.exe /c schtasks /query /tn apply_puppet',
-    path    => $::path
+    path    => 'c:\programdata\microsoft\windows\startm~1\programs\startup\apply_puppet.cmd',
+    content => epp('profile/cmd_apply_puppet.epp',{ })
   }
 }

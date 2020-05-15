@@ -1,0 +1,8 @@
+cmd /c if not exist c:\programdata\puppetlabs\code move c:\programdata\puppetlabs\code.build c:\programdata\puppetlabs\code 
+call puppet apply --verbose --logdest eventlog -e 'include base'
+
+
+
+
+
+powershell -command c:\scripts\apply_puppet.ps1
