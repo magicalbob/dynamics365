@@ -23,6 +23,7 @@ do {
   catch {
     $ou = $null
   }
+  sleep 10
 } while ($ou.DistinguishedName -ne '<%= $ou_string %>')
 
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "join domain got distinguished name."

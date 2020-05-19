@@ -6,6 +6,14 @@ echo "Start time of build test is $(date -d @$start_time)"
 redis_ip=$(grep redis_ip puppet/hieradata/common.yaml |cut -d: -f2)
 redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 
+virtualenv .py > /dev/null 2>&1
+
+. .py/bin/activate > /dev/null 2>&1
+
+pip install pywinrm > /dev/null 2>&1
+
+export admin_password=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
+
 # read prefix for redis keys for this build
 prefix=$(cat prefix)
 
@@ -23,9 +31,15 @@ display_msg8=1
 display_msg9=1
 display_msg10=1
 display_msg11=1
+display_msgAD=1
+display_msgSQL=1
+display_msgFE=1
+display_msgBE=1
+display_msgADM=1
 
 while [ true ]
 do
+  export ad_ip=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_ad_ip\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   ad_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynad_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   sql_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynsql_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   fe_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
@@ -56,6 +70,52 @@ do
       echo -e "AUTH ${redis_pass}\r\nSET LOCK ${LOCK}\r\n" | nc -w1 ${redis_ip} 6379 >/dev/null 2>&1
       resp=$?
     done
+  fi
+
+  ad_machines=$($(dirname $0)/check_winrm.py)
+  if [[ "$ad_machines" =~ "DYNAD," ]]
+  then
+    if [ ${display_msgAD} -eq 1 ]
+    then
+      echo "Domain set up on DYNAD at $(date)"
+      display_msgAD=0
+    fi
+  fi
+
+  if [[ "$ad_machines" =~ "DYNSQL," ]]
+  then
+    if [ ${display_msgSQL} -eq 1 ]
+    then
+      echo "Domain joined by DYNSQL at $(date)"
+      display_msgSQL=0
+    fi
+  fi
+
+  if [[ "$ad_machines" =~ "DYNFE," ]]
+  then
+    if [ ${display_msgFE} -eq 1 ]
+    then
+      echo "Domain joined by DYNFE at $(date)"
+      display_msgFE=0
+    fi
+  fi
+
+  if [[ "$ad_machines" =~ "DYNBE," ]]
+  then
+    if [ ${display_msgBE} -eq 1 ]
+    then
+      echo "Domain joined by DYNBE at $(date)"
+      display_msgBE=0
+    fi
+  fi
+
+  if [[ "$ad_machines" =~ "DYNADM," ]]
+  then
+    if [ ${display_msgADM} -eq 1 ]
+    then
+      echo "Domain joined by DYNADM at $(date)"
+      display_msgADM=0
+    fi
   fi
 
   sql_ready=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_sql_ready\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)

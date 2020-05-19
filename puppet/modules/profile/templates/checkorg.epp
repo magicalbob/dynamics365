@@ -1,0 +1,13 @@
+param($OrgName)
+
+# enable crm powershell commands
+add-pssnapin microsoft.crm.powershell
+
+# check whether org exists & is enabled
+$orgEnabled=(get-crmorganization $OrgName).State
+
+if ( $orgEnabled = "Enabled" ) {
+  /scripts/flagmanset.ps1 -name neworg_ready -value true
+} else {
+  /scripts/flagmanset.ps1 -name neworg_ready -value $orgEnabled
+}

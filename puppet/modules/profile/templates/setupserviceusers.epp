@@ -1,6 +1,5 @@
 <%- | String $dc_string,
       String $ad_suffix,
-      String $dynamics_deploy,
       String $dynamics_app,
       String $dynamics_async,
       String $dynamics_svcapp,
@@ -8,12 +7,6 @@
       String $dynamics_monitor,
       String $dynamics_sandbox
 | -%>
-
-#Add the Deployment account to the administrators group
-if (Get-ADUser -F {SamAccountName -eq "<%= $dynamics_deploy %>"})
-{
-       Add-ADGroupMember -Identity "CN=Administrators,CN=Builtin,<%= $dc_string %>" -Members <%= $dynamics_deploy %>
-}
 
 if ((Get-ADUser -F {SamAccountName -eq "<%= $dynamics_app %>"}) -and (Get-ADUser -F {SamAccountName -eq "<%= $dynamics_async %>"}))
 {
@@ -25,7 +18,6 @@ if (Get-ADUser -F {SamAccountName -eq "<%= $dynamics_svcapp %>"})
        Add-ADGroupMember -Identity "CN=Administrators,CN=Builtin,<%= $dc_string %>" -Members <%= $dynamics_svcapp %>
 }
 
-."c:\Scripts\AddAccountToLogonAsService.ps1" "<%= $hostname %><%= $ad_suffix %>\<%= $dynamics_deploy %>"
 ."c:\Scripts\AddAccountToLogonAsService.ps1" "<%= $hostname %><%= $ad_suffix %>\<%= $dynamics_async %>"
 ."c:\Scripts\AddAccountToLogonAsService.ps1" "<%= $hostname %><%= $ad_suffix %>\<%= $dynamics_vss %>"
 ."c:\Scripts\AddAccountToLogonAsService.ps1" "<%= $hostname %><%= $ad_suffix %>\<%= $dynamics_monitor %>"

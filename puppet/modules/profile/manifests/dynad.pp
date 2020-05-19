@@ -67,7 +67,6 @@ class profile::dynad(
     }
   } else {
     $service_users=lookup('service_users')
-    $dynamics_deploy = $service_users['deploy']['username']
     $dynamics_app = $service_users['app']['username']
     $dynamics_async = $service_users['async']['username']
     $dynamics_svcapp = $service_users['svcapp']['username']
@@ -117,7 +116,6 @@ class profile::dynad(
       content => epp('profile/setupserviceusers.epp',{
         dc_string        => $dc_string,
         ad_suffix        => $ad_suffix,
-        dynamics_deploy  => $dynamics_deploy,
         dynamics_app     => $dynamics_app,
         dynamics_async   => $dynamics_async,
         dynamics_svcapp  => $dynamics_svcapp,

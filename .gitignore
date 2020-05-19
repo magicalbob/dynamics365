@@ -14,3 +14,4 @@ terraform/terraform.tfstate.backup
 terraform/terraform.tfstate.d
 answer_files/AutoUnattend.xml
 answer_files/AutoUnattend.data.yml
+.py/

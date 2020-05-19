@@ -11,13 +11,6 @@ service_users:
     password:  password123~
     database:
     crmgroup:  false
-  deploy:
-    firstname: Deploy
-    lastname:  Dynamics
-    username:  dyndeploy
-    password:  password123~
-    database:
-    crmgroup:  false
   monitor:
     firstname: Monitor
     lastname:  Dynamics

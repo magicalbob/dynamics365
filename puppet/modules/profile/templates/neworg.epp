@@ -1,49 +1,15 @@
-import pyautogui
-import time
-import win32gui
-from os import system
-from os import path
-import sys
-pyautogui.hotkey('win','r')
-time.sleep(10)
-DEPLOY_PATH = 'C:\\Program Files\\Microsoft Dynamics CRM\\tools\\Microsoft.Crm.DeploymentManager.exe'
-if not path.exists(DEPLOY_PATH):
-  print("Dynamics does not exist")
-  sys.exit(-1)
-pyautogui.typewrite(DEPLOY_PATH)
-pyautogui.press('enter')
-time.sleep(10)
-pyautogui.press('down')
-pyautogui.press('down')
-pyautogui.press('apps')
-pyautogui.press('down')
-pyautogui.press('enter')
-time.sleep(10)
-pyautogui.typewrite(sys.argv[1])
-pyautogui.press('tab')
-pyautogui.press('enter')
-pyautogui.press('enter')
-pyautogui.press('enter')
-pyautogui.press('enter')
-time.sleep(120)
-pyautogui.press('enter')
-pyautogui.press('enter')
-def findWizard(hwnd,param):
-  if 'New Organization Wizard' in win32gui.GetWindowText(hwnd):
-    parentWnd.append(hwnd)
-def windowEnumerationHandler(hwnd, param):
-  if 'Finish' in win32gui.GetWindowText(hwnd):
-    targetWnd.append(hwnd)
-parentWnd = []
-targetWnd = []
-while len(parentWnd) == 0:
-  win32gui.EnumWindows(findWizard, None)
-while len(targetWnd) == 0:
-  win32gui.EnumChildWindows(parentWnd[0],windowEnumerationHandler, None)
-while True:
-  try:
-    win32gui.SetActiveWindow(targetWnd[0])
-  except:
-      system('powershell -file /scripts/flagmanset.ps1 -name neworg_ready -value true')
-      system('powershell -command restart-computer -force')
-  time.sleep(10)
+<%- | String $sql_server
+| -%>
+param($OrgName)
+
+# enable crm powershell commands
+add-pssnapin microsoft.crm.powershell
+
+# tell crm to create the org
+new-crmorganization -DisplayName "$OrgName" -SqlServer "<%= $sql_server %>" -SrsUrl "http://<%= $sql_server %>/reportserver/"
+
+# wait for a minute to give crm time to create the org
+sleep 60
+
+# crm creates the org as pending, enable it
+enable-crmorganization -Name "$OrgName"

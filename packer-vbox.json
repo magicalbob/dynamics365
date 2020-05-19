@@ -103,7 +103,7 @@
         "Dismount-DiskImage -ImagePath C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
         "Remove-Item C:\\Users\\Administrator\\VBoxGuestAdditions.iso -Force",
         "Move-Item -Path c:\\ProgramData\\Puppetlabs\\code -Destination c:\\ProgramData\\Puppetlabs\\code.build -Force",
-        "Remove-Item C:\\Scripts\\prefix -Force"
+        "if (Test-Path c:\\scripts\\prefix) { Remove-Item C:\\Scripts\\prefix -Force }"
       ]
     }
   ],

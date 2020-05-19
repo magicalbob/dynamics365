@@ -1,7 +1,7 @@
 # Class: profile::neworg
 # ===========================
 #
-# Installs python3 and pyautogui. Runs script to create new Dynamics org.
+# Runs script to create new Dynamics org.
 #
 # Parameters
 # ----------
@@ -20,35 +20,33 @@
 #    include profile::neworg
 #
 class profile::neworg(
-  $default_org = lookup('default_org')
+  $default_org = lookup('default_org'),
+  $sql_server  = lookup('sql_server')
 )
 {
-  $choco_packages = [ 'python3' ]
-
-  package { $choco_packages:
-    ensure   => 'installed',
-    provider => chocolatey
-  }
-
-  -> exec { 'pip install pyautogui':
-    command => 'cmd.exe /c c:\python38\scripts\pip install pyautogui',
-    path    => $::path,
-  }
-
-  -> exec { 'pip install pywin32':
-    command => 'cmd.exe /c c:\python38\scripts\pip install pywin32',
-    path    => $::path,
-  }
-
-  -> file { 'script to install new org':
+  file { 'script to install new org':
     ensure  => present,
-    path    => 'c:\scripts\neworg.py',
+    path    => 'c:\scripts\neworg.ps1',
     content => epp('profile/neworg.epp',{
+      sql_server => $sql_server
+    })
+  }
+
+  -> file { 'script to check state of new org':
+    ensure  => present,
+    path    => 'c:\scripts\checkorg.ps1',
+    content => epp('profile/checkorg.epp',{
     })
   }
 
   -> exec { 'run neworg script':
-    command => "cmd.exe /c c:\\python38\\python c:\\scripts\\neworg.py ${default_org}",
+    command => "powershell -file c:\\scripts\\neworg.ps1 ${default_org}",
+    path    => $::path,
+    timeout => 0
+  }
+
+  -> exec { 'set flag for neworg state':
+    command => "powershell -file c:\\scripts\\checkorg.ps1 ${default_org}",
     path    => $::path,
     timeout => 0
   }
