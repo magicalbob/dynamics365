@@ -21,15 +21,17 @@ else
 {
   # Copy dynamics iso to local disk
 
+  start-job -scriptblock {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy dynamics 365 upgrade to local disk"
+    $url = "<%= $download_url %><%= $kb4046795_exe %>"
+    $output = "c:\scripts\<%= $kb4046795_exe %>"
+    Start-BitsTransfer -Source $url -Destination $output
+  }
+
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy dynamics iso to local disk"
   Import-Module BitsTransfer
   $url = "<%= $download_url %><%= $dynamics_iso %>"
   $output = "c:\scripts\<%= $dynamics_iso %>"
-  Start-BitsTransfer -Source $url -Destination $output
-
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy dynamics 365 upgrade to local disk"
-  $url = "<%= $download_url %><%= $kb4046795_exe %>"
-  $output = "c:\scripts\<%= $kb4046795_exe %>"
   Start-BitsTransfer -Source $url -Destination $output
 
   # Wait until SQL Server is available

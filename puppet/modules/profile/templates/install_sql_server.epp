@@ -14,15 +14,19 @@ if (where.exe sqlcmd) {
 }
 else
 {
+  start-job -scriptblock {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server copy sql management tools to local disk"
+    $url = "<%= $download_url %><%= $ssm_exe %>"
+    $output = "c:\scripts\<%= $ssm_exe %>"
+    Start-BitsTransfer -Source $url -Destination $output
+  }
+
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server copy sql iso to local disk"
   Import-Module BitsTransfer
   $url = "<%= $download_url %><%= $sql_iso %>"
   $output = "c:\scripts\<%= $sql_iso %>"
   Start-BitsTransfer -Source $url -Destination $output
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server copy sql management tools to local disk"
-  $url = "<%= $download_url %><%= $ssm_exe %>"
-  $output = "c:\scripts\<%= $ssm_exe %>"
-  Start-BitsTransfer -Source $url -Destination $output
+
   # Mount sql server iso
   Mount-DiskImage -ImagePath c:\scripts\<%= $sql_iso %>
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server iso mounted"
