@@ -39,12 +39,12 @@ do
   else
     NOW=$(date +"%s")
     let DIFF=$NOW-$LOCK
-    if [ $DIFF -gt 1200 ]
+    if [ $DIFF -gt 600 ]
     then
       LOCKED=0
     else
       echo "Build is locked by previous build. Last lock was ${DIFF} seconds ago. Waiting for it to finish"
-      sleep 300
+      sleep 60
     fi
   fi
 done
