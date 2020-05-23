@@ -8,7 +8,7 @@ pipeline {
       steps {
         script {
           sh """
-            ./scripts/build-terraform.sh
+            JENKINS_NODE_COOKIE=dontKillMe BUILD_ID=dontKillMe ./scripts/build-terraform.sh
           """
         }
       }
