@@ -72,6 +72,9 @@ do
   resp=$?
 done
 
+# Get primary network device
+export TF_VAR_netdev=$(ip route|grep default|cut -d' ' -f5)
+
 # Bring up the cluster
 /usr/local/bin/terraform apply --auto-approve
 
