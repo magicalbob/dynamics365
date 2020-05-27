@@ -6,7 +6,8 @@
     "winrm_username": "{{env `WINRM_USERNAME`}}",
     "winrm_password": "{{env `WINRM_PASSWORD`}}",
     "disk_size":      "{{env `DISK_SIZE`}}",
-    "build_user":     "{{env `USERNAME`}}"
+    "build_user":     "{{env `USERNAME`}}",
+    "vbox_ver":       "{{env `VBOX_VER`}}"
   },
 
   "builders": 
@@ -96,7 +97,7 @@
       "type": "powershell",
       "inline": [
         "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
-        "Invoke-WebRequest -Uri https://download.virtualbox.org/virtualbox/6.0.14/VBoxGuestAdditions_6.0.14.iso -Outfile C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
+        "Invoke-WebRequest -Uri https://download.virtualbox.org/virtualbox/{{user `vbox_ver`}}/VBoxGuestAdditions_{{user `vbox_ver`}}.iso -Outfile C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
         "Mount-DiskImage -ImagePath C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
         "c:\\windows\\system32\\cmd /c E:\\cert\\VBoxCertUtil.exe add-trusted-publisher e:\\cert\\vbox*.cer --root e:\\cert\\vbox*.cer",
         "c:\\windows\\system32\\cmd /c start /b /wait E:\\VBoxWindowsAdditions.exe /S /force",

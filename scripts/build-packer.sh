@@ -4,6 +4,7 @@ export ISO_MD5=0b171c917909e824967ca7108ff9404f
 export WINRM_USERNAME=administrator
 export WINRM_PASSWORD=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 export DISK_SIZE=51200
+export VBOX_VER=$(VBoxManage --version | cut -dr -f1)
 
 echo "admin_password: ${WINRM_PASSWORD}" > answer_files/AutoUnattend.data.yml
 
