@@ -4,6 +4,8 @@
 BASE_PATH=$(dirname $0)
 cd ${BASE_PATH}/../terraform
 
+source ../scripts/boxname.sh
+
 # Download terraform provider for virtualbox
 curl -LO https://dev.ellisbs.co.uk/files/software/terraform-provider-virtualbox
 chmod +x ./terraform-provider-virtualbox
@@ -12,7 +14,7 @@ chmod +x ./terraform-provider-virtualbox
 rm -rvf *.box ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
 
 # Download the box image
-curl -L -o ./dynamics-windows-virtualbox.box https://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox-${BRANCH_NAME}.box
+curl -L -o ./dynamics-windows-virtualbox.box https://dev.ellisbs.co.uk/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
 
 # Terraform initialise
 terraform init

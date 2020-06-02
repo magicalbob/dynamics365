@@ -7,6 +7,6 @@ resource "virtualbox_vm" "dynfe" {
 
   network_adapter {
     type           = "bridged"
-    host_interface = "${var.netdev}"
+    host_interface = var.netdev
   }
 }

@@ -4,7 +4,7 @@
 | -%>
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "apply_puppet started."
 
-$env:FACTERLIB="c:\programdata\puppetlabs\code\environments\production\facter"
+[Environment]::SetEnvironmentVariable("FACTERLIB","c:\programdata\puppetlabs\code\environments\production\facter","Machine")
 
 if (!(Test-Path c:\scripts\prefix)) {
   $prefix=''

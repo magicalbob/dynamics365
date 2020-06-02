@@ -38,14 +38,7 @@ class base(
 {
   $choco_packages = [ '7zip', 'powershell-core', 'netcat' ]
 
-  windows_env { 'set path to facter':
-    ensure    => present,
-    variable  => 'FACTERLIB',
-    value     => 'c:\programdata\puppetlabs\code\environments\production\facter',
-    mergemode => clobber
-  }
-
-  -> exec { 'Set time zone to UTC':
+  exec { 'Set time zone to UTC':
     command => "Powershell -Command \"Set-TimeZone -Id 'UTC'\"",
     path    => $::path,
   }

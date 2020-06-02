@@ -8,6 +8,8 @@ export VBOX_VER=$(VBoxManage --version | cut -dr -f1)
 
 echo "admin_password: ${WINRM_PASSWORD}" > answer_files/AutoUnattend.data.yml
 
+source scripts/boxname.sh
+
 # Populate AutoUnattend.xml answer file with correct details for build
 mustache answer_files/AutoUnattend.data.yml answer_files/AutoUnattend.xml.template > answer_files/AutoUnattend.xml
 
@@ -26,6 +28,6 @@ cd ..
 vagrant box add -f dynamics-windows-virtualbox.box dynamics-windows-virtualbox.box
 
 # Publish box to jenkins files
-scp dynamics-windows-virtualbox.box xeon:/opt/ellisbs/files/boxes/dynamics-windows-virtualbox-${BRANCH_NAME}.box
-echo "sudo chmod a+rwx /opt/ellisbs/files/boxes/dynamics-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
-echo "sudo chown nginx:nginx /opt/ellisbs/files/boxes/dynamics-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
+scp dynamics-windows-virtualbox.box xeon:/opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
+echo "sudo chmod a+rwx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
+echo "sudo chown nginx:nginx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
