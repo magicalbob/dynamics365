@@ -6,6 +6,12 @@ cd ${BASE_PATH}/../terraform
 
 source ../scripts/boxname.sh
 
+# check that BRANCH_NAME exists, otherwise set it to "master"
+if [[ -z "$BRANCH_NAME" ]]
+then
+  export BRANCH_NAME=master
+fi
+
 # Download terraform provider for virtualbox
 curl -LO https://dev.ellisbs.co.uk/files/software/terraform-provider-virtualbox
 chmod +x ./terraform-provider-virtualbox

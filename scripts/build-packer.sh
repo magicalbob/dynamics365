@@ -13,7 +13,7 @@ source scripts/boxname.sh
 # Populate AutoUnattend.xml answer file with correct details for build
 mustache answer_files/AutoUnattend.data.yml answer_files/AutoUnattend.xml.template > answer_files/AutoUnattend.xml
 
-if [ -z BRANCH_NAME ]
+if [[ -z "$BRANCH_NAME" ]]
 then
   BRANCH_NAME=local
 fi
