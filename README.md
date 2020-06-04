@@ -54,6 +54,8 @@ The scripts `./scripts/test-build.sh` and `./scripts/test-org.sh` report on prog
 
 Once the org has been created, jump on any of the boxes and navigate to `http://dynfe:5555` in Internet Explorer.
 
+According to my Jenkins, build times are ~1h 36min. About 30 mins for packer build, 8 mins for terraform apply, 53 mins for puppet to configure the cluster, and 2 mins to create the organization.
+
 The Machines
 ============
 
