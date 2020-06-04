@@ -318,6 +318,4 @@ do
     echo "Build has finished at $(date -d @${end_time})"
     exit 0
   fi
-
-  sleep 60
 done

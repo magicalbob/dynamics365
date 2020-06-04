@@ -35,5 +35,4 @@ do
   fi
 
   echo -n .
-  sleep 1
 done
