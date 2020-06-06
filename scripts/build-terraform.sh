@@ -1,5 +1,49 @@
 #!/usr/bin/env bash
 
+function createMachine {
+# arg 1 = machine name
+# arg 2 = prefix
+# arg 3 = redis_ip
+# arg 4 = redis_pass
+  vbox_state=""
+  vbox_id=""
+  vbox_mac=""
+  echo "Create Machine: ${1}"
+
+  while [ ! "$vbox_state" == "running" ]
+  do
+    /usr/local/bin/terraform destroy --auto-approve --target virtualbox_vm.${1}
+    /usr/local/bin/terraform apply --auto-approve --target virtualbox_vm.${1}
+
+    vbox_id=$(/usr/local/bin/terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
+
+    sleep 60
+
+    vbox_state=$(VBoxManage showvminfo ${vbox_id}|grep ^State|grep -o running)
+
+    # update the lock time
+    LOCK=$(date +"%s")
+    resp=1
+    while [ $resp -ne 0 ]
+    do
+      echo -e "AUTH ${4}\r\nSET LOCK ${LOCK}\r\n" | nc -w1 ${3} 6379
+      resp=$?
+    done
+  done
+
+  vbox_mac=$(VBoxManage showvminfo ${vbox_id}|grep MAC:|cut -d: -f3|cut -d, -f1|tr -d "[:cntrl:]")
+
+  # Set mac of machine in redis
+  resp=1
+  while [ $resp -ne 0 ]
+  do
+    echo -e "AUTH ${4}\r\nSET ${2}_${vbox_mac:1} ${1}\r\n" | nc -w1 ${3} 6379
+    resp=$?
+  done
+
+  echo "Set ${1} mac address ${vbox_mac:1}"
+}
+
 # make sure we are in right dir
 BASE_PATH=$(dirname $0)
 cd ${BASE_PATH}/../terraform
@@ -81,80 +125,11 @@ do
 done
 
 # Get primary network device
-export TF_VAR_netdev=$(ip route|grep default|cut -d' ' -f5)
+export TF_VAR_netdev=$(/usr/sbin/ip route|grep default|cut -d' ' -f5)
 
 # Bring up the cluster
-/usr/local/bin/terraform apply --auto-approve
-
-LOCK=$(date +"%s")
-resp=1
-while [ $resp -ne 0 ]
-do
-  echo -e "AUTH ${redis_pass}\r\nSET LOCK ${LOCK}\r\n" | nc -w1 ${redis_ip} 6379
-  resp=$?
-done
-
-dynad=$(/usr/local/bin/terraform state show virtualbox_vm.dynad[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
-dynad_mac=$(VBoxManage showvminfo $dynad|grep MAC:|cut -d: -f3|cut -d, -f1|tr -d "[:cntrl:]")
-
-# Set mac of dynad in redis
-resp=1
-while [ $resp -ne 0 ]
-do
-  echo -e "AUTH ${redis_pass}\r\nSET ${prefix}_${dynad_mac:1} dynad\r\n" | nc -w1 ${redis_ip} 6379
-  resp=$?
-done
-
-echo "Set dynad mac address ${dynad_mac:1}"
-
-dynsql=$(/usr/local/bin/terraform state show virtualbox_vm.dynsql[0]|grep "id.*="|cut -d\" -f2)
-dynsql_mac=$(VBoxManage showvminfo $dynsql|grep MAC:|cut -d: -f3|cut -d, -f1)
-
-# Set mac of dynsql in redis
-resp=1
-while [ $resp -ne 0 ]
-do
-  echo -e "AUTH ${redis_pass}\r\nSET ${prefix}_${dynsql_mac:1} dynsql\r\n" | nc -w1 ${redis_ip} 6379
-  resp=$?
-done
-
-echo "Set dynsql mac address ${dynad_mac:1}"
-
-dynfe=$(/usr/local/bin/terraform state show virtualbox_vm.dynfe[0]|grep "id.*="|cut -d\" -f2)
-dynfe_mac=$(VBoxManage showvminfo $dynfe|grep MAC:|cut -d: -f3|cut -d, -f1)
-
-# Set mac of dynfe in redis
-resp=1
-while [ $resp -ne 0 ]
-do
-  echo -e "AUTH ${redis_pass}\r\nSET ${prefix}_${dynfe_mac:1} dynfe\r\n" | nc -w1 ${redis_ip} 6379
-  resp=$?
-done
-
-echo "Set dynfe mac address ${dynfe_mac:1}"
-
-dynbe=$(/usr/local/bin/terraform state show virtualbox_vm.dynbe[0]|grep "id.*="|cut -d\" -f2)
-dynbe_mac=$(VBoxManage showvminfo $dynbe|grep MAC:|cut -d: -f3|cut -d, -f1)
-
-# Set mac of dynbe in redis
-resp=1
-while [ $resp -ne 0 ]
-do
-  echo -e "AUTH ${redis_pass}\r\nSET ${prefix}_${dynbe_mac:1} dynbe\r\n" | nc -w1 ${redis_ip} 6379
-  resp=$?
-done
-
-echo "Set dynbe mac address ${dynbe_mac:1}"
-
-dynadm=$(/usr/local/bin/terraform state show virtualbox_vm.dynadm[0]|grep "id.*="|cut -d\" -f2)
-dynadm_mac=$(VBoxManage showvminfo $dynadm|grep MAC:|cut -d: -f3|cut -d, -f1)
-
-# Set mac of dynadm in redis
-resp=1
-while [ $resp -ne 0 ]
-do
-  echo -e "AUTH ${redis_pass}\r\nSET ${prefix}_${dynadm_mac:1} dynadm\r\n" | nc -w1 ${redis_ip} 6379
-  resp=$?
-done
-
-echo "Set dynadm mac address ${dynadm_mac:1}"
+createMachine dynad  ${prefix} ${redis_ip} ${redis_pass}
+createMachine dynsql ${prefix} ${redis_ip} ${redis_pass}
+createMachine dynfe  ${prefix} ${redis_ip} ${redis_pass}
+createMachine dynbe  ${prefix} ${redis_ip} ${redis_pass}
+createMachine dynadm ${prefix} ${redis_ip} ${redis_pass}

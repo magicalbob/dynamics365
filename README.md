@@ -12,9 +12,9 @@ Setup
 
 Needs packer and VirtualBox to build the base image, and VirtualBox and terraform/Vagrant to run the machines from the base image.
 
-Packer is set up to use an iso install.
+Packer is set up to use an iso install. It has been tested with Windows Server 2016 and 2019.
 
-Download the MS evaluation copy from https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2016
+Download the MS evaluation copy from https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2019
 
 Set ISO_URL to file path of the downloaded iso.
 
