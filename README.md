@@ -12,7 +12,7 @@ Setup
 
 Needs packer and VirtualBox to build the base image, and VirtualBox and terraform/Vagrant to run the machines from the base image.
 
-Packer is set up to use an iso install. It has been tested with Windows Server 2016 and 2019.
+Packer is set up to use an iso install. It has been tested with Windows Server 2016 and 2019. It sometimes works with 2019, but every so often Virtual Box throws a Guru Meditation .... so the boxes available on my Jenkins are currently the 2016 versions.
 
 Download the MS evaluation copy from https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2019
 
@@ -20,7 +20,7 @@ Set ISO_URL to file path of the downloaded iso.
 
 Set ISO_MD5 to output of `openssl md5 $ISO_URL` (In Powershell enter Get-FileHash -Path c:\PATH\TO\FILE\file.name -Algorithm MD5).
 
-A Vagrantfile is present in git. It uses servers.yaml to define the machines available in vagrant. Each machine in servers.yaml can have a box_url atribute that tells vagrant where to get the base image of the machine (if you have not previously stood up the machine).
+A Vagrantfile is present in git. It uses servers.yaml to define the machines available in vagrant. Each machine in servers.yaml can have a box_url attribute that tells vagrant where to get the base image of the machine (if you have not previously stood up the machine).
 
 The `./terraform` directory contains the terraform tf files for all the machines.
 

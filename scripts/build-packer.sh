@@ -1,6 +1,9 @@
 export OS_TYPE=windows
-export ISO_URL=https://dev.ellisbs.co.uk/files/software/WinServer2019.iso
-export ISO_MD5=70fec2cb1d6759108820130c2b5496da
+export ISO_URL=https://dev.ellisbs.co.uk/files/software/WinServer2016.iso
+export ISO_MD5=0b171c917909e824967ca7108ff9404f
+# use the below values for windows server 2019
+# export ISO_URL=https://dev.ellisbs.co.uk/files/software/WinServer2019.iso
+# export ISO_MD5=70fec2cb1d6759108820130c2b5496da
 export WINRM_USERNAME=administrator
 export WINRM_PASSWORD=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 export DISK_SIZE=51200
