@@ -1,14 +1,20 @@
-$nics = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE"
+$nic = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE"
 
 $ad_ip=''
 while (!($ad_ip -match "^[\d\.]+$")) {
-  $ad_ip=$(/scripts/flagmanget.ps1 ad_ip)
+  $ad_ip=(/scripts/flagmanget.ps1 ad_ip)
 }
 
-foreach ($nic in $nics) {
+while ($nic.WINSPrimaryServer -ne $ad_ip) {
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Set WINS Primary Server to $ad_ip"
+
   $newDNS="$ad_ip", "8.8.8.8"
   $nic.SetWINSServer("$ad_ip", "$ad_ip")
   $nic.SetDNSServerSearchOrder($newDNS)
+
+  $nic = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled=TRUE"
+
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "WINS Primary Server is set to $nic.WINSPrimaryServer"
 }
 
 return 0
