@@ -82,15 +82,8 @@
     },
     {
       "type": "powershell",
-      "inline": [
-        "Expand-Archive c:\\windows\\temp\\puppet.zip c:\\ProgramData\\PuppetLabs\\code\\environments\\production",
-        "cmd /c setx FACTERLIB c:\\programdata\\puppetlabs\\facter"
-      ]
-    },
-    {
-      "type": "windows-shell",
       "scripts": [
-        "./scripts/puppet-apply.cmd"
+        "./scripts/puppet-apply.ps1"
       ]
     },
     {
