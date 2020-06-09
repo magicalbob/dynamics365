@@ -59,19 +59,14 @@
         "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Cleanup\" /RL LIMITED",
         "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Scheduled Scan\" /RL LIMITED",
         "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Verification\" /RL LIMITED",
-        "(New-Object System.Net.WebClient).DownloadFile('https://downloads.puppetlabs.com/windows/puppet6/puppet-agent-x64-latest.msi', 'C:/Windows/Temp/puppet.msi')"
+        "(New-Object System.Net.WebClient).DownloadFile('https://downloads.puppetlabs.com/windows/puppet6/puppet-agent-x64-latest.msi', 'C:/Windows/Temp/puppet.msi')",
+        "cmd /c start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log"
       ]
     },
     {
       "type": "file",
       "source": "answer_files/AutoUnattend.xml",
       "destination": "c:\\scripts\\unattend.xml"
-    },
-    {
-      "type": "windows-shell",
-      "inline": [
-        "start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log"
-      ]
     },
     {
       "type": "file",
