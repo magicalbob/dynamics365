@@ -53,10 +53,13 @@
     },
     {
       "type": "powershell",
-      "scripts": [
-        "./scripts/power.ps1",
-        "./scripts/defender.cmd",
-        "./scripts/puppet-download.cmd"
+      "inline": [
+        "powercfg /SetActive SCHEME_MIN",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Cache Maintenance\" /RL LIMITED",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Cleanup\" /RL LIMITED",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Scheduled Scan\" /RL LIMITED",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Verification\" /RL LIMITED",
+        "(New-Object System.Net.WebClient).DownloadFile('https://downloads.puppetlabs.com/windows/puppet6/puppet-agent-x64-latest.msi', 'C:/Windows/Temp/puppet.msi')"
       ]
     },
     {
