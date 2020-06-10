@@ -44,6 +44,18 @@ else
   } Until ($sqlReady -eq "true")
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics SQL server is available"
 
+  # Mount dynamics iso
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy mount dynamic iso"
+  Mount-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>
+
+  # Work out dynamics drive letter and change to it
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy getting iso dir"
+  $install_drive=""
+  while ( ! $install_drive ) {
+    $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>|Get-Volume).DriveLetter
+  }
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy got iso dir $install_drive"
+
   # If back end, wait until ssrs has finished installing
   if ( $env:computername -like "<%= $be_server %>" ) {
     Do {
@@ -68,15 +80,6 @@ else
     } Until ($ssrsReady -eq "true")
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics ssrs node has installed"
   }
-
-  # Mount dynamics iso
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy mount dynamic iso"
-  Mount-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>
-
-  # Work out dynamics drive letter and change to it
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy getting iso dir"
-  $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>|Get-Volume).DriveLetter
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy got iso dir $install_drive"
 
   # Install dynamics
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start dynamics install"

@@ -32,7 +32,10 @@ else
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server iso mounted"
 
   # Work out sql server drive letter and change to it
-  $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $sql_iso %>|Get-Volume).DriveLetter
+  $install_drive=""
+  while ( ! $install_drive ) {
+    $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $sql_iso %>|Get-Volume).DriveLetter
+  }
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server drive $install_drive"
 
   # Install sql server 

@@ -21,6 +21,18 @@ else
   $output = "c:\scripts\<%= $dynamics_iso %>"
   Start-BitsTransfer -Source $url -Destination $output
 
+  # Mount dynamics iso
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy mount dynamic iso"
+  Mount-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>
+
+  # Work out dynamics drive letter and change to it
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy getting iso dir"
+  $install_drive=""
+  while ( ! $install_drive ) {
+    $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>|Get-Volume).DriveLetter
+  }
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy got iso dir $install_drive"
+
   Do {
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics wait until front end node installed"
     $feReady=(c:\scripts\flagmanget.ps1 -Name <%= $fe_server %>_ready)
@@ -29,15 +41,6 @@ else
     }
   } Until ($feReady -eq "true")
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server front end node has installed"
-
-  # Mount dynamics iso
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy mount dynamic iso"
-  Mount-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>
-
-  # Work out dynamics drive letter and change to it
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy getting iso dir"
-  $install_drive=(Get-DiskImage -ImagePath c:\scripts\<%= $dynamics_iso %>|Get-Volume).DriveLetter
-  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy got iso dir $install_drive"
 
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start first srs install"
   $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\server\amd64\SrsDataConnector\SetupSrsDataConnector.exe <%= $quiet_install %> /config "c:\scripts\srs-install-config.xml" /L c:\windows\temp\install_srs.log')
