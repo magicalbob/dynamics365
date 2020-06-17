@@ -5,10 +5,10 @@ function createMachine {
 # arg 2 = prefix
 # arg 3 = redis_ip
 # arg 4 = redis_pass
-  vbox_state=""
-  vbox_id=""
-  vbox_mac=""
   echo "Create Machine: ${1}"
+
+  vbox_id=$(/usr/local/bin/terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
+  vbox_state=$(VBoxManage showvminfo ${vbox_id}|grep ^State|grep -o running)
 
   while [ ! "$vbox_state" == "running" ]
   do
@@ -138,6 +138,7 @@ done
 export TF_VAR_netdev=$(/usr/sbin/ip route|grep default|cut -d' ' -f5)
 
 # Bring up the cluster
+terraform apply --auto-approve
 createMachine dynad  ${prefix} ${redis_ip} ${redis_pass}
 createMachine dynsql ${prefix} ${redis_ip} ${redis_pass}
 createMachine dynfe  ${prefix} ${redis_ip} ${redis_pass}
