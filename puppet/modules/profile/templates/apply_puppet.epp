@@ -24,6 +24,8 @@ if ($machine_name -Like "WIN*") {
   # Make sure flagman in place and prefix set
   puppet apply -e "include flagman"
 
+  Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NetFramework\v4.0.30319' -Name 'SchUseStrongCrypto' -Value '1' -Type DWord 
+  Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\.NetFramework\v4.0.30319' -Name 'SchUseStrongCrypto' -Value '1' -Type DWord
   Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 
   $getMachineNameTries=0
