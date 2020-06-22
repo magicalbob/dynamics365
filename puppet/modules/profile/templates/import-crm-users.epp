@@ -47,7 +47,7 @@ $Users | ForEach-Object {
 
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "import-crm-users add user '$Fname $LName'"
 
-    New-CrmRecord -conn $CRMConn -EntityLogicalName account -Fields @{"name" = "$Fname $LName"; "telephone1" = "0123456789"}
+    New-CrmRecord -conn $CRMConn -EntityLogicalName account -Fields @{"name" = "$Fname.$LName"; "emailaddress1" = "$EmailAddress"}
 
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "import-crm-users user '$Fname $LName' added"
 }
