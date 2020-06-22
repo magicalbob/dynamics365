@@ -1,0 +1,68 @@
+<%- | String $dc_string,
+      String $admin_pass,
+      String $ad_domain,
+      String $crm_user_group
+| -%>
+###########################################################
+# AUTHOR  : Victor Ashiedu
+# WEBSITE : iTechguides.com
+# BLOG    : iTechguides.com/blog-2/
+# CREATED : 08-08-2014 
+# UPDATED : 19-09-2014 
+# COMMENT : This script exports Active Directory users
+#           to a a csv file. v2.1 adds the condition to
+#           ignore all users with the info (Notes) field
+#           found on the Telephones tab containing the
+#           word 'Migrated'.
+###########################################################
+
+
+#Define location of my script variable
+#the -parent switch returns one directory lower from directory defined.
+#below will return up to ImportADUsers folder
+#and since my files are located here it will find it.
+#It failes withpout appending "*.*" at the end
+
+$path = Split-Path -parent "c:\windows\temp\*.*"
+
+#Define CSV and log file location variables
+#they have to be on the same location as the script
+
+$csvfile = $path + "\import-crm-users.csv"
+
+#import the ActiveDirectory Module
+
+Import-Module ActiveDirectory
+
+#Sets the OU to do the base search for all user accounts, change as required.
+#Simon discovered that some users were missing
+#I decided to run the report from the root of the domain
+
+$SearchBase = "CN=Users,<%= $dc_string %>"
+
+#Get Admin account credentials
+$User = "Administrator"
+$secpasswd = "<%= $admin_pass %>"
+$secpasswd2 = ConvertTo-SecureString -String $secpasswd -AsPlainText -Force
+
+$GetAdminact = New-Object System.Management.Automation.PSCredential ($User, $secpasswd2)
+
+#Define variable for a server with AD web services installed
+
+$ADServer = '<%= $ad_domain %>'
+
+$AllADUsers = Get-ADGroupMember '<%= $crm_user_group %>' | Get-ADUser -Properties *
+
+$AllADUsers |
+
+Select-Object @{Label = "DomainName";Expression = {$env:userdomain + '\' + $_.sAMAccountName}},
+@{Label = "EmailAddress";Expression = {$_.sAMAccountName + "@" + (Get-ADDomain).DNSRoot}},
+@{Label = "FirstName";Expression =  {$_.GivenName}},
+@{Label = "LastName";Expression = {$_.Surname}},
+@{Label = "Title";Expression = {(($_.MemberOf -Match "CN=CRM").split(',')[0]).split('=')[1]}},
+@{Label = "SecurityRole1";Expression = {'System Administrator'}},
+@{Label = "FieldSecurityProfile1";Expression = {'NA'}}|
+
+#Export CSV report
+
+Export-Csv -Path $csvfile -NoTypeInformation

@@ -32,4 +32,6 @@ class role::dynadm {
   }
   -> class { 'profile::neworg':
   }
+  -> class { 'profile::dynamicsusers':
+  }
 }
