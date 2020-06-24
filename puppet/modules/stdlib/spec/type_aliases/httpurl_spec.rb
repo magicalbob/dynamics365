@@ -3,16 +3,8 @@ require 'spec_helper'
 if Puppet::Util::Package.versioncmp(Puppet.version, '4.5.0') >= 0
   describe 'Stdlib::HTTPUrl' do
     describe 'valid handling' do
-      %w[
-        https://hello.com
-        https://notcreative.org
-        https://canstillaccepthttps.co.uk
-        http://anhttp.com
-        http://runningoutofideas.gov
-        http://
-        http://graphemica.com/❤
-        http://graphemica.com/緩
-      ].each do |value|
+      ['https://hello.com', 'https://notcreative.org', 'https://canstillaccepthttps.co.uk', 'http://anhttp.com', 'http://runningoutofideas.gov',
+       'http://', 'http://graphemica.com/❤', 'http://graphemica.com/緩', 'HTTPS://FOO.COM', 'HTTP://BAR.COM'].each do |value|
         describe value.inspect do
           it { is_expected.to allow_value(value) }
         end
@@ -28,6 +20,9 @@ if Puppet::Util::Package.versioncmp(Puppet.version, '4.5.0') >= 0
           { 'foo' => 'bar' },
           {},
           '',
+          "\nhttp://hello.com",
+          "\nhttp://hello.com\n",
+          "http://hello.com\n",
           'httds://notquiteright.org',
           'hptts:/nah',
           'https;//notrightbutclose.org',

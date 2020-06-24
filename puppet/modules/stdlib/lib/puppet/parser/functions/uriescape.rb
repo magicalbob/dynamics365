@@ -5,8 +5,13 @@ require 'uri'
 #
 module Puppet::Parser::Functions
   newfunction(:uriescape, :type => :rvalue, :doc => <<-DOC
-    Urlencodes a string or array of strings.
-    Requires either a single string or an array as an input.
+    @summary
+      Urlencodes a string or array of strings.
+      Requires either a single string or an array as an input.
+
+    @return [String]
+      a string that contains the converted value
+
     DOC
              ) do |arguments|
 
@@ -20,9 +25,9 @@ module Puppet::Parser::Functions
 
     result = if value.is_a?(Array)
                # Numbers in Puppet are often string-encoded which is troublesome ...
-               value.map { |i| i.is_a?(String) ? URI.escape(i) : i } # rubocop:disable Lint/UriEscapeUnescape
+               value.map { |i| i.is_a?(String) ? URI.escape(i) : i }
              else
-               URI.escape(value) # rubocop:disable Lint/UriEscapeUnescape
+               URI.escape(value)
              end
 
     return result

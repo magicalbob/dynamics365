@@ -1,23 +1,9 @@
-#!/usr/bin/env rspec
-
 require 'spec_helper'
 
 describe 'PE Version specs' do
-  before :each do
-    # Explicitly load the pe_version.rb file which contains generated facts
-    # that cannot be automatically loaded.  Puppet 2.x implements
-    # Facter.collection.load while Facter 1.x markes Facter.collection.load as
-    # a private method.
-    if Facter.collection.respond_to? :load
-      Facter.collection.load(:pe_version)
-    else
-      Facter.collection.loader.load(:pe_version)
-    end
-  end
-
   context 'when puppetversion is nil' do
     before :each do
-      Facter.fact(:puppetversion).stubs(:value).returns(nil)
+      allow(Facter.fact(:puppetversion)).to receive(:value).and_return(nil)
     end
 
     it 'puppetversion is nil' do
@@ -30,11 +16,11 @@ describe 'PE Version specs' do
   end
 
   context 'when PE is installed' do
-    %w[2.6.1 2.10.300].each do |version|
+    ['2.6.1', '2.10.300'].each do |version|
       puppetversion = "2.7.19 (Puppet Enterprise #{version})"
       context "puppetversion => #{puppetversion}" do
         before :each do
-          Facter.fact(:puppetversion).stubs(:value).returns(puppetversion)
+          allow(Facter.fact(:puppetversion)).to receive(:value).and_return(puppetversion)
         end
 
         (major, minor, patch) = version.split('.')
@@ -64,7 +50,7 @@ describe 'PE Version specs' do
 
   context 'when PE is not installed' do
     before :each do
-      Facter.fact(:puppetversion).stubs(:value).returns('2.7.19')
+      allow(Facter.fact(:puppetversion)).to receive(:value).and_return('2.7.19')
     end
 
     it 'is_pe is false' do

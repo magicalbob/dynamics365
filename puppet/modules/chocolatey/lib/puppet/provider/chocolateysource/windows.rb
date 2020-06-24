@@ -3,25 +3,30 @@ require 'pathname'
 require 'rexml/document'
 
 Puppet::Type.type(:chocolateysource).provide(:windows) do
-  confine :operatingsystem => :windows
-  defaultfor :operatingsystem => :windows
+  @doc = 'Windows based provider for chocolateysource type.'
+
+  confine operatingsystem: :windows
+  defaultfor operatingsystem: :windows
 
   require Pathname.new(__FILE__).dirname + '../../../' + 'puppet_x/chocolatey/chocolatey_common'
   include PuppetX::Chocolatey::ChocolateyCommon
 
-  MINIMUM_SUPPORTED_CHOCO_VERSION = '0.9.9.0'
-  MINIMUM_SUPPORTED_CHOCO_VERSION_PRIORITY = '0.9.9.9'
+  MINIMUM_SUPPORTED_CHOCO_VERSION = '0.9.9.0'.freeze
+  MINIMUM_SUPPORTED_CHOCO_VERSION_PRIORITY = '0.9.9.9'.freeze
+  MINIMUM_SUPPORTED_CHOCO_VERSION_BYPASS_PROXY = '0.10.4'.freeze
+  MINIMUM_SUPPORTED_CHOCO_VERSION_ALLOW_SELF_SERVICE = '0.10.4'.freeze
+  MINIMUM_SUPPORTED_CHOCO_VERSION_ADMIN_ONLY = '0.10.8'.freeze
 
-  commands :chocolatey => PuppetX::Chocolatey::ChocolateyCommon.chocolatey_command
+  commands chocolatey: PuppetX::Chocolatey::ChocolateyCommon.chocolatey_command
 
-  def initialize(value={})
+  def initialize(value = {})
     super(value)
     @property_flush = {}
   end
 
   def properties
     if @property_hash.empty?
-      @property_hash = query || { :ensure => ( :absent )}
+      @property_hash = query || { ensure: :absent }
       @property_hash[:ensure] = :absent if @property_hash.empty?
     end
     @property_hash.dup
@@ -29,23 +34,23 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
 
   def query
     self.class.sources.each do |source|
-      return source.properties if @resource[:name][/\A\S*/].downcase == source.name.downcase
+      return source.properties if @resource[:name][%r{\A\S*}].casecmp(source.name.downcase).zero?
     end
 
-    return {}
+    {}
   end
 
-  def self.get_sources
+  def self.read_sources
     PuppetX::Chocolatey::ChocolateyCommon.set_env_chocolateyinstall
 
     choco_config = PuppetX::Chocolatey::ChocolateyCommon.choco_config_file
-    raise Puppet::ResourceError, "Config file not found for Chocolatey. Please make sure you have Chocolatey installed." if choco_config.nil?
+    raise Puppet::ResourceError, 'Config file not found for Chocolatey. Please make sure you have Chocolatey installed.' if choco_config.nil?
     raise Puppet::ResourceError, "An install was detected, but was unable to locate config file at #{choco_config}." unless PuppetX::Chocolatey::ChocolateyCommon.file_exists?(choco_config)
 
     Puppet.debug("Gathering sources from '#{choco_config}'.")
     config = REXML::Document.new File.read(choco_config)
 
-    config.elements.to_a( '//source' )
+    config.elements.to_a('//source')
   end
 
   def self.get_source(element)
@@ -56,12 +61,21 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
     source[:location] = element.attributes['value'].downcase if element.attributes['value']
 
     disabled = false
-    disabled = element.attributes['disabled'].downcase == 'true' if element.attributes['disabled']
+    disabled = element.attributes['disabled'].casecmp('true').zero? if element.attributes['disabled']
     source[:ensure] = :present
     source[:ensure] = :disabled if disabled
 
-    source[:priority] = 0
+    source[:priority] = '0'
     source[:priority] = element.attributes['priority'].downcase if element.attributes['priority']
+
+    source[:bypass_proxy] = false
+    source[:bypass_proxy] = element.attributes['bypassProxy'].downcase if element.attributes['bypassProxy']
+
+    source[:admin_only] = false
+    source[:admin_only] = element.attributes['adminOnly'].downcase if element.attributes['adminOnly']
+
+    source[:allow_self_service] = false
+    source[:allow_self_service] = element.attributes['selfService'].downcase if element.attributes['selfService']
 
     source[:user] = ''
     source[:user] = element.attributes['user'].downcase if element.attributes['user']
@@ -72,7 +86,7 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
   end
 
   def self.sources
-    @sources ||=  get_sources.collect do |item|
+    @sources ||= read_sources.map do |item|
       source = get_source(item)
       new(source)
     end
@@ -80,7 +94,7 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
 
   def self.refresh_sources
     @sources = nil
-    self.sources
+    sources
   end
 
   def self.instances
@@ -114,11 +128,25 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
   def validate
     choco_version = Gem::Version.new(PuppetX::Chocolatey::ChocolateyCommon.choco_version)
     if PuppetX::Chocolatey::ChocolateyCommon.file_exists?(PuppetX::Chocolatey::ChocolateyCommon.chocolatey_command) && choco_version < Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION)
-      raise Puppet::ResourceError, "Chocolatey version must be '#{MINIMUM_SUPPORTED_CHOCO_VERSION}' to manage configuration values with Puppet. Detected '#{choco_version}' as your version. Please upgrade Chocolatey to use this resource."
+      raise Puppet::ResourceError, "Chocolatey version must be '#{MINIMUM_SUPPORTED_CHOCO_VERSION}' to manage configuration values with Puppet. "\
+        "Detected '#{choco_version}' as your version. Please upgrade Chocolatey to use this resource."
     end
 
-    if choco_version < Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_PRIORITY) && resource[:priority] && resource[:priority] != 0
+    if choco_version < Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_PRIORITY) && resource[:priority] && resource[:priority] != '0'
       Puppet.warning("Chocolatey is unable to manage priority for sources when version is less than #{MINIMUM_SUPPORTED_CHOCO_VERSION_PRIORITY}. The value you set will be ignored.")
+    end
+
+    if choco_version < Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_BYPASS_PROXY) && resource[:bypass_proxy] && resource[:bypass_proxy] != :false
+      Puppet.warning("Chocolatey is unable to specify bypassing system proxy for sources when version is less than #{MINIMUM_SUPPORTED_CHOCO_VERSION_BYPASS_PROXY}. The value you set will be ignored.")
+    end
+
+    if choco_version < Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_ALLOW_SELF_SERVICE) && resource[:allow_self_service] && resource[:allow_self_service] != :false
+      Puppet.warning("Chocolatey is unable to specify self-service for sources when version is less than #{MINIMUM_SUPPORTED_CHOCO_VERSION_ALLOW_SELF_SERVICE}. The value you set will be ignored.")
+    end
+
+    if choco_version < Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_ADMIN_ONLY) && resource[:admin_only] && resource[:admin_only] != :false
+      Puppet.warning("Chocolatey is unable to specify administrator only visibility for sources when version is less than #{MINIMUM_SUPPORTED_CHOCO_VERSION_ADMIN_ONLY}. "\
+        'The value you set will be ignored.')
     end
 
     # location is always filled in with puppet resource, but
@@ -132,12 +160,13 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
     # resource[:location] is nil when running puppet resource
     # if you remove `location => value`
     location_check = resource[:location] if location_check == :absent
-    if (resource[:ensure] == :present && (location_check.nil? || location_check.strip == ''))
-      raise ArgumentError, "A non-empty location must be specified when ensure => present."
+    if resource[:ensure] == :present && (location_check.nil? || location_check.strip == '')
+      raise ArgumentError, 'A non-empty location must be specified when ensure => present.'
     end
 
-    if resource[:password] && resource[:password] != ''
-      Puppet.debug("The password is not ensurable, so Puppet is unable to change the value using chocolateysource resource. As a workaround, a password change can be in the form of an exec. Reference Chocolateysource[#{resource[:name]}]")
+    if resource[:password] && resource[:password] != '' # rubocop:disable Style/GuardClause
+      Puppet.debug('The password is not ensurable, so Puppet is unable to change the value using chocolateysource resource. '\
+        "As a workaround, a password change can be in the form of an exec. Reference Chocolateysource[#{resource[:name]}]")
     end
   end
 
@@ -145,6 +174,8 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
 
   def flush
     args = []
+    opts = {}
+
     args << 'source'
 
     # look at the hash, then flush if present.
@@ -163,28 +194,41 @@ Puppet::Type.type(:chocolateysource).provide(:windows) do
     if command == 'add'
       args << '--source' << resource[:location]
 
-      if resource[:user]  && resource[:user] != ''
+      if resource[:user] && resource[:user] != ''
         args << '--user' << resource[:user]
         args << '--password' << resource[:password]
+        opts = { sensitive: true, failonfail: true, combine: true }
       end
 
       choco_gem_version = Gem::Version.new(PuppetX::Chocolatey::ChocolateyCommon.choco_version)
+      if choco_gem_version >= Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_BYPASS_PROXY)
+        args << '--bypass-proxy' if resource[:bypass_proxy].to_s == 'true'
+      end
+
+      if choco_gem_version >= Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_ALLOW_SELF_SERVICE)
+        args << '--allow-self-service' if resource[:allow_self_service] == :true
+      end
+
+      if choco_gem_version >= Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_ADMIN_ONLY)
+        args << '--admin-only' if resource[:admin_only].to_s == 'true'
+      end
+
       if choco_gem_version >= Gem::Version.new(MINIMUM_SUPPORTED_CHOCO_VERSION_PRIORITY)
         args << '--priority' << resource[:priority]
       end
     end
 
     begin
-      Puppet::Util::Execution.execute([command(:chocolatey), *args])
+      Puppet::Util::Execution.execute([command(:chocolatey), *args], opts)
     rescue Puppet::ExecutionFailure
-      raise Puppet::Error, "An error occurred running choco. Unable to set Chocolatey source configuration for #{self.inspect}"
+      raise Puppet::Error, "An error occurred running choco. Unable to set Chocolatey source configuration for #{inspect}"
     end
 
     if property_ensure == :present
       begin
         Puppet::Util::Execution.execute([command(:chocolatey), 'source', 'enable', '--name', resource[:name]])
       rescue Puppet::ExecutionFailure
-        raise Puppet::Error, "An error occurred running choco. Unable to set Chocolatey source configuration for #{self.inspect}"
+        raise Puppet::Error, "An error occurred running choco. Unable to set Chocolatey source configuration for #{inspect}"
       end
     end
 

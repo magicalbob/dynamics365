@@ -5,10 +5,10 @@ Puppet::Type.type(:archive).provide(:curl, parent: :ruby) do
   def curl_params(params)
     account = [resource[:username], resource[:password]].compact.join(':') if resource[:username]
     params += optional_switch(account, ['--user', '%s'])
-    params += optional_switch(resource[:cookie], ['--cookie', '%s'])
     params += optional_switch(resource[:proxy_server], ['--proxy', '%s'])
     params += ['--insecure'] if resource[:allow_insecure]
     params += resource[:download_options] if resource[:download_options]
+    params += optional_switch(resource[:cookie], ['--cookie', '%s'])
 
     params
   end
@@ -19,7 +19,7 @@ Puppet::Type.type(:archive).provide(:curl, parent: :ruby) do
         resource[:source],
         '-o',
         filepath,
-        '-fsSL',
+        '-fsSLg',
         '--max-redirs',
         5
       ]
@@ -32,7 +32,7 @@ Puppet::Type.type(:archive).provide(:curl, parent: :ruby) do
     params = curl_params(
       [
         resource[:checksum_url],
-        '-fsSL',
+        '-fsSLg',
         '--max-redirs',
         5
       ]

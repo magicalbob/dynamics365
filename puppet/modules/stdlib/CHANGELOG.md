@@ -1,7 +1,265 @@
 # Change log
 
-All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to [Semantic Versioning](http://semver.org).
+All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
+
+## [v6.3.0](https://github.com/puppetlabs/puppetlabs-stdlib/tree/v6.3.0) (2020-04-15)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-stdlib/compare/v6.2.0...v6.3.0)
+
+### Added
+
+- Add start\_with function [\#1086](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1086) ([baurmatt](https://github.com/baurmatt))
+- stdlib::end\_with: create String.end\_with function [\#1084](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1084) ([b4ldr](https://github.com/b4ldr))
+- Adding str2saltedpbkdf2 function [\#1040](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1040) ([genebean](https://github.com/genebean))
+
+### Fixed
+
+- \(MODULES-10623\) explicitly top-scope calls to JSON methods [\#1101](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1101) ([tkishel](https://github.com/tkishel))
+- \[IAC-547\] Remove strftime from stdlib as it has already been replaced by the puppet agent since 4.8.0 [\#1097](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1097) ([carabasdaniel](https://github.com/carabasdaniel))
+- Add correct namespace for start\_with function [\#1095](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1095) ([baurmatt](https://github.com/baurmatt))
+- intersection: show types in exception due to invalid arguments [\#1077](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1077) ([runejuhl](https://github.com/runejuhl))
+- Make type aliases stricter [\#1066](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1066) ([pegasd](https://github.com/pegasd))
+
+## [v6.2.0](https://github.com/puppetlabs/puppetlabs-stdlib/tree/v6.2.0) (2019-12-10)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-stdlib/compare/v6.1.0...v6.2.0)
+
+### Added
+
+- \(FM-8696\) - Addition of Support for CentOS 8 [\#1065](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1065) ([david22swan](https://github.com/david22swan))
+- Add support for additional options to to\_json\_pretty [\#1055](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1055) ([runejuhl](https://github.com/runejuhl))
+
+### Fixed
+
+- Fix PE detection \(for the moment\) [\#1049](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1049) ([trevor-vaughan](https://github.com/trevor-vaughan))
+
+## [v6.1.0](https://github.com/puppetlabs/puppetlabs-stdlib/tree/v6.1.0) (2019-09-20)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-stdlib/compare/v6.0.0...v6.1.0)
+
+### Added
+
+- \(MODULES-9915\) Add type aliases for cloud object store uris [\#1048](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1048) ([hooten](https://github.com/hooten))
+- FM-8411 - add support for debian10 [\#1045](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1045) ([lionce](https://github.com/lionce))
+- \(FM-8230\) Convert testing to litmus [\#1031](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1031) ([eimlav](https://github.com/eimlav))
+- \(FM-8160\) Add Windows Server 2019 support [\#1025](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1025) ([eimlav](https://github.com/eimlav))
+- \(FM-8048\) Add RedHat 8 support [\#1022](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1022) ([eimlav](https://github.com/eimlav))
+- \(MODULES-9049\) Add type alias for 'yes' and 'no'. [\#1017](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1017) ([ghoneycutt](https://github.com/ghoneycutt))
+- add Stdlib::Syslogfacility type [\#1005](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1005) ([bastelfreak](https://github.com/bastelfreak))
+
+### Fixed
+
+- fix lib/puppet/parser/functions/fqdn\_rand\_string.rb:21: syntax error [\#1029](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1029) ([pulecp](https://github.com/pulecp))
+- Limit the maximum array size produced by range\(\). [\#1023](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1023) ([mbaynton](https://github.com/mbaynton))
+
+## [v6.0.0](https://github.com/puppetlabs/puppetlabs-stdlib/tree/v6.0.0) (2019-05-10)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-stdlib/compare/5.2.0...v6.0.0)
+
+### Changed
+
+- pdksync - \(MODULES-8444\) - Raise lower Puppet bound [\#1011](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1011) ([david22swan](https://github.com/david22swan))
+- \(MODULES-8760\) Add iterative feature to merge\(\) function [\#1008](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1008) ([hlindberg](https://github.com/hlindberg))
+
+### Added
+
+- Add a stdlib::ip\_in\_range\(\) function [\#1003](https://github.com/puppetlabs/puppetlabs-stdlib/pull/1003) ([iglov](https://github.com/iglov))
+
+## [5.2.0](https://github.com/puppetlabs/puppetlabs-stdlib/tree/5.2.0) (2019-01-17)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-stdlib/compare/5.1.0...5.2.0)
+
+### Added
+
+- \(MODULES-8404\) - Relax `Stdlib::Filesource` type [\#981](https://github.com/puppetlabs/puppetlabs-stdlib/pull/981) ([alexjfisher](https://github.com/alexjfisher))
+- Creates new type Stdlib::IP::Address::V6::CIDR [\#980](https://github.com/puppetlabs/puppetlabs-stdlib/pull/980) ([timhughes](https://github.com/timhughes))
+- \(MODULES-8137\) - Addition of support for SLES 15 [\#978](https://github.com/puppetlabs/puppetlabs-stdlib/pull/978) ([david22swan](https://github.com/david22swan))
+- \(MODULES-8322\) Consider IPs with /0 as valid [\#975](https://github.com/puppetlabs/puppetlabs-stdlib/pull/975) ([simondeziel](https://github.com/simondeziel))
+- Add a function to compare the OS version [\#972](https://github.com/puppetlabs/puppetlabs-stdlib/pull/972) ([ekohl](https://github.com/ekohl))
+- \(MODULES-8273\) - Make unquoted classes useable [\#971](https://github.com/puppetlabs/puppetlabs-stdlib/pull/971) ([baurmatt](https://github.com/baurmatt))
+- add Function extname\(\) [\#949](https://github.com/puppetlabs/puppetlabs-stdlib/pull/949) ([cocker-cc](https://github.com/cocker-cc))
+- \(MODULES-7024\) Add 20-octet MAC addresses [\#905](https://github.com/puppetlabs/puppetlabs-stdlib/pull/905) ([ananace](https://github.com/ananace))
+
+### Fixed
+
+- pdksync - \(FM-7655\) Fix rubygems-update for ruby \< 2.3 [\#979](https://github.com/puppetlabs/puppetlabs-stdlib/pull/979) ([tphoney](https://github.com/tphoney))
+- fix ensure\_packages duplicate checking [\#969](https://github.com/puppetlabs/puppetlabs-stdlib/pull/969) ([netzvieh](https://github.com/netzvieh))
+
+## [5.1.0](https://github.com/puppetlabs/puppetlabs-stdlib/tree/5.1.0) (2018-09-28)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-stdlib/compare/5.0.0...5.1.0)
+
+### Added
+
+- pdksync - \(MODULES-6805\) metadata.json shows support for puppet 6 [\#958](https://github.com/puppetlabs/puppetlabs-stdlib/pull/958) ([tphoney](https://github.com/tphoney))
+- \(maint\) Convert from mocking with mocha to rspec-mocks [\#948](https://github.com/puppetlabs/puppetlabs-stdlib/pull/948) ([rodjek](https://github.com/rodjek))
+
+### Fixed
+
+- \(FM-7388\) - Fixing unit tests for puppet 4, 5 and 6 [\#962](https://github.com/puppetlabs/puppetlabs-stdlib/pull/962) ([tphoney](https://github.com/tphoney))
+- Fix `pick` function docs [\#955](https://github.com/puppetlabs/puppetlabs-stdlib/pull/955) ([alexjfisher](https://github.com/alexjfisher))
+- \(MODULES-7768\) Handle nil in delete\_undef\_values\(\) function [\#954](https://github.com/puppetlabs/puppetlabs-stdlib/pull/954) ([hlindberg](https://github.com/hlindberg))
+- Update docs for 'concat' to be correct [\#950](https://github.com/puppetlabs/puppetlabs-stdlib/pull/950) ([rhowe-gds](https://github.com/rhowe-gds))
+
+## 5.0.0
+### Summary
+This is a major release which removes support for the Scientific 5 and Debian 7 OS, as well as a removal of the `Stdlib::(Ipv4|IPv6|Ip_address)` data types in favour of `Stdlib::IP::*`. 
+
+**In addition it contains a substantial piece of work centered around updating functions that have now been migrated into Puppet itself. Please note that this will be the last major release to support Puppet 2 and Puppet 3 and that they will soon be removed.**
+
+#### Fixed
+- Docs URLs corrected.
+- Docs clarified that `Stdlib::Unixpath` only matches absolute paths.
+- `dirname()` now fails when passed an empty string.
+- `basename()` documentation clarified.
+- Corrected documentation of `count()` wrt matches and empty string.
+- Corrected example in `getparam()` and added note about equivalent in puppet.
+- Fixed URL to use 'latest' instead of '5.5' for `Hash.new` function.
+
+#### Added
+- Support added for symbolic file nodes.
+- `loadjson()` and `loadyml()` now compatible with HTTPS files.
+- `loadjson()` and `loadyml()` now compatible with HTTP basic auth files.
+- `any2array` now returns and empty array when given an empty string.
+- Support has now been added for Ubuntu 18.04.
+- `seeded_rand_string()` function has been added.
+
+#### Changed
+- PDK update `1.5.0` has been applied.
+- `size()` function deprecated for Puppet 6 and above.
+- `wrt` functions moved to Puppet as of Puppet 6.
+- `sprintf_hash` has had notification put in place to show that as of Puppet 4.10.10 it's functionality is supported by the puppet core.
+- Added note that `abs()` is in puppet since 6.0.0.
+- Added information to `base64` function about Binary data type.
+- Added note to `camelcase()` that function is now in puppet.
+- Added note to `capitalize()` that function is now in puppet.
+- Added note to `ceiling()` that function is now in puppet.
+- Added note to `chomp()` that function is now in puppet.
+- Added note to `chop()` that function is now in puppet.
+- Added note how to do equivalence of `clamp()` function in puppet 6.
+- Added note that `concat()` can be done with + since puppet 4.0.0.
+- Added note to `convert_base()` how to do this with puppet core.
+- Added equivalent puppet core way of doing `count()`.
+- Added docs for equivalent puppet language for `delete_regexp()`.
+- Added docs for equivalent language constructs for `delete_at()`.
+- Added puppet 4 equivalent for `delete_undef()` function.
+- Added equivalent puppet language for `delete_values()`.
+- Updated `delete()` function with docs about equivalent language.
+- Added docs that - between arrays is the same as `difference()`.
+- Added note to `downcase()` that function is now in puppet.
+- Added note to `empty()` that function is now in puppet.
+- Added note to `flatten()` that function is now in puppet.
+- Added note to `floor()` that function is now in puppet.
+- Added note to `get_module_path()` that puppet has similar function.
+- Amended documentation for `getvar()`.
+- Add note to `grep()` that `filter()` in puppet does the same.
+- Updated `has_key()` with equivalent puppet lang expresion.
+- Updated the `hash()` function to show equivalent expression.
+- Added note about more formatting options with `String()` in puppet.
+- Added note to `join()` that it is in puppet since 5.4.0.
+- Added note to `keys()` that it is in puppet since 5.4.0.
+- Added note to `lstrip()`, `rstrip()`, `strip()` and `upcase()` that they are in puppet since 6.0.0.
+- Updated `member()` with equivalent language expression example.
+- Updated `merge()` with puppt language equivalent example.
+- Updated `min()` and `max()` with note that they are in puppet.
+- Updated `num2bool()` with information that Boolean can convert.
+- Updated `prefix()` function with equivalent operation in pupppet.
+- Updated `range()` with information that Integer can be used.
+- Updated `reject()` with equivalent filter() call.
+- Added note to `reverse()` that the `reverse_each()` Puppet function does the same as it.
+- Added note to `round()` that it has moved to puppet in 6.0.0.
+- Added note to `size()` that `length()` is in puppet since 5.4.0.
+- Added note to `sort()` that is has moved to Puppet in 6.0.0.
+- Updated `str2bool()` with a note that Boolean can handle conversion.
+- Added note to `strftime()` that it moved to puppet in 4.8.0.
+- Added note to `suffix()` that the same can be done with `map()`.
+- Updated `time()` to mention Timespan and Timestamp data types.
+- Added note to `values_at()` for equivalent slice operation in language.
+- Added note to `values()` that it moved to puppet in 5.5.0.
+- Corrected docs for `keys()` - in puppet since 5.5.0.
+- Added note to `length()` that function moved to puppet.
+- Updated README.md with deprecations for functions moved to puppet.
+- Updated documentation of `values_at()`.
+- Updated README with note from `time()` about data types for time.
+- Updated README for `strintf_hash()` (supported by builtin sprintf).
+- Updated README with deprecation of `hash()` function (use data type).
+- Updated README `suffix` with equiv example for `map`.
+- Updated README with `reject` equivalent call to `filter`.
+- Updated README with `range` equiv use of type system + `each`.
+- Updated README with `prefix` equiv func using `map`.
+- Updated README for `num2bool` with info about Boolean type.
+- Updated README `str2bool` with information about `Boolean` equivalent.
+- Updated README `merge` with info about `+` operator equivalent.
+- Updated README `member` with equivalent alternative in language.
+- Updated README `join_keys_to_values` with link to String.new.
+- Updated README `has_key` shows deprecation in favor of `in`.
+- Updated README `grep` adds information about `filter`.
+- Updated README and `getvar.rb` as getvar has moved to puppet.
+- Updated README for `getparam` to be the same as in function.
+- Updated README `get_module_path` with info about built in variant.
+- Updated README `difference` to mention `-` operator equiv.
+- Updated README `delete` with built-in alternatives.
+- Updated README `delete_values` with builtin equiv.
+- Updated README `delete_undef` & `delete_regexp` with builtin equiv.
+- Updated README `delete_at` with equivalent built-in examples.
+- Updated README `coun`t to show built-in equiv.
+- Updated README `convert_base` with built-in equiv.
+- Updated README `concat` with built-in equiv using + and <<.
+- Updated README `base_64` with built-in equiv using Binary type.
+- Skipped tests for `abs` if puppet version < 6.0.0.
+- Skipped tests for `min` and `max` if puppet version < 6.0.0.
+- Skipped tests for `floor` if puppet version < 6.0.0.
+- Skipped tests for `ceiling` if puppet version < 6.0.0.
+- Skipped tests for `round` if puppet version < 6.0.0.
+- Skipped tests for `upcase` if puppet version < 6.0.0.
+- Skipped tests for `downcase` if puppet version < 6.0.0.
+- Skipped tests for `capitalize` if puppet version < 6.0.0.
+- Skipped tests for `camelcase` if puppet version < 6.0.0.
+- Skipped tests for strip functions if puppet version < 6.0.0.
+- Skipped tests for `chop` and `chomp` if puppet version < 6.0.0.
+- Skipped tests for `sort` if puppet version < 6.0.0.
+- Removed extra space in `describe` for `abs` test.
+- Updated README and `any2array` with built-in equiv Array.new.
+- Updated README and `any2bool` with built-in equiv Boolean.new.
+- Updated README and `bool2num` with built-in equiv Numeric.new.
+- Updated README and `bool2str` with built-in equiv String.new.
+- Corrected equivalent example for `count`.
+- Updated README and made mention of `filter` in `delete` a link.
+- Updated docs and tests for `strftime`.
+- Updated all acceptance test using Puppet.version.
+- Change 'puppet' to 'Puppet' in function doc strings.
+- HTTP type checks are now case insensitive.
+
+#### Removed
+- Support has been removed for `Scientific 5` and `Debian 7` operating systems.
+- `Stdlib::(Ipv4|IPv6|Ip_address)` have been removed.
+
+## Supported Release 4.25.1
+### Summary
+
+This is a patch which includes a roll up of small fixes. In Puppet 5.5.0 `flatten()`, `length(),` `empty(),` `join(),` `keys(),` and `values()` are now built into Puppet. Please note that the Puppet implementation of the functions will take precedence over the functions in 'puppetlabs-stdlib'.
+
+#### Fixed
+- Remove unneeded execute permission from test files.
+- Puppet 5.5.0 function deprecation [MODULES-6894](https://tickets.puppetlabs.com/browse/MODULES-6894).
+
+## Supported Release 4.25.0
+### Summary
+
+This is quite a feature heavy release, it makes this module PDK-compliant for easier maintenance and includes a roll up of maintenance changes.
+
+#### Added
+- PDK conversion [MODULES-6332](https://tickets.puppetlabs.com/browse/MODULES-6332).
+- Update `join_keys_to_values` with an undef statement.
+- Type alias `Stdlib::Fqdn` matches paths on a fully qualified domain name.
+- Type alias `Stdlib::Host` matches a valid host, this can be a valid 'ipv4', 'ipv6' or 'fqdn'.
+- Type alias `Stdlib::Port` matches a valid TCP/UDP Port number.
+- Type alias `Stdlib::Filesource` matches paths valid values for the source parameter of the puppet file type.
+- Type alias `Stdlib::IP::Address` matches any IP address, including both IPv4 and IPv6 addresses,
+- Type alias `Stdlib::IP::Address::V4` matches any string consisting of a valid IPv4 address, this is extended by 'CIDR' and 'nosubnet'.
+- Type alias `Stdlib::IP::Address::V6` matches any string consisting of a valid IPv6 address, this is extended by 'Full', 'Alternate' and 'Compressed'.
+- Type alias `Stdlib::IP::Address::V6::Nosubnet`matches any string consisting of a valid IPv6 address with no subnet, this is extended by 'Full', 'Alternate' and 'Compressed'.
+- Type alias `Stdlib::Port` matches a valid TCP/UDP Port number this is then extended to 'Privileged' which are ports less than 1024 and 'Unprivileged' which are ports greater than 1024.
 
 ## Supported Release 4.24.0
 ### Summary
@@ -94,9 +352,9 @@ This release adds new functions and better documentation/fixes for existing func
 - Add new function, fact() (FACT-932)
 
 #### Fixed
-- Fixes for the file_line provider ([MODULES-5003](https://tickets.puppet.com/browse/MODULES-5003)) 
-- Add documentation for email functions ([MODULES-5382](https://tickets.puppet.com/browse/MODULES-5382)) 
-- unique function is deprecated for puppet version > 5. (FM-6239) 
+- Fixes for the file_line provider ([MODULES-5003](https://tickets.puppet.com/browse/MODULES-5003))
+- Add documentation for email functions ([MODULES-5382](https://tickets.puppet.com/browse/MODULES-5382))
+- unique function is deprecated for puppet version > 5. (FM-6239)
 - Fix headers in CHANGELOG.md so that headers render correctly
 - ensure_packages, converge ensure values 'present' and 'installed'
 
@@ -309,7 +567,7 @@ Includes the addition of several new functions and considerable improvements to 
 
 #### Bugfixes
 - Fix backwards compatibility from an improvement to the parseyaml function
-- Renaming of load_module_metadata test to include _spec.rb
+- Renaming of load_module_metadata test to include \_spec.rb
 - Fix root_home fact on AIX 5.x, now '-c' rather than '-C'
 - Fixed Gemfile to work with ruby 1.8.7
 
@@ -910,3 +1168,6 @@ This is a supported release
 ##### 0.1.1 2011-05-24 Jeff McCune <jeff@puppetlabs.com>
 
 * Add stdlib::stages class with a standard set of stages
+
+
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
