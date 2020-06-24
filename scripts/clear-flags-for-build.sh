@@ -93,3 +93,6 @@ persistRedisFlag ${redis_ip} ${redis_pass} dynadm_365_done ${prefix}
 setRedisFlag ${redis_ip} ${redis_pass} neworg_ready "false" ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} neworg_ready ${prefix}
 
+# set flag to mark an unexpected machine restart
+setRedisFlag ${redis_ip} ${redis_pass} machine_restart "false" ${prefix}
+persistRedisFlag ${redis_ip} ${redis_pass} machine_restart ${prefix}

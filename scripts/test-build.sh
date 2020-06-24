@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+shopt -s nocasematch
+
 start_time="$(date -u +%s)"
 echo "Start time of build test is $(date -d @$start_time)"
 
@@ -279,7 +281,7 @@ do
   fi
  
   elapsed="$((${end_time}-${start_time}))"
-  if [ ${elapsed} -gt 14400 ]
+  if [ ${elapsed} -gt 5400 ]
   then
     echo "Build has timed out at $(date -d @${end_time})"
     echo ${MSG1}
@@ -317,5 +319,13 @@ do
   then
     echo "Build has finished at $(date -d @${end_time})"
     exit 0
+  fi
+
+  machine_restart=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_machine_restart\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
+  if [[ ${machine_restart} =~ 'dyn' ]]
+  then
+    # print which machine restarted, clear the machine_restart flag again
+    echo "Unexpected machine restart: ${machine_restart}"
+    echo -e "AUTH ${redis_pass}\r\nSET ${prefix}_machine_restart false\r\n" | nc -w1 ${redis_ip} 6379 >/dev/null 2>&1
   fi
 done

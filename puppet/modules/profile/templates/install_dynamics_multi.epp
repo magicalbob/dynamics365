@@ -87,8 +87,14 @@ else
   Invoke-Expression $install_command
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics completed dynamics install"
 
-  # set flag to say dynamics installed on this machine now
-  c:\scripts\flagmanset.ps1 -Name "$(hostname)_ready" -Value "true"
+  if (!(Test-Path 'C:\Program Files\Microsoft Dynamics CRM\tools\Microsoft.Crm.DeploymentManager.exe')) {
+    # dynamics has not installed, so restart & try again?
+    c:\scripts\flagmanset.ps1 -Name "machine_restart" -Value "$(hostname)"
+    restart-computer -force
+  } else {
+    # set flag to say dynamics installed on this machine now
+    c:\scripts\flagmanset.ps1 -Name "$(hostname)_ready" -Value "true"
+  }
 
   # wait for all dynamics nodes to install (so wait for be_server and adm_server)
   Do {
@@ -100,11 +106,6 @@ else
     }
   } Until (($beReady -eq "true") -And ($admReady -eq "true"))
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics all dynamics nodes have installed"
-
-  # check that dynamics really is installed. change the ready flag to error if not.
-  if (!(Test-Path 'C:\Program Files\Microsoft Dynamics CRM\tools\Microsoft.Crm.DeploymentManager.exe')) {
-    c:\scripts\flagmanset.ps1 -Name "$(hostname)_ready" -Value "error"
-  }
 
   # Upgrade from 2016 to 365
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start dynamics 365 upgrade"
