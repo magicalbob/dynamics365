@@ -5,7 +5,10 @@ Pre-requisites
 *	virtualbox
 *	terraform
 *	vagrant
+*	ruby
 *	mustache
+
+For Windows run the shell scripts with Git Bash.
 
 Setup
 =====
@@ -48,7 +51,7 @@ To build the base image just run `./scripts/build-packer.sh`. To get Jenkins to 
 
 To stand up dynamics in Vagrant run `./scripts/build-vagrant.sh`. Vagrant is always a bit flaky.
 
-To stand up dynamics in Terraform run `./scripts/build-terraform.sh`. The script downloads the terraform provider for Virtual Box from my Jenkins server. It is for linux, so won't work in Windows or OS X - unless you build your own provider binary and update the script to download it or not. The source code for the terraform virtualbox provider used is here: https://github.com/pyToshka/terraform-provider-virtualbox
+To stand up dynamics in Terraform run `./scripts/build-terraform.sh`. The script downloads the terraform provider for Virtual Box from my Jenkins server. It is built for linux and Windows (but not Mac. You'd have to build it yourself with `go` and update the scripts to make use of it). The source code for the terraform virtualbox provider used is here: https://github.com/pyToshka/terraform-provider-virtualbox.
 
 The scripts `./scripts/test-build.sh` and `./scripts/test-org.sh` report on progress of both `build-vagrant.sh` and `build-terraform.sh`. There is also `./scripts/check_redis.sh` which reports on the redis flags for the current build.
 

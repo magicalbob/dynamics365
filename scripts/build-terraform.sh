@@ -7,15 +7,15 @@ function createMachine {
 # arg 4 = redis_pass
   echo "Create Machine: ${1}"
 
-  vbox_id=$(/usr/local/bin/terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
+  vbox_id=$(terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
   vbox_state=$(VBoxManage showvminfo ${vbox_id}|grep ^State|grep -o running)
 
   while [ ! "$vbox_state" == "running" ]
   do
-    /usr/local/bin/terraform destroy --auto-approve --target virtualbox_vm.${1}
-    /usr/local/bin/terraform apply --auto-approve --target virtualbox_vm.${1}
+    terraform destroy --auto-approve --target virtualbox_vm.${1}
+    terraform apply --auto-approve --target virtualbox_vm.${1}
 
-    vbox_id=$(/usr/local/bin/terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
+    vbox_id=$(terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
 
     sleep 60
 
@@ -50,6 +50,13 @@ cd ${BASE_PATH}/../terraform
 
 source ../scripts/boxname.sh
 
+if [ "$OS" == "Windows_NT" ]
+then
+  PROVIDER_EXT=".exe"
+else
+  PROVIDER_EXT=""
+fi
+
 # check that BRANCH_NAME exists, otherwise set it to "master"
 if [[ -z "$BRANCH_NAME" ]]
 then
@@ -60,7 +67,7 @@ fi
 resp=1
 while [ $resp -ne 0 ]
 do
-  curl -fLO https://dev.ellisbs.co.uk/files/software/terraform-provider-virtualbox
+  curl -fLO https://dev.ellisbs.co.uk/files/software/terraform-provider-virtualbox${PROVIDER_EXT}
   resp=$?
 done
 chmod +x ./terraform-provider-virtualbox
@@ -134,8 +141,22 @@ do
   resp=$?
 done
 
+if [ "$OS" == "Windows_NT" ]
+then
+  if [ -d ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox ]
+  then
+    echo "Gold Box already exists?"
+  else
+    echo "Create Gold Box"
+    mkdir ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
+    pushd ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
+    tar xf ${OLDPWD}/dynamics-windows-virtualbox.box
+    popd
+  fi
+fi
+
 # Get primary network device
-export TF_VAR_netdev=$(/usr/sbin/ip route|grep default|cut -d' ' -f5)
+export TF_VAR_netdev=$(VBoxManage list bridgedifs|head -n1|cut -d: -f2|sed 's/^[ ]*//g')
 
 # Bring up the cluster
 terraform apply --auto-approve
