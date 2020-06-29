@@ -36,10 +36,10 @@ class profile::dynamicsusers(
     ensure  => present,
     path    => 'c:\scripts\export-users-from-ad.ps1',
     content => epp('profile/export-users-from-ad.epp',{
-      dc_string        => $dc_string,
-      admin_pass       => $admin_pass,
-      ad_domain        => $ad_domain,
-      crm_user_group   => $crm_user_group
+      dc_string      => $dc_string,
+      admin_pass     => $admin_pass,
+      ad_domain      => $ad_domain,
+      crm_user_group => $crm_user_group
     })
   }
 
