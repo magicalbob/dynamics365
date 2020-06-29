@@ -25,7 +25,7 @@ rm -f puppet.zip
 cd puppet
 zip -qr ../puppet.zip hieradata manifests modules facter
 cd ..
-/usr/local/bin/packer build -force packer-vbox.json
+packer build -force packer-vbox.json
 
 # Forcibly add the base box
 vagrant box add -f dynamics-windows-virtualbox.box dynamics-windows-virtualbox.box

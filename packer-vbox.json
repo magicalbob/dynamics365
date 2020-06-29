@@ -1,58 +1,68 @@
 {
-  "variables": {
-    "os_type":        "{{env `OS_TYPE`}}",
-    "iso_url":        "{{env `ISO_URL`}}",
-    "iso_md5":        "{{env `ISO_MD5`}}",
-    "winrm_username": "{{env `WINRM_USERNAME`}}",
-    "winrm_password": "{{env `WINRM_PASSWORD`}}",
-    "disk_size":      "{{env `DISK_SIZE`}}",
-    "build_user":     "{{env `USERNAME`}}",
-    "vbox_ver":       "{{env `VBOX_VER`}}"
-  },
-
-  "builders": 
-  [
+  "builders": [
     {
-      "headless":          true,
-      "type":              "virtualbox-iso",
-      "vm_name":           "{{user `os_type`}}-{{timestamp}}",
-      "guest_os_type":     "Windows2012_64",
-      "disk_size":         "{{user `disk_size`}}",
-      "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--natpf1", "winrm,tcp,,55985,,5985" ],
-        [ "modifyvm", "{{.Name}}", "--memory", "16384" ],
-        [ "modifyvm", "{{.Name}}", "--cpus", "4" ]
-      ],
-      "guest_additions_mode": "disable",
-      "post_shutdown_delay": "2m",
-      "iso_checksum_type": "md5",
-      "iso_url":           "{{user `iso_url`}}",
-      "iso_checksum":      "{{user `iso_md5`}}",
-      "communicator":      "winrm",
-      "winrm_username":    "{{user `winrm_username`}}",
-      "winrm_password":    "{{user `winrm_password`}}",
-      "winrm_timeout":     "5h",
-      "shutdown_command":  "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml",
-      "shutdown_timeout":     "15m",
+      "communicator": "winrm",
+      "disk_size": "{{user `disk_size`}}",
       "floppy_files": [
         "answer_files/AutoUnattend.xml",
         "scripts/winrm.ps1"
-      ]
+      ],
+      "guest_additions_mode": "disable",
+      "guest_os_type": "Windows2012_64",
+      "headless": true,
+      "iso_checksum": "{{user `iso_md5`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `iso_url`}}",
+      "post_shutdown_delay": "2m",
+      "shutdown_command": "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml",
+      "shutdown_timeout": "15m",
+      "type": "virtualbox-iso",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--natpf1",
+          "winrm,tcp,,55985,,5985"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "16384"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "4"
+        ]
+      ],
+      "vm_name": "{{user `os_type`}}-{{timestamp}}",
+      "winrm_password": "{{user `winrm_password`}}",
+      "winrm_timeout": "5h",
+      "winrm_username": "{{user `winrm_username`}}"
+    }
+  ],
+  "post-processors": [
+    {
+      "compression_level": 9,
+      "keep_input_artifact": false,
+      "output": "dynamics-{{user `os_type`}}-{{.Provider}}.box",
+      "type": "vagrant"
     }
   ],
   "provisioners": [
     {
-      "type": "windows-shell",
       "inline": [
         "winrm quickconfig -q",
         "winrm set winrm/config/service/Auth @{Basic=\"true\"}",
         "winrm set winrm/config/service @{AllowUnencrypted=\"true\"}",
         "winrm set winrm/config/winrs @{MaxMemoryPerShellMB=\"1024\"}",
         "netsh advfirewall set allprofiles state off"
-      ]
+      ],
+      "type": "windows-shell"
     },
     {
-      "type": "powershell",
       "inline": [
         "powercfg /SetActive SCHEME_MIN",
         "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Cache Maintenance\" /RL LIMITED",
@@ -62,31 +72,31 @@
         "Install-WindowsFeature Net-Framework-Core,Windows-Identity-Foundation  -IncludeAllSubFeature -source d:/sources/sxs",
         "(New-Object System.Net.WebClient).DownloadFile('https://downloads.puppetlabs.com/windows/puppet6/puppet-agent-x64-latest.msi', 'C:/Windows/Temp/puppet.msi')",
         "cmd /c start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log"
-      ]
+      ],
+      "type": "powershell"
     },
     {
-      "type": "file",
+      "destination": "c:\\scripts\\unattend.xml",
       "source": "answer_files/AutoUnattend.xml",
-      "destination": "c:\\scripts\\unattend.xml"
+      "type": "file"
     },
     {
-      "type": "file",
+      "destination": "c:\\ProgramData\\PuppetLabs\\puppet\\etc\\hiera.yaml",
       "source": "files/hiera.yaml",
-      "destination": "c:\\ProgramData\\PuppetLabs\\puppet\\etc\\hiera.yaml"
+      "type": "file"
     },
     {
-      "type": "file",
+      "destination": "c:\\windows\\temp\\puppet.zip",
       "source": "puppet.zip",
-      "destination": "c:\\windows\\temp\\puppet.zip"
+      "type": "file"
     },
     {
-      "type": "powershell",
       "scripts": [
         "./scripts/puppet-apply.ps1"
-      ]
+      ],
+      "type": "powershell"
     },
     {
-      "type": "powershell",
       "inline": [
         "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
         "Invoke-WebRequest -Uri https://download.virtualbox.org/virtualbox/{{user `vbox_ver`}}/VBoxGuestAdditions_{{user `vbox_ver`}}.iso -Outfile C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
@@ -97,15 +107,19 @@
         "Remove-Item C:\\Users\\Administrator\\VBoxGuestAdditions.iso -Force",
         "Move-Item -Path c:\\ProgramData\\Puppetlabs\\code -Destination c:\\ProgramData\\Puppetlabs\\code.build -Force",
         "if (Test-Path c:\\scripts\\prefix) { Remove-Item C:\\Scripts\\prefix -Force }"
-      ]
+      ],
+      "type": "powershell"
     }
   ],
-  "post-processors": [
-    {
-      "type": "vagrant",
-      "keep_input_artifact": false,
-      "compression_level": 9,
-      "output": "dynamics-{{user `os_type`}}-{{.Provider}}.box"
-    }
-  ]
+  "variables": {
+    "build_user": "{{env `USERNAME`}}",
+    "disk_size": "{{env `DISK_SIZE`}}",
+    "iso_md5": "{{env `ISO_MD5`}}",
+    "iso_url": "{{env `ISO_URL`}}",
+    "os_type": "{{env `OS_TYPE`}}",
+    "vbox_ver": "{{env `VBOX_VER`}}",
+    "winrm_password": "{{env `WINRM_PASSWORD`}}",
+    "winrm_username": "{{env `WINRM_USERNAME`}}"
+  }
 }
+
