@@ -4,10 +4,11 @@ Pre-requisites
 *	packer		(on Windows tested with `choco install -y packer`)
 *	virtualbox	(on Windows tested with `choco install -y virtualbox`)
 *	terraform	(on Windows tested with `choco install -y terraform`)
-*	vagrant
+*	vagrant         (on Windows tested with `choco install -y vagrant`)
 *	ruby		(on Windows tested with `choco install -y ruby`)
 *	mustache	(`gem install mustache`)
 *	zip		(on Windows tested with `choco install -y zip`)
+*	python		(on Windows tested with `choco install -y python3`)
 
 For Windows run the shell scripts with Git Bash.
 
