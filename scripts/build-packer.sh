@@ -1,3 +1,8 @@
+if [ "${OS}" == "Windows_NT" ]
+then
+  PATH=$PATH:/c/tools/ruby27/bin:"/c/Program Files/Oracle/VirtualBox"
+fi
+
 export OS_TYPE=windows
 export ISO_URL=https://dev.ellisbs.co.uk/files/software/WinServer2016.iso
 export ISO_MD5=0b171c917909e824967ca7108ff9404f

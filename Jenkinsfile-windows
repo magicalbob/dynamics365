@@ -1,0 +1,56 @@
+pipeline {
+  agent { 
+    label 'swarm'
+  }
+
+  triggers {
+    cron(env.BRANCH_NAME == 'develop' ? 'H H(1-5) * * 1-7' : '')
+  }
+
+  stages {
+
+    stage('packer build dynamics vagrant box') {
+      steps {
+        script {
+          bat """
+            c:\\progra~1\\git\\bin\\bash ./scripts/build-packer.sh
+          """
+        }
+      }
+    }
+
+    stage('terraform apply dynamics') {
+      steps {
+        script {
+          bat """
+            c:\\progra~1\\git\\bin\\bash ./scripts/build-terraform.sh
+          """
+        }
+      }
+    }
+
+    stage('test build status') {
+      steps {
+        script {
+          bat """
+            c:\\progra~1\\git\\bin\\bash ./scripts/test-build.sh
+          """
+        }
+      }
+    }
+
+    stage('test new org created') {
+      steps {
+        script {
+          try {
+              bat 'c:\\progra~1\\git\\bin\\bash ./scripts/test-org.sh'
+          }
+          catch (exc) {
+              echo 'Creating org failed!'
+              currentBuild.result = 'UNSTABLE'
+          }
+        }
+      }
+    }
+  }
+}

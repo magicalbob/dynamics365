@@ -2,6 +2,11 @@
 
 shopt -s nocasematch
 
+if [ "$OS" == "Windows_NT" ]
+then
+  PATH=$PATH:/c/Python38
+fi
+
 start_time="$(date -u +%s)"
 echo "Start time of build test is $(date -d @$start_time)"
 
@@ -281,7 +286,7 @@ do
   fi
  
   elapsed="$((${end_time}-${start_time}))"
-  if [ ${elapsed} -gt 5400 ]
+  if [ ${elapsed} -gt 15400 ]
   then
     echo "Build has timed out at $(date -d @${end_time})"
     echo ${MSG1}

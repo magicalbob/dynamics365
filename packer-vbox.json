@@ -10,8 +10,7 @@
       "guest_additions_mode": "disable",
       "guest_os_type": "Windows2012_64",
       "headless": true,
-      "iso_checksum": "{{user `iso_md5`}}",
-      "iso_checksum_type": "md5",
+      "iso_checksum": "{{user `iso_checksum`}}",
       "iso_url": "{{user `iso_url`}}",
       "post_shutdown_delay": "2m",
       "shutdown_command": "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml",
@@ -114,7 +113,7 @@
   "variables": {
     "build_user": "{{env `USERNAME`}}",
     "disk_size": "{{env `DISK_SIZE`}}",
-    "iso_md5": "{{env `ISO_MD5`}}",
+    "iso_checksum": "md5:{{env `ISO_MD5`}}",
     "iso_url": "{{env `ISO_URL`}}",
     "os_type": "{{env `OS_TYPE`}}",
     "vbox_ver": "{{env `VBOX_VER`}}",
