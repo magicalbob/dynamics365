@@ -3,7 +3,7 @@ resource "virtualbox_vm" "dynbe" {
   name   = join("", ["dynbe", formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())])
   image  = "./dynamics-windows-virtualbox.box"
   cpus   = 1
-  memory = "2048 mib"
+  memory = "1024 mib"
 
   network_adapter {
     type           = "bridged"
