@@ -1,6 +1,8 @@
 if [ "${OS}" == "Windows_NT" ]
 then
   PATH=$PATH:/c/tools/ruby27/bin:"/c/Program Files/Oracle/VirtualBox"
+  export JENKINS_NODE_COOKIE=dontKillMe 
+  export BUILD_ID=dontKillMe
 fi
 
 export OS_TYPE=windows
@@ -26,7 +28,8 @@ then
   BRANCH_NAME=local
 fi
 
-rm -f puppet.zip
+echo "Removing puppet.zip and dynamics-windows-virtualbox.box"
+rm -vf puppet.zip dynamics-windows-virtualbox.box
 cd puppet
 zip -qr ../puppet.zip hieradata manifests modules facter
 cd ..
@@ -36,6 +39,12 @@ packer build -force packer-vbox.json
 vagrant box add -f dynamics-windows-virtualbox.box dynamics-windows-virtualbox.box
 
 # Publish box to jenkins files
-scp dynamics-windows-virtualbox.box xeon:/opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
-echo "sudo chmod a+rwx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
-echo "sudo chown nginx:nginx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
+if [ -f dynamics-windows-virtualbox.box ]
+then
+  scp dynamics-windows-virtualbox.box xeon:/opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
+  echo "sudo chmod a+rwx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
+  echo "sudo chown nginx:nginx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
+else
+  echo "dynamics-windows-virtualbox.box was not produced. Fail!"
+  exit -1
+fi
