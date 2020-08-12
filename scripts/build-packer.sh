@@ -1,8 +1,6 @@
 if [ "${OS}" == "Windows_NT" ]
 then
   PATH=$PATH:/c/tools/ruby27/bin:"/c/Program Files/Oracle/VirtualBox"
-  export JENKINS_NODE_COOKIE=dontKillMe 
-  export BUILD_ID=dontKillMe
 fi
 
 export OS_TYPE=windows

@@ -27,7 +27,7 @@ quiet_install: '/q'
 
 default_org: dynamics
 
-redis_ip: 82.43.114.96
+redis_ip: dev.ellisbs.co.uk
 redis_pass: zofeufigheeghohxoh6einoo9raxeNgizahghioshaito3ief2phei8eingei0Cai7zaeQuei1Aifooyoh5mah1ow6ohk3sootieshi3iey0Meipi0fefah8A
 
 reboot_timeout: "60"

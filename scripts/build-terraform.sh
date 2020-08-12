@@ -88,7 +88,8 @@ done
 terraform init
 
 # Get redis details from puppet hiera
-redis_ip=$(grep redis_ip ../puppet/hieradata/common.yaml |cut -d: -f2)
+redis_name=$(grep redis_ip ../puppet/hieradata/common.yaml |cut -d: -f2)
+redis_ip=$(nslookup -querytype=A ${redis_name} 2> /dev/null | grep ^Address:|tail -n1|cut -d: -f2)
 redis_pass=$(grep redis_pass ../puppet/hieradata/common.yaml |cut -d: -f2)
 
 # LOCK loop checking no lock more recent than X minutes ago

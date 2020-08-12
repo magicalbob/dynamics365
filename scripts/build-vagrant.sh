@@ -14,7 +14,8 @@ function run_machine {
 # Setup prefix in redis for this build
 prefix=$(date +%s)
 echo ${prefix} > prefix
-redis_ip=$(grep redis_ip puppet/hieradata/common.yaml |cut -d: -f2)
+redis_name=$(grep redis_ip puppet/hieradata/common.yaml |cut -d: -f2)
+redis_ip=$(nslookup -querytype=A ${redis_name} 2> /dev/null | grep ^Address:|tail -n1|cut -d: -f2)
 redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 
 ./scripts/clear-flags-for-build.sh ${prefix} ${redis_ip} ${redis_pass}
