@@ -10,7 +10,8 @@ fi
 start_time="$(date -u +%s)"
 echo "Start time of build test is $(date -d @$start_time)"
 
-redis_ip=$(grep redis_ip puppet/hieradata/common.yaml |cut -d: -f2)
+redis_name=$(grep redis_ip puppet/hieradata/common.yaml |cut -d: -f2)
+redis_ip=$(nslookup -querytype=A ${redis_name} | grep ^Address:|tail -n1|cut -d\  -f2)
 redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 
 virtualenv .py > /dev/null 2>&1
