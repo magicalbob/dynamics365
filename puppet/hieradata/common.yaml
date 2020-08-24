@@ -5,9 +5,6 @@ ad_domain: DYNAD
 ad_domain_url: vagrant.local
 ad_suffix: DEV
 
-cluster:
-  dynad:   172.28.128.100
-
 crm_system_group: CRMSystem
 crm_user_group: CRMUser
 
