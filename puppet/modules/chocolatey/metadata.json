@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-chocolatey",
-  "version": "5.0.2",
+  "version": "5.1.1",
   "author": "puppetlabs",
   "summary": "Chocolatey package provider for Puppet",
   "license": "Apache-2.0",
@@ -14,14 +14,13 @@
     },
     {
       "name": "puppetlabs/powershell",
-      "version_requirement": ">= 1.0.1 < 4.0.0"
+      "version_requirement": ">= 1.0.1 < 5.0.0"
     },
     {
       "name": "puppetlabs/registry",
       "version_requirement": ">= 1.0.0 < 4.0.0"
     }
   ],
-  "data_provider": null,
   "operatingsystem_support": [
     {
       "operatingsystem": "Windows",
@@ -57,7 +56,7 @@
     "chocolatey for business",
     "chocolatey professional"
   ],
-  "pdk-version": "1.15.0",
-  "template-url": "https://github.com/puppetlabs/pdk-templates#master",
-  "template-ref": "heads/master-0-g941e819"
+  "pdk-version": "1.18.1",
+  "template-url": "https://github.com/puppetlabs/pdk-templates#main",
+  "template-ref": "remotes/origin/main-0-g8f10887"
 }

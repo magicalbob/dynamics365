@@ -1,0 +1,55 @@
+---
+".gitattributes":
+  exclude:
+  - "*.erb"
+".gitlab-ci.yml":
+  delete: true
+".rubocop.yml":
+  default_configs:
+    inherit_from: ".rubocop_todo.yml"
+    require:
+    - rubocop-rspec
+".travis.yml":
+  global_env: 
+    - HONEYCOMB_WRITEKEY="7f3c63a70eecc61d635917de46bea4e6",HONEYCOMB_DATASET="litmus tests"
+  deploy_to_forge:
+    enabled: false
+  simplecov: true
+  notifications:
+    slack:
+      secure: >-
+        h7gePV9i9gHb3JDY3CpwS9XOY5fzrGs2PuXqWMBO9r3nbsOwTUBLOP4Z7O6/GPpsW9Wmn0kn7INfPEvArZ/i3KHx/0/uotKA4qa8SwSPRgC9CAwj54GDo9j2NyLX/A6QBm/xn6kRF5Q7Q7GynF+b0NBmQvxjbILXqU2uY5gkRK6Pq5AoVt87aEXRj4XXAfbjDIKRxgdo4i8DC9F0n1yaKqO9iaiP8IvhFqOK6UCD+wCTdAav/es/Y5bE30X19me5PCSHEM2HkYopNFpBderR6HkSKOXhgMWaQi+ojb6IvmbpzQzQHtscvLOjkyrQEUZTu43aaaQoMura82x095t+4AiA1tuYBVvke1KsnvIdFljPT7rsJVl7IdH/m04BN0UQT7myssxEeBPVCX8ijT1yp0sdtSBboyIdbsPd8WQIQ4YWwauPt1Vi1gsMxZGZjmWUCe21bVlF5LMTZMonUYXjym/lKWMRPorW7AYVEdDJ2abE1OoeF3v8iig5wvSC11r1K00V6YcDNXR1lZ2azlMisnCtKbJBbG2MNRj339umi+faTsCMICLlwr6LkTTyYMzhhunQoSyGKHzNaqoAJcRkTtuLKS2kzAeZRY5qqP2LOhBMM5VYOcftHogyh9ym9qmwhslSQQEoxakig8jm4Yl7l7apM8vHyzq9J7WrhmO5zBo=
+appveyor.yml:
+  environment:
+    HONEYCOMB_WRITEKEY: 7f3c63a70eecc61d635917de46bea4e6
+    HONEYCOMB_DATASET: litmus tests
+  use_litmus: true
+  matrix_extras:
+  - RUBY_VERSION: 25-x64
+    ACCEPTANCE: 'yes'
+    TARGET_HOST: localhost
+  - RUBY_VERSION: 25-x64
+    ACCEPTANCE: 'yes'
+    TARGET_HOST: localhost
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  simplecov: true
+Gemfile:
+  use_litmus: true
+  required:
+    ":system_tests":
+    - gem: nokogiri
+      platforms:
+      - ruby
+      - mswin
+      - mingw
+      - x64_mingw
+  optional:
+    ":development":
+    - gem: ruby-pwsh
+    - gem: github_changelog_generator
+      git: https://github.com/skywinder/github-changelog-generator
+      ref: 20ee04ba1234e9e83eb2ffb5056e23d641c7a018
+      condition: Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')
+spec/spec_helper.rb:
+  mock_with: ":rspec"
+  coverage_report: true
