@@ -5,7 +5,7 @@ param($accountToAdd)
 ## <--- Configure here
 
 if( [string]::IsNullOrEmpty($accountToAdd) ) {
-	Write-Host "no account specified"
+	Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: no account specified"
 	exit
 }
 
@@ -20,18 +20,18 @@ try {
 	$sidstr = $null
 }
 
-Write-Host "Account: $($accountToAdd)" -ForegroundColor DarkCyan
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: Account: $($accountToAdd)"
 
 if( [string]::IsNullOrEmpty($sidstr) ) {
-	Write-Host "Account not found!" -ForegroundColor Red
+	Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Account not found!"
 	exit -1
 }
 
-Write-Host "Account SID: $($sidstr)" -ForegroundColor DarkCyan
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: Account SID: $($sidstr)"
 
 $tmp = [System.IO.Path]::GetTempFileName()
 
-Write-Host "Export current Local Security Policy" -ForegroundColor DarkCyan
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: Export current Local Security Policy"
 secedit.exe /export /cfg "$($tmp)" 
 
 $c = Get-Content -Path $tmp 
@@ -46,7 +46,7 @@ foreach($s in $c) {
 }
 
 if( $currentSetting -notlike "*$($sidstr)*" ) {
-	Write-Host "Modify Setting ""Logon as a Service""" -ForegroundColor DarkCyan
+	Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: Modify Setting ""Logon as a Service"""
 	
 	if( [string]::IsNullOrEmpty($currentSetting) ) {
 		$currentSetting = "*$($sidstr)"
@@ -54,7 +54,7 @@ if( $currentSetting -notlike "*$($sidstr)*" ) {
 		$currentSetting = "*$($sidstr),$($currentSetting)"
 	}
 	
-	Write-Host "$currentSetting"
+	Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: $currentSetting"
 	
 	$outfile = @"
 [Unicode]
@@ -69,7 +69,7 @@ SeServiceLogonRight = $($currentSetting)
 	$tmp2 = [System.IO.Path]::GetTempFileName()
 	
 	
-	Write-Host "Import new settings to Local Security Policy" -ForegroundColor DarkCyan
+	Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: Import new settings to Local Security Policy"
 	$outfile | Set-Content -Path $tmp2 -Encoding Unicode -Force
 
 	#notepad.exe $tmp2
@@ -77,12 +77,11 @@ SeServiceLogonRight = $($currentSetting)
 	
 	try {
 		secedit.exe /configure /db "secedit.sdb" /cfg "$($tmp2)" /areas USER_RIGHTS 
-		#write-host "secedit.exe /configure /db ""secedit.sdb"" /cfg ""$($tmp2)"" /areas USER_RIGHTS "
 	} finally {	
 		Pop-Location
 	}
 } else {
-	Write-Host "NO ACTIONS REQUIRED! Account already in ""Logon as a Service""" -ForegroundColor DarkCyan
+	Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: NO ACTIONS REQUIRED! Account already in ""Logon as a Service"""
 }
 
-Write-Host "Done." -ForegroundColor DarkCyan
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addaccounttologonasservice: Done."

@@ -5,7 +5,7 @@
 param($Username, $Password, $Databases)
 
 if ($Databases -eq "") {
-  Write-Host "User $Username is not a database user"
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: User $Username is not a database user"
 } else {
   #import SQL Server module
   Import-Module SQLPS -DisableNameChecking
@@ -23,8 +23,8 @@ if ($Databases -eq "") {
   # drop login if it exists
   if ($server.Logins.Contains($loginName))
   {
-    Write-Host("Deleting the existing login $loginName.")
-       $server.Logins[$loginName].Drop()
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: Deleting the existing login $loginName."
+    $server.Logins[$loginName].Drop()
   }
   
   $login = New-Object `
@@ -33,18 +33,18 @@ if ($Databases -eq "") {
   $login.LoginType = [Microsoft.SqlServer.Management.Smo.LoginType]::WindowsUser
   $login.PasswordExpirationEnabled = $false
   $login.Create($sqlPassword)
-  Write-Host("Login $loginName created successfully.")
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: Login $loginName created successfully."
 
   $serverRole = $server.Roles | where {$_.Name -eq 'sysadmin'}
   $serverRole.AddMember($loginName)
-  Write-Host("Login $loginName added to sysadmin.")
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: Login $loginName added to sysadmin."
   
   foreach($databaseToMap in $databasenames)
   {
     $database = $server.Databases[$databaseToMap]
     if ($database.Users[$dbUserName])
     {
-      Write-Host("Dropping user $dbUserName on $database.")
+      Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: Dropping user $dbUserName on $database."
       $database.Users[$dbUserName].Drop()
     }
   
@@ -53,12 +53,12 @@ if ($Databases -eq "") {
     -ArgumentList $database, $dbUserName
     $dbUser.Login = $loginName
     $dbUser.Create()
-    Write-Host("User $dbUser created successfully.")
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: User $dbUser created successfully."
   
     #assign database role for a new user
     $dbrole = $database.Roles[$roleName]
     $dbrole.AddMember($dbUserName)
     $dbrole.Alter()
-    Write-Host("User $dbUser successfully added to $roleName role.")
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqluser: User $dbUser successfully added to $roleName role."
   }
 }

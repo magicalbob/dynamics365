@@ -19,8 +19,8 @@ $server = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Server -Argume
 # drop login if it exists
 if ($server.Logins.Contains($loginName))
 {
-  Write-Host("Deleting the existing login $loginName.")
-     $server.Logins[$loginName].Drop()
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqladminuser: Deleting the existing login $loginName."
+  $server.Logins[$loginName].Drop()
 }
 
 $login = New-Object `
@@ -29,8 +29,8 @@ $login = New-Object `
 $login.LoginType = [Microsoft.SqlServer.Management.Smo.LoginType]::WindowsUser
 $login.PasswordExpirationEnabled = $false
 $login.Create($sqlPassword)
-Write-Host("Login $loginName created successfully.")
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqladminuser: Login $loginName created successfully."
 
 $serverRole = $server.Roles | where {$_.Name -eq 'sysadmin'}
 $serverRole.AddMember($loginName)
-Write-Host("Login $loginName added to sysadmin.")
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "addsqladminuser: Login $loginName added to sysadmin."
