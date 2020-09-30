@@ -34,6 +34,9 @@ else
   $output = "c:\scripts\<%= $dynamics_iso %>"
   Start-BitsTransfer -Source $url -Destination $output
 
+<% if $fe_server == '' { %>
+  # No need to Wait until SQL Server is available
+<% } else { %>
   # Wait until SQL Server is available
   Do {
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics wait until sql ready"
@@ -43,6 +46,7 @@ else
     }
   } Until ($sqlReady -eq "true")
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics SQL server is available"
+<% } %>
 
   # Mount dynamics iso
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy mount dynamic iso"
@@ -104,7 +108,7 @@ else
     if (($beReady -ne "true") -Or ($admReady -ne "true")) {
       Start-Sleep 60
     }
-  } Until (($beReady -eq "true") -And ($admReady -eq "true"))
+  } Until (($beReady -eq "true") -And ($admReady -eq "true") -Or ("allinone<%= $fe_server %>" -eq "allinone"))
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics all dynamics nodes have installed"
 
   # Upgrade from 2016 to 365

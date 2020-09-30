@@ -94,3 +94,12 @@ DYNADM
 ------
 
 Installs the `VSSWriter`, `DeploymentWebService`, `DeploymentTools` admin server roles of Dynamics 2016, then waits for the other nodes before upgrading to 365.
+
+All In One
+==========
+
+Scripts `build-vagrant-allinone.sh` and `build-terraform-allinone.sh` both build the Dynamics 365 on a single machine (`allinone`) in `vagrant` and `terraform` respectively.
+
+Script `test-build-allinone.sh` monitors progress of the build (which has less stages than the multi-tier version of course).
+
+When Dynamics is built on a single machine, the installer automatically creates an organisation, so there is no equivalent to `test-org.sh` (and puppet `profile::neworg` is not used by `allinone`).

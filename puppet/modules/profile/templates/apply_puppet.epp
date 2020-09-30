@@ -64,6 +64,13 @@ while ($machine_name -Like "VAGRANT*") {
 Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\" -Name Domain -Value "<%= $ad_domain_url %>"
 
 # if this is the active directory machine set its IP in redis for the other machines
+if ($machine_name -Like "ALLINONE") {
+  # This might have already been done, but no harm doing it again
+  puppet apply -e "include flagman"
+
+  $ad_ip=(Get-NetIPAddress -InterfaceAlias "Ethernet 2").IPAddress
+  c:\scripts\flagmanset.ps1 -Name ad_ip -Value $ad_ip
+}
 if ($machine_name -Like "DYNAD") {
   # This might have already been done, but no harm doing it again
   puppet apply -e "include flagman"

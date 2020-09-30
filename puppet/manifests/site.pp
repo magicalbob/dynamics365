@@ -1,3 +1,7 @@
+node /^allinone.*$/ {
+  include role::allinone
+}
+
 node /^dynfe.*$/ {
   include role::dynfe
 }

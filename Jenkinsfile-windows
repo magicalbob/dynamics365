@@ -23,7 +23,7 @@ pipeline {
       steps {
         script {
           bat """
-            c:\\progra~1\\git\\bin\\bash ./scripts/build-terraform.sh
+            c:\\progra~1\\git\\bin\\bash ./scripts/build-terraform-allinone.sh
           """
         }
       }
@@ -33,22 +33,8 @@ pipeline {
       steps {
         script {
           bat """
-            c:\\progra~1\\git\\bin\\bash ./scripts/test-build.sh
+            c:\\progra~1\\git\\bin\\bash ./scripts/test-build-allinone.sh
           """
-        }
-      }
-    }
-
-    stage('test new org created') {
-      steps {
-        script {
-          try {
-              bat 'c:\\progra~1\\git\\bin\\bash ./scripts/test-org.sh'
-          }
-          catch (exc) {
-              echo 'Creating org failed!'
-              currentBuild.result = 'UNSTABLE'
-          }
         }
       }
     }

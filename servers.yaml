@@ -1,4 +1,11 @@
 ---
+- hostname:     allinone
+  domain:       blue.local.vagrant.vagrant.local
+  memory:       4096
+  cpus:         1
+  box:          dynamics-windows-virtualbox.box
+  box_url:      http://dev.ellisbs.co.uk/files/boxes/dynamics-windows-virtualbox.box
+
 - hostname:     dynad
   domain:       blue.local.vagrant.vagrant.local
   memory:       4096

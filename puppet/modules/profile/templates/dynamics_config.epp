@@ -24,10 +24,31 @@
 | -%>
 <CRMSetup>
 <Server>
+<% if $fe_server == '' { %>
+<Patch update="true"></Patch>
+<% } else { %>
 <Patch update="false"></Patch>
+<% } %>
 <LicenseKey><%= $crm_license_key %></LicenseKey>
 <PreferredDC><%= $preferred_dc %></PreferredDC>
 <SqlServer><%= $sql_server %></SqlServer>
+<% if $fe_server == '' { %>
+<Database create="true"/>
+<Roles>
+   <Role name="WebApplicationServer"/>
+   <Role Name="OrganizationWebService" />
+   <Role Name="DiscoveryWebService" />
+   <Role Name="HelpServer" />
+   <Role Name="AsynchronousProcessingService" />
+   <Role Name="EmailConnector" />
+   <Role Name="SandboxProcessingService" />
+   <Role Name="VSSWriter" />
+   <Role Name="DeploymentWebService" />
+   <Role Name="DeploymentTools" />
+</Roles>
+<Reporting URL="<%= $reporting_url %>"/>
+<% } %>
+
 <% if $hostname == $fe_server { %>
 <Database create="true"/>
 <Roles>
@@ -93,8 +114,13 @@
   <ServiceAccountPassword><%= $monitor_pass %></ServiceAccountPassword>
 </MonitoringServiceAccount>
 
+<% if $fe_server == '' { %>
+<SQM optin="true"/>
+<muoptin optin="true"/>
+<% } else { %>
 <SQM optin="false"/>
 <muoptin optin="false"/>
+<% } %>
 
  <Email>
   <IncomingExchangeServer name=""/>
