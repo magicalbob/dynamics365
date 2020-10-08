@@ -20,7 +20,7 @@
 #    include profile::neworg
 #
 class profile::dynamicsusers(
-  $admin_pass = $facts['admin_pass'],
+  $admin_pass = lookup('admin_password'),
   $ad_domain = lookup('ad_domain'),
   $ad_suffix = lookup('ad_suffix'),
   $fe_server = lookup('fe_server'),

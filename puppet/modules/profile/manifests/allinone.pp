@@ -25,7 +25,7 @@ class profile::allinone(
 )
 {
   $ad_suffix = lookup('ad_suffix')
-  $safemodeadminpass = $facts['safemodeadminpass']
+  $safemodeadminpass = lookup('safemodeadminpass')
   $crm_system_group = lookup('crm_system_group')
   $crm_user_group = lookup('crm_user_group')
   $dc_string=join(['DC=',$domain.split('[.]').join(',DC=')])
@@ -39,7 +39,7 @@ class profile::allinone(
   $sql_iso = lookup('sql_iso')
   $ssm_exe = lookup('ssm_exe')
 
-  $admin_pass = $facts['admin_pass']
+  $admin_pass = lookup('admin_password')
   $fe_server = ''
   $be_server = ''
   $adm_server = ''

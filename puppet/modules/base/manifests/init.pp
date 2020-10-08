@@ -79,7 +79,7 @@ class base(
     path    => $::path,
   }
 
-  $admin_pass = $facts['admin_pass']
+  $admin_pass = lookup('admin_password')
 
   exec { 'backup sysprep unattend file':
     command => 'cmd.exe /c copy /y c:\scripts\unattend.xml c:\scripts\unattend.xml.backup',

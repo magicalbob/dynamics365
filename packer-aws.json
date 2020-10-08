@@ -1,0 +1,81 @@
+{
+  "builders": [
+      {
+          "type": "amazon-ebs",
+          "ami_name": "dynamics",
+          "region": "eu-west-2",
+          "security_group_id": "sg-76484411",
+          "subnet_id": "subnet-19492c63",
+          "encrypt_boot": false,
+          "ami_users": [
+                  "841411968712"
+          ],
+          "instance_type": "t2.micro",
+          "user_data_file": "./scripts/SetUpWinRM.ps1",
+          "communicator": "winrm",
+          "winrm_username": "Administrator",
+          "winrm_use_ssl": false,
+          "winrm_insecure": true,
+          "winrm_timeout": "60m",
+          "windows_password_timeout": "60m",
+          "source_ami": "ami-0aac9d7fa83beb6d2",
+          "launch_block_device_mappings": [
+            {
+              "device_name": "/dev/sda1",
+              "volume_size": 50,
+              "volume_type": "gp2",
+              "delete_on_termination": true
+            }
+          ],
+          "ssh_keypair_name": "packer",
+          "ssh_private_key_file": "/home/ian/.ssh/id_packer"
+      }
+  ],
+  "provisioners": [
+    {
+      "inline": [
+        "winrm quickconfig -q",
+        "winrm set winrm/config/service/Auth @{Basic=\"true\"}",
+        "winrm set winrm/config/service @{AllowUnencrypted=\"true\"}",
+        "winrm set winrm/config/winrs @{MaxMemoryPerShellMB=\"1024\"}",
+        "netsh advfirewall set allprofiles state off"
+      ],
+      "type": "windows-shell"
+    },
+    {
+      "inline": [
+        "powercfg /SetActive SCHEME_MIN",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Cache Maintenance\" /RL LIMITED",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Cleanup\" /RL LIMITED",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Scheduled Scan\" /RL LIMITED",
+        "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Verification\" /RL LIMITED",
+        "Install-WindowsFeature Net-Framework-Core,Windows-Identity-Foundation  -IncludeAllSubFeature -source d:/sources/sxs",
+        "(New-Object System.Net.WebClient).DownloadFile('https://downloads.puppetlabs.com/windows/puppet6/puppet-agent-6.18.0-x64.msi', 'C:/Windows/Temp/puppet.msi')",
+        "cmd /c start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log"
+      ],
+      "type": "powershell"
+    },
+    {
+      "destination": "c:\\scripts\\unattend.xml",
+      "source": "answer_files/AutoUnattend.xml",
+      "type": "file"
+    },
+    {
+      "destination": "c:\\ProgramData\\PuppetLabs\\puppet\\etc\\hiera.yaml",
+      "source": "files/hiera.yaml",
+      "type": "file"
+    },
+    {
+      "destination": "c:\\windows\\temp\\puppet.zip",
+      "source": "puppet.zip",
+      "type": "file"
+    },
+    {
+      "scripts": [
+        "./scripts/puppet-apply.ps1"
+      ],
+      "type": "powershell"
+    }
+  ]
+}
+

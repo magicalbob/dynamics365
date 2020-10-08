@@ -30,7 +30,7 @@ class joindomain(
 {
   $dc_string=join(['DC=',$domain.split('[.]').join(',DC=')])
   $ou_string=join(['OU=ServiceAccounts,',$dc_string])
-  $admin_pass = $facts['admin_pass']
+  $admin_pass = lookup('admin_password')
 
   # allow getting and setting of flags using redis
   class { 'flagman': }

@@ -24,7 +24,7 @@ class profile::dynamics(
   $ad_suffix = lookup('ad_suffix'),
   $ad_domain = lookup('ad_domain'),
   $sql_server = lookup('sql_server'),
-  $admin_pass = $facts['admin_pass'],
+  $admin_pass = lookup('admin_password'),
   $fe_server = lookup('fe_server'),
   $be_server = lookup('be_server'),
   $adm_server = lookup('adm_server'),

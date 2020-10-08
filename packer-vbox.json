@@ -13,8 +13,8 @@
       "iso_checksum": "{{user `iso_checksum`}}",
       "iso_url": "{{user `iso_url`}}",
       "post_shutdown_delay": "2m",
-      "shutdown_command": "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml",
       "shutdown_timeout": "15m",
+      "shutdown_command": "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml",
       "type": "virtualbox-iso",
       "vboxmanage": [
         [

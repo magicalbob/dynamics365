@@ -24,7 +24,7 @@ class profile::dynad(
 )
 {
   $ad_suffix = lookup('ad_suffix')
-  $safemodeadminpass = $facts['safemodeadminpass']
+  $safemodeadminpass = lookup('safemodeadminpass')
   $crm_system_group = lookup('crm_system_group')
   $crm_user_group = lookup('crm_user_group')
   $dc_string=join(['DC=',$domain.split('[.]').join(',DC=')])

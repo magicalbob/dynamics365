@@ -26,7 +26,7 @@
 class profile::ssrs(
   $ad_domain  = lookup('ad_domain'),
   $ad_suffix  = lookup('ad_suffix'),
-  $admin_pass = $facts['admin_pass'],
+  $admin_pass = lookup('admin_password'),
   $sql_server = lookup('sql_server'),
   $fe_server  = lookup('fe_server'),
   $monitor_user = lookup('service_users')['monitor']['username'],

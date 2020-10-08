@@ -7,11 +7,11 @@ output-virtualbox-iso/
 files/software
 puppet.zip
 prefix
-terraform/.terraform/
-terraform/terraform-provider-virtualbox*
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
-terraform/terraform.tfstate.d
+terraform*/.terraform/
+terraform*/terraform-provider-virtualbox*
+terraform*/terraform.tfstate
+terraform*/terraform.tfstate.backup
+terraform*/terraform.tfstate.d
 answer_files/AutoUnattend.xml
 answer_files/AutoUnattend.data.yml
 .py/

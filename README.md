@@ -103,3 +103,14 @@ Scripts `build-vagrant-allinone.sh` and `build-terraform-allinone.sh` both build
 Script `test-build-allinone.sh` monitors progress of the build (which has less stages than the multi-tier version of course).
 
 When Dynamics is built on a single machine, the installer automatically creates an organisation, so there is no equivalent to `test-org.sh` (and puppet `profile::neworg` is not used by `allinone`).
+
+AWS
+===
+
+Work on making this work with AWS EC2 instances is work in progress.
+
+The build-packer-aws.sh builds an AWS AMI, which will launch an EC2 instance.
+
+The terraform-allinone-aws dir contains the terraform to stand up a t2.micro EC2 instance, but build hasn't been tried at all yet.
+
+The terraform-aws dir contains the terraform for the full stack. Script build-terraform.aws.sh stands the stack up. It successfully stands up all the EC2 instances, but needs plenty of debugging yet.

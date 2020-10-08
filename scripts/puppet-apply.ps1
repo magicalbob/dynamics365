@@ -28,3 +28,7 @@ if ($resp -eq 0) {
    echo Failure Reason Given is $resp
    exit $resp
 }
+
+if (Test-Path c:\programdata\amazon\ec2-windows\launch\sysprep\unattend.xml) {
+    c:\windows\system32\sysprep\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\scripts\unattend.xml
+}
