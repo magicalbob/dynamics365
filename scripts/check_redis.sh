@@ -15,7 +15,7 @@ prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc ${redis_ip} 6379|t
 
 export ad_ip=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_ad_ip\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-ad_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynad_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+ad_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadir_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
 sql_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynsql_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
@@ -53,7 +53,7 @@ echo "   FE Started: ${fe_started}."
 echo "   BE Started: ${be_started}."
 echo "  ADM Started: ${adm_started}."
 echo -n "    AD Joined: "
-if [[ "$ad_machines" =~ "DYNAD," ]]; then echo "true."; else echo "false."; fi
+if [[ "$ad_machines" =~ "DYNADIR," ]]; then echo "true."; else echo "false."; fi
 
 echo -n "   SQL Joined: "
 if [[ "$ad_machines" =~ "DYNSQL," ]]; then echo "true."; else echo "false."; fi

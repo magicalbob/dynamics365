@@ -9,6 +9,7 @@ Pre-requisites
 *	mustache	(`gem install mustache`)
 *	zip		(on Windows tested with `choco install -y zip`)
 *	python		(on Windows tested with `choco install -y python3`)
+*	jq		(on Windows tested with `choco install -y jq`)
 
 For Windows run the shell scripts with Git Bash.
 
@@ -64,12 +65,12 @@ According to my Jenkins, build times are ~1h 36min. About 30 mins for packer bui
 The Machines
 ============
 
-There is an Active Directory server (DYNAD), a SQL server (DYNSQL), a Dynamic Font End (DYNFE), a Dynamics Back End (DYNBE) and a Dynamics Admin server (DYNADM) in the servers.yaml.
+There is an Active Directory server (DYNADIR), a SQL server (DYNSQL), a Dynamic Font End (DYNFE), a Dynamics Back End (DYNBE) and a Dynamics Admin server (DYNADM) in the servers.yaml.
 
-DYNAD comes up first, the other machines wait for it so that they can join the domain. Then DYNSQL installs SQL server, before waiting for DYNFE to install the base dynamics front end. Now DYNSQL installs the dynamics report server. Once done, DYNBE installs the dynamics back end. Then DYNADM installs the dynamics admin server, before DYNFE, DYNBE and DYNADM upgrade to Dynamics 365. Finally DYNADM creates a new organization.
+DYNADIR comes up first, the other machines wait for it so that they can join the domain. Then DYNSQL installs SQL server, before waiting for DYNFE to install the base dynamics front end. Now DYNSQL installs the dynamics report server. Once done, DYNBE installs the dynamics back end. Then DYNADM installs the dynamics admin server, before DYNFE, DYNBE and DYNADM upgrade to Dynamics 365. Finally DYNADM creates a new organization.
 
-DYNAD
------
+DYNADIR
+-------
 
 Installs the Active Directory features and a new forest, before adding all the service accounts to the AD.
 

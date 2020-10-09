@@ -8,6 +8,7 @@ files/software
 puppet.zip
 prefix
 terraform*/.terraform/
+terraform*/.terraform.tfstate.lock.info
 terraform*/terraform-provider-virtualbox*
 terraform*/terraform.tfstate
 terraform*/terraform.tfstate.backup

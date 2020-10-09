@@ -7,19 +7,19 @@ function createMachine {
 # arg 4 = redis_pass
   echo "Create Machine: ${1}"
 
-  vbox_id=$(terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
-  vbox_state=$(VBoxManage showvminfo ${vbox_id}|grep ^State|grep -o running)
+  vbox_id=$(terraform show -json|jq ".values.root_module.resources[]|select( .name|test(\"${1}\"))"|jq .values.id|cut -d\" -f2)
+  vbox_state=$(VBoxManage showvminfo ${vbox_id} --machinereadable|grep ^VMState=|cut -d\" -f2)
 
   while [ ! "$vbox_state" == "running" ]
   do
     terraform destroy --auto-approve --target virtualbox_vm.${1}
     terraform apply --auto-approve --target virtualbox_vm.${1}
 
-    vbox_id=$(terraform state show virtualbox_vm.${1}[0]|grep "id.*="|cut -d\" -f2|tr -d "[:cntrl:])")
+    vbox_id=$(terraform show -json|jq ".values.root_module.resources[]|select( .name|test(\"${1}\"))"|jq .values.id|cut -d\" -f2)
 
     sleep 60
 
-    vbox_state=$(VBoxManage showvminfo ${vbox_id}|grep ^State|grep -o running)
+    vbox_state=$(VBoxManage showvminfo ${vbox_id} --machinereadable|grep ^VMState=|cut -d\" -f2)
 
     # update the lock time
     LOCK=$(date +"%s")
@@ -37,11 +37,11 @@ function createMachine {
   resp=1
   while [ $resp -ne 0 ]
   do
-    echo -e "AUTH ${4}\r\nSET ${2}_${vbox_mac:1} ${1}\r\n" | nc -w1 ${3} 6379
+    echo -e "AUTH ${4}\r\nSET ${2}_${vbox_mac} ${1}\r\n" | nc -w1 ${3} 6379
     resp=$?
   done
 
-  echo "Set ${1} mac address ${vbox_mac:1}"
+  echo "Set ${1} mac address ${vbox_mac}"
 }
 
 # make sure we are in right dir

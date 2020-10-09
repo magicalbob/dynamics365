@@ -21,7 +21,7 @@ redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 ./scripts/clear-flags-for-build.sh ${prefix} ${redis_ip} ${redis_pass}
 
 # Bring up the Active Directory server
-run_machine dynad
+run_machine dynadir
 
 # Bring up the rest of the machines
 run_machine dynsql

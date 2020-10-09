@@ -22,7 +22,7 @@ function createMachine {
 
 # make sure we are in right dir
 BASE_PATH=$(dirname $0)
-cd ${BASE_PATH}/../terraform-aws
+cd ${BASE_PATH}/../terraform-allinone-aws
 
 if [ "$OS" == "Windows_NT" ]
 then
@@ -81,7 +81,7 @@ prefix=$(date +%s)
 echo ${prefix} > prefix
 echo ${prefix} > ../prefix
 
-../scripts/clear-flags-for-build.sh ${prefix} ${redis_ip} ${redis_pass}
+../scripts/clear-flags-for-build-allinone.sh ${prefix} ${redis_ip} ${redis_pass}
 
 LOCK=$(date +"%s")
 resp=1
@@ -93,8 +93,4 @@ done
 
 # Bring up the cluster
 terraform apply --auto-approve
-createMachine dynadir  ${prefix} ${redis_ip} ${redis_pass}
-createMachine dynsql   ${prefix} ${redis_ip} ${redis_pass}
-createMachine dynfe    ${prefix} ${redis_ip} ${redis_pass}
-createMachine dynbe    ${prefix} ${redis_ip} ${redis_pass}
-createMachine dynadm   ${prefix} ${redis_ip} ${redis_pass}
+createMachine allinone  ${prefix} ${redis_ip} ${redis_pass}

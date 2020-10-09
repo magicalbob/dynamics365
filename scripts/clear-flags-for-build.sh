@@ -52,8 +52,8 @@ ad_ip='NOWT'
 
 setRedisFlag ${redis_ip} ${redis_pass} ad_ip ${ad_ip} ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} ad_ip ${prefix}
-setRedisFlag ${redis_ip} ${redis_pass} dynad_started "false" ${prefix}
-persistRedisFlag ${redis_ip} ${redis_pass} dynad_started ${prefix}
+setRedisFlag ${redis_ip} ${redis_pass} dynadir_started "false" ${prefix}
+persistRedisFlag ${redis_ip} ${redis_pass} dynadir_started ${prefix}
 
 setRedisFlag ${redis_ip} ${redis_pass} sql_ready "false" ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} sql_ready ${prefix}

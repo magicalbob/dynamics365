@@ -1,7 +1,7 @@
 ---
 version: 5
 
-ad_domain: DYNAD
+ad_domain: DYNADIR
 ad_domain_url: vagrant.local
 ad_suffix: DEV
 

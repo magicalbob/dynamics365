@@ -14,8 +14,8 @@ node /^dynadm.*$/ {
   include role::dynadm
 }
 
-node /^dynad.*$/ {
-  include role::dynad
+node /^dynadir.*$/ {
+  include role::dynadir
 }
 
 node /^dynsql.*$/ {

@@ -4,6 +4,10 @@
 | -%>
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "apply_puppet started."
 
+if (Test-Path c:\programdata\amazon\ec2-windows\launch\sysprep\unattend.xml) {
+    C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\InitializeInstance.ps1
+} 
+
 [Environment]::SetEnvironmentVariable("FACTERLIB","c:\programdata\puppetlabs\code\environments\production\facter","Machine")
 
 if (!(Test-Path c:\scripts\prefix)) {
@@ -20,7 +24,7 @@ if (!(Test-Path c:\scripts\prefix)) {
 }
 
 $machine_name = hostname
-if ($machine_name -Like "WIN*") {
+if (($machine_name -Like "WIN*") -Or ($machine_name -Like "EC2*")) {
   # Make sure flagman in place and prefix set
   puppet apply -e "include flagman"
 
@@ -30,9 +34,14 @@ if ($machine_name -Like "WIN*") {
 
   $getMachineNameTries=0
 
-  while ($machine_name -Like "WIN*") {
-    # get MAC of ethernet
-    $mac = (Get-NetAdapter "Ethernet 2").MacAddress -replace '-',''
+  while (($machine_name -Like "WIN*") -Or ($machine_name -Like "EC2*")) {
+    if (Test-Path c:\programdata\amazon\ec2-windows\launch\sysprep\unattend.xml) {
+      # get instance-id for AWS EC2 instance
+      $mac = (curl http://169.254.169.254/latest/meta-data/instance-id -UseBasicParsing).Content
+    } else {
+      # get MAC of ethernet
+      $mac = (Get-NetAdapter "Ethernet 2").MacAddress -replace '-',''
+    }
     # look up the mac address in redis to find name of machine
     $got_name = (c:\scripts\flagmanget.ps1 -Name $mac)
     # if found, put puppet code back in place, rename the computer to the got name and restart
@@ -71,7 +80,7 @@ if ($machine_name -Like "ALLINONE") {
   $ad_ip=(Get-NetIPAddress -InterfaceAlias "Ethernet 2").IPAddress
   c:\scripts\flagmanset.ps1 -Name ad_ip -Value $ad_ip
 }
-if ($machine_name -Like "DYNAD") {
+if ($machine_name -Like "DYNADIR") {
   # This might have already been done, but no harm doing it again
   puppet apply -e "include flagman"
 

@@ -48,7 +48,7 @@ display_msgADM=1
 while [ true ]
 do
   export ad_ip=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_ad_ip\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
-  ad_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynad_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
+  ad_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynadir_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   sql_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynsql_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   fe_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   be_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
@@ -81,11 +81,11 @@ do
   fi
 
   ad_machines=$($(dirname $0)/check_winrm.py)
-  if [[ "$ad_machines" =~ "DYNAD," ]]
+  if [[ "$ad_machines" =~ "DYNADIR," ]]
   then
     if [ ${display_msgAD} -eq 1 ]
     then
-      echo "Domain set up on DYNAD at $(date)"
+      echo "Domain set up on DYNADIR at $(date)"
       display_msgAD=0
     fi
   fi
