@@ -31,7 +31,7 @@ function createMachine {
     done
   done
 
-  vbox_mac=$(VBoxManage showvminfo ${vbox_id}|grep MAC:|cut -d: -f3|cut -d, -f1|tr -d "[:cntrl:]")
+  vbox_mac=$(VBoxManage showvminfo ${vbox_id} --machinereadable|grep -i ^macaddress|cut -d\" -f2)
 
   # Set mac of machine in redis
   resp=1
