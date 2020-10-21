@@ -52,6 +52,10 @@ else
   cmd /r start /b /wait c:\scripts\<%= $ssm_exe %> /install /IACCEPTSQLSERVERLICENSETERMS <% if $quiet_install =~ "/[qQ]" { %>/quiet<% } %> /log c:\Windows\Temp\ssms-install.log
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server management tools install complete"
 
+  # Set SQL Server and Server Agent to delayed auto start
+  sc.exe config MSSQLSERVER start=delayed-auto
+  sc.exe config SQLSERVERAGENT start=delayed-auto
+
   # Restart computer post-install
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server restart computer"
   Restart-Computer -Force
