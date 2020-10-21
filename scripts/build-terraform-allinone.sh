@@ -61,7 +61,7 @@ fi
 # check that BRANCH_NAME exists, otherwise set it to "master"
 if [[ -z "$BRANCH_NAME" ]]
 then
-  export BRANCH_NAME=master
+  export BRANCH_NAME=local
 fi
 
 # Download terraform provider for virtualbox
