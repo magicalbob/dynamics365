@@ -26,6 +26,11 @@ class role::allinone {
   }
   -> class { 'profile::allinone':
   }
+  -> class { 'profile::ssrs':
+    ad_domain  => 'allinone',
+    sql_server => 'allinone',
+    fe_server  => ''
+  }
   -> class { 'removepuppet':
   }
 }

@@ -50,7 +50,7 @@ class profile::ssrs(
 
   -> file { 'script to install dynamics ssrs data connector':
     ensure  => present,
-    path    => 'c:\scripts\install_dynamics.ps1',
+    path    => 'c:\scripts\install_dynamics_ssrs.ps1',
     content => epp('profile/install_dynamics_ssrs.epp',{
       sql_server    => $sql_server,
       admin_pass    => $admin_pass,
@@ -62,7 +62,7 @@ class profile::ssrs(
   }
 
   -> exec { 'install dynamics ssrs data connector':
-    command => 'powershell -File c:\scripts\install_dynamics.ps1',
+    command => 'powershell -File c:\scripts\install_dynamics_ssrs.ps1',
     timeout => 0,
     path    => $::path
   }

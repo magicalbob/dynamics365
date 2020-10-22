@@ -15,11 +15,15 @@ sql_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_sql_ready\r\n" | nc ${
 allinone_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 allinone_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_365_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 allinone_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_365_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+allinone_ssrs_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+allinone_ssrs_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-echo "         Prefix is: ${prefix}."
-echo "          AD IP is: ${ad_ip}."
-echo "  Allinone Started: ${allinone_started}."
-echo "         SQL Ready: ${sql_ready}."
-echo "    Allinone Ready: ${allinone_ready}."
-echo "Allinone 365 Start: ${allinone_365_start}."
-echo " Allinone 365 Done: ${allinone_365_done}."
+echo "          Prefix is: ${prefix}."
+echo "           AD IP is: ${ad_ip}."
+echo "   Allinone Started: ${allinone_started}."
+echo "          SQL Ready: ${sql_ready}."
+echo "     Allinone Ready: ${allinone_ready}."
+echo " Allinone 365 Start: ${allinone_365_start}."
+echo "  Allinone 365 Done: ${allinone_365_done}."
+echo "Allinone SSRS Start: ${allinone_ssrs_start}."
+echo " Allinone SSRS Done: ${allinone_ssrs_done}."

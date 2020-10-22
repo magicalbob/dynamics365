@@ -27,6 +27,8 @@ display_msg2=1
 display_msg3=1
 display_msg5=1
 display_msg6=1
+display_msg7=1
+display_msg8=1
 
 while [ true ]
 do
@@ -98,11 +100,37 @@ do
     if [ ${display_msg6} -eq 1 ]
     then
       echo ${MSG6}
+      display_msg6=0
+    fi
+  else
+    MSG6="Dynamics AllInOne 365 Upgrade Not Done"
+  fi
+
+  allinone_ssrs_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
+  if [[ ${allinone_ssrs_started} =~ 'true' ]]
+  then
+    MSG6="Dynamics AllInOne SSRS Install Started at $(date)"
+    if [ ${display_msg7} -eq 1 ]
+    then
+      echo ${MSG7}
+      display_msg7=0
+    fi
+  else
+    MSG7="Dynamics AllInOne SSRS Install Start Not Done"
+  fi
+
+  allinone_ssrs_done=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_done\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
+  if [[ ${allinone_ssrs_done} =~ 'true' ]]
+  then
+    MSG8="Dynamics AllInOne SSRS Install Done at $(date)"
+    if [ ${display_msg8} -eq 1 ]
+    then
+      echo ${MSG8}
       echo "Build has finished at $(date -d @${end_time})"
       exit 0
     fi
   else
-    MSG6="Dynamics AllInOne 365 Upgrade Not Done"
+    MSG8="Dynamics AllInOne SSRS Install Not Done"
   fi
  
   elapsed="$((${end_time}-${start_time}))"
@@ -114,6 +142,8 @@ do
     echo ${MSG3}
     echo ${MSG5}
     echo ${MSG6}
+    echo ${MSG7}
+    echo ${MSG8}
     exit -1
   fi
 
@@ -125,6 +155,8 @@ do
     echo ${MSG3}
     echo ${MSG5}
     echo ${MSG6}
+    echo ${MSG7}
+    echo ${MSG8}
     exit -2
   fi
 

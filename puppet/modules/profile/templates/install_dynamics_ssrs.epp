@@ -33,6 +33,9 @@ else
   }
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics copy got iso dir $install_drive"
 
+<% if $fe_server == '' { %>
+  # No need to Wait until Front End Server is available if allinone
+<% } else { %>
   Do {
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics wait until front end node installed"
     $feReady=(c:\scripts\flagmanget.ps1 -Name <%= $fe_server %>_ready)
@@ -41,6 +44,7 @@ else
     }
   } Until ($feReady -eq "true")
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server front end node has installed"
+<% } %>
 
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start first srs install"
   $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\server\amd64\SrsDataConnector\SetupSrsDataConnector.exe <%= $quiet_install %> /config "c:\scripts\srs-install-config.xml" /L c:\windows\temp\install_srs.log')

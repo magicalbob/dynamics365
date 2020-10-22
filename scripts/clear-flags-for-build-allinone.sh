@@ -67,6 +67,11 @@ persistRedisFlag ${redis_ip} ${redis_pass} allinone_365_started ${prefix}
 setRedisFlag ${redis_ip} ${redis_pass} allinone_365_done "false" ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} allinone_365_done ${prefix}
 
+setRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_started "false" ${prefix}
+persistRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_started ${prefix}
+setRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_done "false" ${prefix}
+persistRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_done ${prefix}
+
 # set flag to mark an unexpected machine restart
 setRedisFlag ${redis_ip} ${redis_pass} machine_restart "false" ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} machine_restart ${prefix}
