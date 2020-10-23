@@ -67,8 +67,8 @@ persistRedisFlag ${redis_ip} ${redis_pass} allinone_365_started ${prefix}
 setRedisFlag ${redis_ip} ${redis_pass} allinone_365_done "false" ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} allinone_365_done ${prefix}
 
-setRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_started "false" ${prefix}
-persistRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_started ${prefix}
+setRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_start "false" ${prefix}
+persistRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_start ${prefix}
 setRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_done "false" ${prefix}
 persistRedisFlag ${redis_ip} ${redis_pass} allinone_ssrs_done ${prefix}
 
