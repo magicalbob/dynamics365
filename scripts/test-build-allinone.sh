@@ -106,10 +106,10 @@ do
     MSG6="Dynamics AllInOne 365 Upgrade Not Done"
   fi
 
-  allinone_ssrs_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
+  allinone_ssrs_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_start\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
   if [[ ${allinone_ssrs_started} =~ 'true' ]]
   then
-    MSG6="Dynamics AllInOne SSRS Install Started at $(date)"
+    MSG7="Dynamics AllInOne SSRS Install Started at $(date)"
     if [ ${display_msg7} -eq 1 ]
     then
       echo ${MSG7}

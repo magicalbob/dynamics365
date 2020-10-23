@@ -15,7 +15,7 @@ sql_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_sql_ready\r\n" | nc ${
 allinone_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 allinone_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_365_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 allinone_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_365_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-allinone_ssrs_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+allinone_ssrs_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_start\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 allinone_ssrs_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
 echo "          Prefix is: ${prefix}."
