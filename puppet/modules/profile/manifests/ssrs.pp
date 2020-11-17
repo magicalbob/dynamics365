@@ -10,7 +10,6 @@
 #  ad_domain  = The name of the Active Directory domain controller
 #  ad_suffix  = The suffix added to ad_domain to form BIOS Name of AD DC
 #  sql_server = The name of the SQL Server machine
-#  admin_pass = Administrator password to use
 #
 # Variables
 # ----------
@@ -26,7 +25,6 @@
 class profile::ssrs(
   $ad_domain  = lookup('ad_domain'),
   $ad_suffix  = lookup('ad_suffix'),
-  $admin_pass = lookup('admin_password'),
   $sql_server = lookup('sql_server'),
   $fe_server  = lookup('fe_server'),
   $monitor_user = lookup('service_users')['monitor']['username'],
@@ -53,7 +51,6 @@ class profile::ssrs(
     path    => 'c:\scripts\install_dynamics_ssrs.ps1',
     content => epp('profile/install_dynamics_ssrs.epp',{
       sql_server    => $sql_server,
-      admin_pass    => $admin_pass,
       fe_server     => $fe_server,
       quiet_install => $quiet_install,
       dynamics_iso  => $dynamics_iso,

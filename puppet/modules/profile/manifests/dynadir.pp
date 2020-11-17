@@ -30,7 +30,8 @@ class profile::dynadir(
   $dc_string=join(['DC=',$domain.split('[.]').join(',DC=')])
   $ou_string=join(['OU=ServiceAccounts,',$dc_string])
   $user_string=join(['CN=Users,',$dc_string])
-  $new_user=join([$hostname.upcase(),$ad_suffix,'\Administrator'])
+  $admin_user=lookup('admin_username')
+  $new_user=join([$hostname.upcase(),$ad_suffix,'\\',$admin_user])
 
   if $facts['identity']['user'] != $new_user {
     exec { 'Install Windows Features':
@@ -75,31 +76,33 @@ class profile::dynadir(
     $dynamics_sandbox = $service_users['sandbox']['username']
 
     exec { 'Wait before New AD Organizational Unit':
-      command => 'powershell -Command Start-Sleep -Seconds 120',
-      unless  => "powershell -Command Get-ADOrganizationalUnit '${ou_string}'",
-      timeout => 0,
-      path    => $::path
+      command  => 'powershell -Command Start-Sleep -Seconds 120',
+      provider => powershell,
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { 'Add New AD Organizational Unit':
-      command => "powershell -Command New-ADOrganizationalUnit -Name 'ServiceAccounts' -ProtectedFromAccidentalDeletion:\$true",
-      unless  => "powershell -Command Get-ADOrganizationalUnit '${ou_string}'",
-      timeout => 0,
-      path    => $::path
+      command  => "New-ADOrganizationalUnit -Name 'ServiceAccounts' -ProtectedFromAccidentalDeletion:1",
+      provider => powershell,
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { "Add ${crm_system_group} Group":
-      command => "powershell -Command New-ADGroup -Name \"${crm_system_group}\" -GroupScope Global",
-      returns => [0, 1],
-      timeout => 0,
-      path    => $::path
+      command  => "New-ADGroup -Name \"${crm_system_group}\" -GroupScope Global",
+      provider => powershell,
+      returns  => [0, 1],
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { "Add ${crm_user_group} Group":
-      command => "powershell -Command New-ADGroup -Name \"${crm_user_group}\" -GroupScope Global",
-      returns => [0, 1],
-      timeout => 0,
-      path    => $::path
+      command  => "New-ADGroup -Name \"${crm_user_group}\" -GroupScope Global",
+      provider => powershell,
+      returns  => [0, 1],
+      timeout  => 0,
+      path     => $::path
     }
 
     -> file { 'Script to add service user':

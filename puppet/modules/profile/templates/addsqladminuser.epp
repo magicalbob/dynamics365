@@ -1,7 +1,8 @@
 <%- | String $sql_server,
+      String $admin_user,
       String $admin_pass
 | -%>
-$Username = "Administrator"
+$Username = "<%= $admin_user %>"
 $Password = "<%= $admin_pass %>"
 
 #import SQL Server module
@@ -9,7 +10,7 @@ Import-Module SQLPS -DisableNameChecking
 
 $instanceName = "<%= $sql_server %>"
 
-$loginName = "<%= $sql_server %>\$Username"
+$loginName = "DYNADIRDEV\Administrator"
 $dbUserName = $Username
 $sqlPassword = (ConvertTo-SecureString $Password -AsPlainText -Force)
 $roleName = "db_owner"

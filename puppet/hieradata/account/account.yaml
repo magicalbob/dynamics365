@@ -1,6 +1,7 @@
 ---
 version: 5
 
+admin_username: vagrant
 admin_password: vagrant
 
 service_users:

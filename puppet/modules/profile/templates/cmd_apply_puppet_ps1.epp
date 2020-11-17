@@ -1,0 +1,80 @@
+<%- | String $admin_user,
+      String $admin_pass,
+      String $ad_domain,
+      String $ad_domain_url,
+      String $ad_suffix,
+      String $ou_string,
+      String $reboot_timeout
+| -%>
+$machine_name = hostname
+if (($machine_name -Like "WIN-*") -Or ($machine_name -Like "ALLINONE*") -Or ($machine_name -Like "<%= $ad_domain %>*")) {
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Machine ${hostname} does not need to join domain"
+} else {
+  if ( $Env:USERDOMAIN -eq "<%= $ad_domain %><%= $ad_suffix %>" ) {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Machine ${hostname} is already part of domain <%= $ad_domain %><%= $ad_suffix %>"
+  } else {
+    install-windowsfeature -name ADLDS
+    
+    powershell -File c:\scripts\setwinsnet.ps1
+  
+    do {
+      Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "join domain started."
+    
+      $startTime=(Get-Date)
+      try {
+        # check how long been running. If more than <%= $reboot_timeout %> seconds something has prob gone wrong, restart
+        $currTime=(Get-Date)
+        $timeDiff=(New-TimeSpan $startTime $currTime).TotalSeconds
+        if ( $timeDiff -gt <%= $reboot_timeout %> ) {
+          Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "join domain stalled. Re-starting."
+          Restart-Computer -Force
+        }
+        Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Get-ADOrganizationalUnit -Server '<%= $ad_domain %>.<%= $ad_domain_url %>' '<%= $ou_string %>'"
+        $ou = (Get-ADOrganizationalUnit -Server '<%= $ad_domain %>.<%= $ad_domain_url %>' '<%= $ou_string %>')
+        Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Get-ADOrganizationalUnit Response: $ou"
+      }
+      catch {
+        $ou = $null
+      }
+      sleep 10
+    } while ($ou.DistinguishedName -ne '<%= $ou_string %>')
+  
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "join domain got distinguished name."
+    
+    $joinCred=New-Object pscredential -ArgumentList ([pscustomobject]@{
+        UserName='<%= $admin_user %>'
+        Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0]
+    })
+    
+    Add-Computer -DomainName <%= $ad_domain_url %> -Credential $joinCred
+    
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "join domain finished."
+  
+    Enable-PSRemoting -Force
+  
+    Set-Item wsman:\localhost\client\trustedhosts * -Force
+  
+    Reg Add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultDomainName /t REG_SZ /d "<%= $ad_domain %><%= $ad_suffix %>" /f
+  
+    Restart-Computer -Force
+  }
+}
+
+if (($machine_name -Like "ALLINONE*") -Or ($machine_name -Like "<%= $ad_domain %>*")) {
+  Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Machine ${hostname} does not need to add installation user to administrators"
+} else {
+  if ( (new-object System.Security.Principal.WindowsPrincipal([System.Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole("Administrators")) {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "User is already in administrators"
+  } else {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Adding user to administrators"
+    $admincred=New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName="$computername\administrator"; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
+
+    Invoke-Command -ScriptBlock { Add-LocalGroupMember -Group administrators -Member <%= $ad_domain %><%= $ad_suffix %>\<%= $admin_user %> } -Credential $admincred -ComputerName (hostname)
+
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Restart after adding user to administrators"
+
+    Restart-Computer -Force
+  }
+}
+
+powershell -file c:\scripts\apply_puppet.ps1

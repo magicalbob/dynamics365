@@ -98,13 +98,17 @@
     {
       "inline": [
         "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
-        "Invoke-WebRequest -Uri https://download.virtualbox.org/virtualbox/{{user `vbox_ver`}}/VBoxGuestAdditions_{{user `vbox_ver`}}.iso -Outfile C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
-        "Mount-DiskImage -ImagePath C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
+        "Invoke-WebRequest -Uri https://download.virtualbox.org/virtualbox/{{user `vbox_ver`}}/VBoxGuestAdditions_{{user `vbox_ver`}}.iso -Outfile C:\\Users\\{{user `winrm_username`}}\\VBoxGuestAdditions.iso",
+        "Mount-DiskImage -ImagePath C:\\Users\\{{user `winrm_username`}}\\VBoxGuestAdditions.iso",
         "c:\\windows\\system32\\cmd /c E:\\cert\\VBoxCertUtil.exe add-trusted-publisher e:\\cert\\vbox*.cer --root e:\\cert\\vbox*.cer",
         "c:\\windows\\system32\\cmd /c start /b /wait E:\\VBoxWindowsAdditions.exe /S /force",
-        "Dismount-DiskImage -ImagePath C:\\Users\\Administrator\\VBoxGuestAdditions.iso",
-        "Remove-Item C:\\Users\\Administrator\\VBoxGuestAdditions.iso -Force",
+        "Dismount-DiskImage -ImagePath C:\\Users\\{{user `winrm_username`}}\\VBoxGuestAdditions.iso",
+        "Remove-Item C:\\Users\\{{user `winrm_username`}}\\VBoxGuestAdditions.iso -Force",
         "Move-Item -Path c:\\ProgramData\\Puppetlabs\\code -Destination c:\\ProgramData\\Puppetlabs\\code.build -Force",
+        "icacls c:\\ProgramData\\Puppetlabs /grant {{user `winrm_username`}}:F /Q /C /T",
+        "icacls c:\\ProgramData\\Puppetlabs /grant everyone:F /Q /C /T",
+        "icacls \"c:\\Program Files\\Puppet Labs\" /grant {{user `winrm_username`}}:F /Q /C /T",
+        "icacls c:\\Scripts /grant {{user `winrm_username`}}:F /Q /C /T",
         "if (Test-Path c:\\scripts\\prefix) { Remove-Item C:\\Scripts\\prefix -Force }"
       ],
       "type": "powershell"

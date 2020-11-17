@@ -28,18 +28,18 @@ class profile::allinone(
   $safemodeadminpass = lookup('safemodeadminpass')
   $crm_system_group = lookup('crm_system_group')
   $crm_user_group = lookup('crm_user_group')
-  $dc_string=join(['DC=',$domain.split('[.]').join(',DC=')])
-  $ou_string=join(['OU=ServiceAccounts,',$dc_string])
-  $user_string=join(['CN=Users,',$dc_string])
-  $new_user=join([$hostname.upcase(),$ad_suffix,'\Administrator'])
+  $dc_string = join(['DC=',$domain.split('[.]').join(',DC=')])
+  $ou_string = join(['OU=ServiceAccounts,',$dc_string])
+  $user_string = join(['CN=Users,',$dc_string])
+  $admin_user = lookup('admin_username')
+  $admin_pass = lookup('admin_password')
+  $new_user=join([$hostname.upcase(),$ad_suffix,'\\',$admin_user])
   $ad_domain   = 'allinone'
   $sql_server  = 'allinone'
   $sql_svc_pass = lookup('service_users')['sqlsvc']['password']
   $download_url = lookup('download_url')
   $sql_iso = lookup('sql_iso')
   $ssm_exe = lookup('ssm_exe')
-
-  $admin_pass = lookup('admin_password')
   $fe_server = ''
   $be_server = ''
   $adm_server = ''
@@ -209,6 +209,7 @@ class profile::allinone(
       content => epp('profile/install_sql_server.epp',{
         ad_domain    => $ad_domain,
         ad_suffix    => $ad_suffix,
+        admin_user   => $admin_user,
         sql_svc_pass => $sql_svc_pass,
         download_url => $download_url,
         sql_iso      => $sql_iso,
@@ -227,6 +228,7 @@ class profile::allinone(
       path    => 'c:\scripts\addsqladminuser.ps1',
       content => epp('profile/addsqladminuser.epp',{
         sql_server => $sql_server,
+        admin_user => $admin_user,
         admin_pass => $admin_pass
       })
     }
@@ -272,13 +274,13 @@ class profile::allinone(
         ou_display      => 'CRMDev',
         ou_name         => 'CRMDev',
         ou_value        => $ou_string,
-        reporting_url   => "http://127.0.0.1/reportserver",
+        reporting_url   => 'http://127.0.0.1/reportserver',
         dynamics_port   => '5555',
         dynamics_user   => "${use_domain}\\${dynamics_user}",
         dynamics_pass   => $dynamics_pass,
         sandbox_user    => "${use_domain}\\${sandbox_user}",
         sandbox_pass    => $sandbox_pass,
-        deploy_user     => "${use_domain}\\administrator",
+        deploy_user     => "${use_domain}\\${admin_user}",
         deploy_pass     =>  $admin_pass,
         async_user      => "${use_domain}\\${async_user}",
         async_pass      => $async_pass,

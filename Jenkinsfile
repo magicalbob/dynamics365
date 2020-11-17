@@ -3,7 +3,22 @@ pipeline {
     label 't7610'
   }
 
+  triggers {
+    cron(env.BRANCH_NAME == 'develop' ? 'H H(1-5) * * 1-7' : '')
+  }
+
   stages {
+
+    stage('packer build dynamics vagrant box') {
+      steps {
+        script {
+          sh """
+            ./scripts/build-packer.sh
+          """
+        }
+      }
+    }
+
     stage('terraform apply dynamics') {
       steps {
         script {

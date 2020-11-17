@@ -31,9 +31,16 @@
 #    include base
 #
 class base(
+  $ad_domain = lookup('ad_domain'),
   $ad_domain_url = lookup('ad_domain_url'),
   $redis_ip = lookup('redis_ip'),
-  $redis_pass = lookup('redis_pass')
+  $redis_pass = lookup('redis_pass'),
+  $admin_user = lookup('admin_username'),
+  $admin_pass = lookup('admin_password'),
+  $ad_suffix = lookup('ad_suffix'),
+  $reboot_timeout = lookup('reboot_timeout'),
+  $dc_string=join(['DC=',$ad_domain_url.split('[.]').join(',DC=')]),
+  $ou_string=join(['OU=ServiceAccounts,',$dc_string])
 )
 {
   $choco_packages = [ '7zip', 'powershell-core', 'netcat' ]
@@ -74,12 +81,39 @@ class base(
     data  => 16,
   }
 
+  -> registry::value { 'disable uac':
+    key   => 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',
+    value => 'EnableLUA',
+    type  => 'dword',
+    data  => 0,
+  }
+
+  -> registry::value { 'disable uac path':
+    key   => 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',
+    value => 'EnableSecureUIAPaths',
+    type  => 'dword',
+    data  => 0,
+  }
+
+  -> registry::value { 'disable uac consent prompt behaviour':
+    key   => 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',
+    value => 'ConsentPromptBehavior',
+    type  => 'dword',
+    data  => 0,
+  }
+
+  -> registry::value { 'disable uac consent prompt user behaviour':
+    key   => 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',
+    value => 'ConsentPromptBehaviorUser',
+    type  => 'dword',
+    data  => 0,
+  }
+
   -> exec { 'run ieesc script':
     command => 'cmd.exe /c powershell -File c:\scripts\disable_ieesc.ps1',
     path    => $::path,
   }
 
-  $admin_pass = lookup('admin_password')
 
   exec { 'backup sysprep unattend file':
     command => 'cmd.exe /c copy /y c:\scripts\unattend.xml c:\scripts\unattend.xml.backup',
@@ -117,18 +151,30 @@ class base(
     path               => 'c:\scripts\unattend.xml',
     line               => "      <RegisteredOwner>EC2</RegisteredOwner>
       <UserAccounts>
-        <AdministratorPassword>
-          <Value>${admin_pass}</Value>
-          <PlainText>true</PlainText>
-        </AdministratorPassword>
+          <AdministratorPassword>
+              <Value>${admin_pass}</Value>
+              <PlainText>true</PlainText>
+          </AdministratorPassword>
+          <LocalAccounts>
+              <LocalAccount wcm:action= \"add\" >
+                  <Password>
+                      <Value>${admin_pass}</Value>
+                      <PlainText>true</PlainText>
+                  </Password>
+                  <Description>Admin user</Description>
+                  <DisplayName>${admin_pass}</DisplayName>
+                  <Name>${admin_pass}</Name>
+                  <Group>Administrators</Group>
+              </LocalAccount>
+          </LocalAccounts>
       </UserAccounts>
       <AutoLogon>
-        <Password>
-          <Value>${admin_pass}</Value>
-          <PlainText>true</PlainText>
-        </Password>
-        <Enabled>true</Enabled>
-        <Username>administrator</Username>
+          <Password>
+              <Value>${admin_pass}</Value>
+              <PlainText>true</PlainText>
+          </Password>
+          <Enabled>true</Enabled>
+          <Username>${admin_pass}</Username>
       </AutoLogon>",
     match              => '<RegisteredOwner>EC2</RegisteredOwner>',
     append_on_no_match => false
@@ -164,13 +210,39 @@ class base(
     content => epp('profile/apply_puppet.epp',{
       ad_domain_url => $ad_domain_url,
       redis_ip      => $redis_ip,
-      redis_pass    => $redis_pass
+      redis_pass    => $redis_pass,
+      ad_domain     => $ad_domain,
+      ad_suffix     => $ad_suffix,
+      admin_user    => $admin_user,
+      admin_pass    => $admin_pass
     })
   }
 
-  -> file { 'script to run apply_puppet task':
+  -> file { 'script to run script to run apply_puppet script':
     ensure  => present,
     path    => 'c:\programdata\microsoft\windows\startm~1\programs\startup\apply_puppet.cmd',
     content => epp('profile/cmd_apply_puppet.epp',{ })
+  }
+
+  -> file { 'script to run apply_puppet script':
+    ensure  => present,
+    path    => 'c:\scripts\cmd_apply_puppet.ps1',
+    content => epp('profile/cmd_apply_puppet_ps1.epp',
+                   {
+                     admin_user     => $admin_user,
+                     admin_pass     => $admin_pass,
+                     ad_domain      => $ad_domain,
+                     ad_domain_url  => $ad_domain_url,
+                     ad_suffix      => $ad_suffix,
+                     ou_string      => $ou_string,
+                     reboot_timeout => $reboot_timeout
+                   })
+  }
+
+  -> file { 'script to set dns/wins server':
+    ensure  => present,
+    path    => 'c:\scripts\setwinsnet.ps1',
+    content => epp('profile/setwinsnet.epp',{
+    })
   }
 }

@@ -1,6 +1,8 @@
 if [ "${OS}" == "Windows_NT" ]
 then
   PATH=$PATH:/c/tools/ruby27/bin:"/c/Program Files/Oracle/VirtualBox"
+  export JENKINS_NODE_COOKIE=dontKillMe 
+  export BUILD_ID=dontKillMe
 fi
 
 export OS_TYPE=windows
@@ -9,12 +11,15 @@ export OS_TYPE=windows
 # use the below values for windows server 2019
 export ISO_URL=https://dev.ellisbs.co.uk/files/software/WinServer2019.iso
 export ISO_MD5=70fec2cb1d6759108820130c2b5496da
-export WINRM_USERNAME=administrator
+export WINRM_USERNAME=$(grep admin_username ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 export WINRM_PASSWORD=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 export DISK_SIZE=51200
 export VBOX_VER=$(VBoxManage --version | cut -dr -f1)
 
-echo "admin_password: ${WINRM_PASSWORD}" > answer_files/AutoUnattend.data.yml
+echo "{" > answer_files/AutoUnattend.data.yml
+echo "admin_password: ${WINRM_PASSWORD}," >> answer_files/AutoUnattend.data.yml
+echo "admin_username: ${WINRM_USERNAME}" >> answer_files/AutoUnattend.data.yml
+echo "}" >> answer_files/AutoUnattend.data.yml
 
 source scripts/boxname.sh
 

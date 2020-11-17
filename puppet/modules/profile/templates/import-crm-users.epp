@@ -1,4 +1,5 @@
 <%- | String $fe_server,
+      String $admin_user,
       String $admin_pass,
       String $default_org,
       String $use_domain
@@ -7,7 +8,7 @@ Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Inf
 Install-Module Microsoft.Xrm.Data.PowerShell -Force
 
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "import-crm-users get crm connection"
-$CRMCred = New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName='<%= $use_domain %>\Administrator'; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
+$CRMCred = New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName='<%= $use_domain %>\<%= $admin_user %>'; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
 $CRMConn = $null
 while ($CRMConn -eq $null) {
   $CRMConn = Connect-CrmOnPremDiscovery -ServerUrl http://<%= $fe_server %>:5555/<%= default_org %> -Credential $CRMCred

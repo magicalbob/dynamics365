@@ -2,6 +2,9 @@ Expand-Archive c:\windows\temp\puppet.zip c:\ProgramData\PuppetLabs\code\environ
 
 set FACTERLIB=c:\programdata\puppetlabs\code\environments\production\facter
 
+icacls c:\ProgramData\Puppetlabs /grant vagrant:F /Q /C /T
+icacls "c:\Program Files\Puppet Labs" /grant vagrant:F /Q /C /T
+
 & "c:\program files\puppet labs\puppet\bin\puppet" apply c:\ProgramData\PuppetLabs\code\environments\production\manifests\choco.pp
 $resp=$LASTEXITCODE
 if ($resp -eq 0) {

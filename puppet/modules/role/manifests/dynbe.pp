@@ -22,8 +22,6 @@
 class role::dynbe {
   class { 'base':
   }
-  -> class { 'joindomain':
-  }
   -> class { 'vcredist':
   }
   -> class { 'profile::dynamics':

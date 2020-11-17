@@ -20,6 +20,7 @@
 #    include profile::neworg
 #
 class profile::dynamicsusers(
+  $admin_user = lookup('admin_username'),
   $admin_pass = lookup('admin_password'),
   $ad_domain = lookup('ad_domain'),
   $ad_suffix = lookup('ad_suffix'),
@@ -37,6 +38,7 @@ class profile::dynamicsusers(
     path    => 'c:\scripts\export-users-from-ad.ps1',
     content => epp('profile/export-users-from-ad.epp',{
       dc_string      => $dc_string,
+      admin_user     => $admin_user,
       admin_pass     => $admin_pass,
       ad_domain      => $ad_domain,
       crm_user_group => $crm_user_group
@@ -48,6 +50,7 @@ class profile::dynamicsusers(
     path    => 'c:\scripts\import-crm-users.ps1',
     content => epp('profile/import-crm-users.epp',{
       fe_server   => $fe_server,
+      admin_user  => $admin_user,
       admin_pass  => $admin_pass,
       use_domain  => $use_domain,
       default_org => $default_org

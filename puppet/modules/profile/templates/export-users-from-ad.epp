@@ -1,4 +1,5 @@
 <%- | String $dc_string,
+      String $admin_user,
       String $admin_pass,
       String $ad_domain,
       String $crm_user_group
@@ -41,7 +42,7 @@ Import-Module ActiveDirectory
 $SearchBase = "CN=Users,<%= $dc_string %>"
 
 #Get Admin account credentials
-$User = "Administrator"
+$User = "<%= $admin_user %>"
 $secpasswd = "<%= $admin_pass %>"
 $secpasswd2 = ConvertTo-SecureString -String $secpasswd -AsPlainText -Force
 

@@ -30,6 +30,8 @@
 class profile::dynsql(
   $ad_domain   = lookup('ad_domain'),
   $ad_suffix   = lookup('ad_suffix'),
+  $admin_user  = lookup('admin_username'),
+  $admin_pass  = lookup('admin_password'),
   $sql_server  = lookup('sql_server'),
   $sql_svc_pass = lookup('service_users')['sqlsvc']['password'],
   $download_url = lookup('download_url'),
@@ -43,6 +45,7 @@ class profile::dynsql(
     content => epp('profile/install_sql_server.epp',{
       ad_domain    => $ad_domain,
       ad_suffix    => $ad_suffix,
+      admin_user   => $admin_user,
       sql_svc_pass => $sql_svc_pass,
       download_url => $download_url,
       sql_iso      => $sql_iso,
@@ -61,6 +64,7 @@ class profile::dynsql(
     path    => 'c:\scripts\addsqladminuser.ps1',
     content => epp('profile/addsqladminuser.epp',{
       sql_server => $sql_server,
+      admin_user => $admin_user,
       admin_pass => $admin_pass
     })
   }

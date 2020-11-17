@@ -1,6 +1,10 @@
 <%- | String $ad_domain_url,
       String $redis_ip,
-      String $redis_pass
+      String $redis_pass,
+      String $ad_domain,
+      String $ad_suffix,
+      String $admin_user,
+      String $admin_pass
 | -%>
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "apply_puppet started."
 
@@ -20,6 +24,28 @@ if (!(Test-Path c:\scripts\prefix)) {
     } else {
       echo $prefix > c:\scripts\prefix
     }
+  }
+}
+
+if (!(Test-Path c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.puppetlabs\etc\code\environments)) {
+  if (([System.Security.Principal.WindowsIdentity]::GetCurrent()).Name -eq "<%= $ad_domain %><%= $ad_suffix %>\<%= $admin_user %>") {
+    mkdir c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.puppetlabs\etc\code\environments\production
+    cd c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.puppetlabs\etc\code\environments\production
+    xcopy /E /Y c:\programdata\puppetlabs\code\environments\production\* .
+    echo "---" > .\hiera.yaml
+    echo "version: 5" >> .\hiera.yaml
+    echo "defaults:" >> .\hiera.yaml
+    echo "  datadir: c:\programdata\puppetlabs\code\environments\production\hieradata" >> .\hiera.yaml
+    echo "  data_hash: yaml_data" >> .\hiera.yaml
+    echo "hierarchy:" >> .\hiera.yaml
+    echo "  - name: Common" >> .\hiera.yaml
+    echo "    paths:" >> .\hiera.yaml
+    echo "      - account/account.yaml" >> .\hiera.yaml
+    echo "      - common.yaml" >> .\hiera.yaml
+
+    $admincred=New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName="$computername\administrator"; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
+
+    Invoke-Command -ScriptBlock { Restart-Computer -Force } -Credential $admincred -ComputerName (hostname)
   }
 }
 

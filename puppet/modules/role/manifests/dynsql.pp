@@ -22,8 +22,6 @@
 class role::dynsql {
   class { 'base':
   }
-  -> class { 'joindomain':
-  }
   -> class { 'vcredist':
   }
   -> class { 'profile::dynsql':

@@ -1,5 +1,4 @@
 <%- | String $sql_server,
-      String $admin_pass,
       String $fe_server,
       Optional[String] $quiet_install = '/q',
       String $dynamics_iso,

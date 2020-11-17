@@ -108,6 +108,18 @@
                     <Value>{{admin_password}}</Value>
                     <PlainText>true</PlainText>
                 </AdministratorPassword>
+                <LocalAccounts>
+                    <LocalAccount wcm:action= "add" >
+                        <Password>
+                            <Value>{{admin_password}}</Value>
+                            <PlainText>true</PlainText>
+                        </Password>
+                        <Description>Admin user</Description>
+                        <DisplayName>{{admin_username}}</DisplayName>
+                        <Name>{{admin_username}}</Name>
+                        <Group>Administrators</Group>
+                    </LocalAccount>
+                </LocalAccounts>
             </UserAccounts>
             <AutoLogon>
                 <Password>
@@ -115,7 +127,7 @@
                     <PlainText>true</PlainText>
                 </Password>
                 <Enabled>true</Enabled>
-                <Username>administrator</Username>
+                <Username>{{admin_username}}</Username>
             </AutoLogon>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
