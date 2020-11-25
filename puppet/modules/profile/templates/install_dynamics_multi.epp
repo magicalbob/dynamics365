@@ -7,9 +7,14 @@
       String $download_url,
       String $dynamics_iso,
       String $kb4046795_exe,
-      Optional[String] $quiet_install = '/q'
+      Optional[String] $quiet_install = ''
 | -%>
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics started."
+
+if (Test-Path 'C:\Program Files\Microsoft Dynamics CRM\tools\Microsoft.Crm.DeploymentManager.exe') {
+  # set flag to say dynamics installed on this machine now
+  c:\scripts\flagmanset.ps1 -Name "$(hostname)_ready" -Value "true"
+}
 
 # Check if Dynamics already installed
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics check crm_ready tag for this node"

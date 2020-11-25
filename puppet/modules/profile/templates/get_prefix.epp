@@ -1,0 +1,16 @@
+<%- | String $redis_ip,
+      String $redis_pass
+| -%>
+if (!(Test-Path c:\scripts\prefix)) {
+  $prefix=''
+  while (!($prefix -match "^[\d\.]+$")) {
+    $prefix=(echo "AUTH <%= $redis_pass %>" ` "GET prefix" | nc -w 1 <%= $redis_ip %> 6379)
+    $prefix = ($prefix -match "^[\d]+$" )
+    if (!( "$prefix" -match "^[\d]+$" )) {
+      $prefix=''
+    } else {
+      echo $prefix > c:\scripts\prefix
+    }
+  }
+}
+

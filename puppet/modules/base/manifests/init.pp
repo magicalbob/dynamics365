@@ -162,8 +162,8 @@ class base(
                       <PlainText>true</PlainText>
                   </Password>
                   <Description>Admin user</Description>
-                  <DisplayName>${admin_pass}</DisplayName>
-                  <Name>${admin_pass}</Name>
+                  <DisplayName>${admin_user}</DisplayName>
+                  <Name>${admin_user}</Name>
                   <Group>Administrators</Group>
               </LocalAccount>
           </LocalAccounts>
@@ -174,16 +174,10 @@ class base(
               <PlainText>true</PlainText>
           </Password>
           <Enabled>true</Enabled>
-          <Username>${admin_pass}</Username>
+          <Username>${admin_user}</Username>
       </AutoLogon>",
     match              => '<RegisteredOwner>EC2</RegisteredOwner>',
     append_on_no_match => false
-  }
-
-  # set admin user password to never expire
-  -> exec { 'set admin password to never expire':
-    command => 'powershell -command "Set-LocalUser -PasswordNeverExpires 1 -Name Administrator"',
-    path    => $::path
   }
 
   # enable windows search service
@@ -218,10 +212,20 @@ class base(
     })
   }
 
+  -> file { 'script to get redis prefix':
+    ensure  => present,
+    path    => 'c:\scripts\get_prefix.ps1',
+    content => epp('profile/get_prefix.epp',{
+      redis_ip      => $redis_ip,
+      redis_pass    => $redis_pass
+    })
+  }
+
   -> file { 'script to run script to run apply_puppet script':
     ensure  => present,
     path    => 'c:\programdata\microsoft\windows\startm~1\programs\startup\apply_puppet.cmd',
-    content => epp('profile/cmd_apply_puppet.epp',{ })
+    content => epp('profile/cmd_apply_puppet.epp',{
+    })
   }
 
   -> file { 'script to run apply_puppet script':

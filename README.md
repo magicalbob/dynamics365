@@ -110,8 +110,8 @@ AWS
 
 Work on making this work with AWS EC2 instances is work in progress.
 
-The build-packer-aws.sh builds an AWS AMI, which will launch an EC2 instance.
+The `build-packer-aws.sh` builds an AWS AMI.
 
-The terraform-allinone-aws dir contains the terraform to stand up a t2.micro EC2 instance, but build hasn't been tried at all yet.
+The `terraform-allinone-aws` dir contains the terraform to stand up a t2.micro EC2 instance. Script `build-terraform-allinone-aws.sh` stands up the AMI & builds successfully.
 
 The terraform-aws dir contains the terraform for the full stack. Script build-terraform.aws.sh stands the stack up. It successfully stands up all the EC2 instances, but needs plenty of debugging yet.

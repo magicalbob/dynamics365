@@ -2,7 +2,7 @@
 version: 5
 
 admin_username: vagrant
-admin_password: vagrant
+admin_password: V8gr^nt123456789
 
 service_users:
   app:

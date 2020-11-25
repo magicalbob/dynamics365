@@ -53,6 +53,8 @@ source ../scripts/boxname.sh
 if [ "$OS" == "Windows_NT" ]
 then
   PROVIDER_EXT=".exe"
+  export JENKINS_NODE_COOKIE=dontKillMe 
+  export BUILD_ID=dontKillMe 
   PATH=$PATH:/c/tools/ruby27/bin:"/c/Program Files/Oracle/VirtualBox"
 else
   PROVIDER_EXT=""

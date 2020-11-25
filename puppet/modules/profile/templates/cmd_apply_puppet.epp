@@ -1,3 +1,5 @@
 cmd /c if not exist c:\programdata\puppetlabs\code move c:\programdata\puppetlabs\code.build c:\programdata\puppetlabs\code 
+powershell -file "c:\scripts\get_prefix.ps1"
+call puppet apply --verbose --logdest eventlog -e 'include flagman'
 call puppet apply --verbose --logdest eventlog -e 'include base'
 powershell -file "c:\scripts\cmd_apply_puppet.ps1"

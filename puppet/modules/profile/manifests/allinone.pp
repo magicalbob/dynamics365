@@ -228,6 +228,8 @@ class profile::allinone(
       path    => 'c:\scripts\addsqladminuser.ps1',
       content => epp('profile/addsqladminuser.epp',{
         sql_server => $sql_server,
+        ad_domain  => $ad_domain,
+        ad_suffix  => $ad_suffix,
         admin_user => $admin_user,
         admin_pass => $admin_pass
       })

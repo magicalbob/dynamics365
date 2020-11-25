@@ -1,34 +1,28 @@
 {
   "builders": [
       {
-          "type": "amazon-ebs",
-          "ami_name": "dynamics",
-          "region": "eu-west-2",
-          "security_group_id": "sg-76484411",
-          "subnet_id": "subnet-19492c63",
-          "encrypt_boot": false,
-          "ami_users": [
-                  "841411968712"
-          ],
-          "instance_type": "t2.micro",
-          "user_data_file": "./scripts/SetUpWinRM.ps1",
+          "type": "azure-arm",
+          "client_id": "{{user `azure_client_id`}}",
+          "client_secret": "{{user `azure_client_secret`}}",
+          "tenant_id": "{{user `azure_tenant_id`}}",
+          "subscription_id": "{{user `azure_subscription_id`}}",
+          "os_type": "Windows",
+          "image_publisher": "MicrosoftWindowsServer",
+          "image_offer": "WindowsServer",
+          "image_sku": "2016-Datacenter",
+          "disk_caching_type": "ReadWrite",
           "communicator": "winrm",
-          "winrm_username": "Administrator",
-          "winrm_use_ssl": false,
+          "winrm_username": "vagrant",
+          "winrm_use_ssl": true,
           "winrm_insecure": true,
           "winrm_timeout": "60m",
-          "windows_password_timeout": "60m",
-          "source_ami": "ami-0aac9d7fa83beb6d2",
-          "launch_block_device_mappings": [
-            {
-              "device_name": "/dev/sda1",
-              "volume_size": 50,
-              "volume_type": "gp2",
-              "delete_on_termination": true
-            }
-          ],
-          "ssh_keypair_name": "packer",
-          "ssh_private_key_file": "/home/ian/.ssh/id_packer"
+          "vm_size": "Standard_A2_v2",
+          "location": "UK South",
+          "azure_tags": {
+              "dept": "dynamics"
+          },
+          "managed_image_name": "dynamics",
+          "managed_image_resource_group_name": "allinone"
       }
   ],
   "provisioners": [
@@ -51,11 +45,14 @@
         "cmd /c schtasks /CHANGE /TN \"\\Microsoft\\Windows\\Windows Defender\\Windows Defender Verification\" /RL LIMITED",
         "Install-WindowsFeature Net-Framework-Core,Windows-Identity-Foundation  -IncludeAllSubFeature -source d:/sources/sxs",
         "(New-Object System.Net.WebClient).DownloadFile('https://downloads.puppetlabs.com/windows/puppet6/puppet-agent-6.18.0-x64.msi', 'C:/Windows/Temp/puppet.msi')",
-        "cmd /c start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log",
-        "mkdir c:\\scripts",
-        "cp c:\\programdata\\amazon\\ec2-windows\\launch\\sysprep\\unattend.xml c:\\scripts\\unattend.xml"
+        "cmd /c start /wait msiexec /qn /i C:\\Windows\\Temp\\puppet.msi /log C:\\Windows\\Temp\\puppet.log"
       ],
       "type": "powershell"
+    },
+    {
+      "destination": "c:\\scripts\\unattend.xml",
+      "source": "answer_files/AutoUnattend.xml",
+      "type": "file"
     },
     {
       "destination": "c:\\ProgramData\\PuppetLabs\\puppet\\etc\\hiera.yaml",
@@ -79,6 +76,12 @@
       ],
       "type": "windows-shell"
     }
-  ]
+  ],
+  "variables": {
+    "azure_client_id": "{{env `AZURE_CLIENT_ID`}}",
+    "azure_client_secret": "{{env `AZURE_CLIENT_SECRET`}}",
+    "azure_tenant_id": "{{env `AZURE_TENANT_ID`}}",
+    "azure_subscription_id": "{{env `AZURE_SUBSCRIPTION_ID`}}"
+  }
 }
 

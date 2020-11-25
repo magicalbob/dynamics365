@@ -9,20 +9,20 @@ function createMachine {
 
   aws_id=$(terraform show -json|jq ".values.root_module.resources[]|select(.name|test(\"${1}\"))"|jq .values.id|cut -d\" -f2)
 
-  # Set instance-id of machine in redis
-  resp=1
-  while [ $resp -ne 0 ]
-  do
-    echo -e "AUTH ${4}\r\nSET ${2}_${aws_id} ${1}\r\n" | nc -w1 ${3} 6379
-    resp=$?
-  done
+#  # Set instance-id of machine in redis
+#  resp=1
+#  while [ $resp -ne 0 ]
+#  do
+#    echo -e "AUTH ${4}\r\nSET ${2}_${aws_id:1} ${1}\r\n" | nc -w1 ${3} 6379
+#    resp=$?
+#  done
 
   echo "Set ${1} instance-id ${aws_id}"
 }
 
 # make sure we are in right dir
 BASE_PATH=$(dirname $0)
-cd ${BASE_PATH}/../terraform-allinone-aws
+cd ${BASE_PATH}/../terraform-allinone-azure
 
 if [ "$OS" == "Windows_NT" ]
 then

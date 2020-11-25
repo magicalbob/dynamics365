@@ -14,19 +14,6 @@ if (Test-Path c:\programdata\amazon\ec2-windows\launch\sysprep\unattend.xml) {
 
 [Environment]::SetEnvironmentVariable("FACTERLIB","c:\programdata\puppetlabs\code\environments\production\facter","Machine")
 
-if (!(Test-Path c:\scripts\prefix)) {
-  $prefix=''
-  while (!($prefix -match "^[\d\.]+$")) {
-    $prefix=(echo "AUTH <%= $redis_pass %>" ` "GET prefix" | nc -w 1 <%= $redis_ip %> 6379)
-    $prefix = ($prefix -match "^[\d]+$" )
-    if (!( "$prefix" -match "^[\d]+$" )) {
-      $prefix=''
-    } else {
-      echo $prefix > c:\scripts\prefix
-    }
-  }
-}
-
 if (!(Test-Path c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.puppetlabs\etc\code\environments)) {
   if (([System.Security.Principal.WindowsIdentity]::GetCurrent()).Name -eq "<%= $ad_domain %><%= $ad_suffix %>\<%= $admin_user %>") {
     mkdir c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.puppetlabs\etc\code\environments\production
@@ -51,9 +38,6 @@ if (!(Test-Path c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.
 
 $machine_name = hostname
 if (($machine_name -Like "WIN*") -Or ($machine_name -Like "EC2*")) {
-  # Make sure flagman in place and prefix set
-  puppet apply -e "include flagman"
-
   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NetFramework\v4.0.30319' -Name 'SchUseStrongCrypto' -Value '1' -Type DWord 
   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\.NetFramework\v4.0.30319' -Name 'SchUseStrongCrypto' -Value '1' -Type DWord
   Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
@@ -100,17 +84,11 @@ Set-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\" -Na
 
 # if this is the active directory machine set its IP in redis for the other machines
 if ($machine_name -Like "ALLINONE") {
-  # This might have already been done, but no harm doing it again
-  puppet apply -e "include flagman"
-
-  $ad_ip=(Get-NetIPAddress -InterfaceAlias "Ethernet 2").IPAddress
+  $ad_ip=(Get-NetIPAddress -InterfaceAlias "Ethernet*").IPAddress
   c:\scripts\flagmanset.ps1 -Name ad_ip -Value $ad_ip
 }
 if ($machine_name -Like "DYNADIR") {
-  # This might have already been done, but no harm doing it again
-  puppet apply -e "include flagman"
-
-  $ad_ip=(Get-NetIPAddress -InterfaceAlias "Ethernet 2").IPAddress
+  $ad_ip=(Get-NetIPAddress -InterfaceAlias "Ethernet*").IPAddress
   c:\scripts\flagmanset.ps1 -Name ad_ip -Value $ad_ip
 }
 

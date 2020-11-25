@@ -7,7 +7,7 @@
       String $reboot_timeout
 | -%>
 $machine_name = hostname
-if (($machine_name -Like "WIN-*") -Or ($machine_name -Like "ALLINONE*") -Or ($machine_name -Like "<%= $ad_domain %>*")) {
+if (($machine_name -Like "WIN*") -Or ($machine_name -Like "EC2*") -Or ($machine_name -Like "ALLINONE*") -Or ($machine_name -Like "<%= $ad_domain %>*")) {
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Machine ${hostname} does not need to join domain"
 } else {
   if ( $Env:USERDOMAIN -eq "<%= $ad_domain %><%= $ad_suffix %>" ) {
