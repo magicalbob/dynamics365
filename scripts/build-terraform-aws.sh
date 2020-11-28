@@ -13,7 +13,7 @@ function createMachine {
   resp=1
   while [ $resp -ne 0 ]
   do
-    echo -e "AUTH ${4}\r\nSET ${2}_${aws_id:1} ${1}\r\n" | nc -w1 ${3} 6379
+    echo -e "AUTH ${4}\r\nSET ${2}_${aws_id} ${1}\r\n" | nc -w1 ${3} 6379
     resp=$?
   done
 

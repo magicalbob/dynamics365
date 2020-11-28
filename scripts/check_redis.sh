@@ -3,11 +3,6 @@
 redis_name=$(grep redis_ip puppet/hieradata/common.yaml |cut -d: -f2)
 redis_ip=$(nslookup -querytype=A ${redis_name} 2> /dev/null | grep ^Address:|tail -n1|cut -d: -f2)
 redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
-virtualenv .py > /dev/null 2>&1
-
-. .py/bin/activate > /dev/null 2>&1
-
-pip install pywinrm > /dev/null 2>&1
 
 export admin_password=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 
@@ -43,8 +38,6 @@ adm_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_365_done\r\n
 
 org_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_neworg_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-ad_machines=$($(dirname $0)/check_winrm.py)
-
 echo "    Prefix is: ${prefix}."
 echo "     AD IP is: ${ad_ip}."
 echo "   AD Started: ${ad_started}."
@@ -52,21 +45,6 @@ echo "  SQL Started: ${sql_started}."
 echo "   FE Started: ${fe_started}."
 echo "   BE Started: ${be_started}."
 echo "  ADM Started: ${adm_started}."
-echo -n "    AD Joined: "
-if [[ "$ad_machines" =~ "DYNADIR," ]]; then echo "true."; else echo "false."; fi
-
-echo -n "   SQL Joined: "
-if [[ "$ad_machines" =~ "DYNSQL," ]]; then echo "true."; else echo "false."; fi
-
-echo -n "    FE Joined: "
-if [[ "$ad_machines" =~ "DYNFE," ]]; then echo "true."; else echo "false."; fi
-
-echo -n "    BE Joined: "
-if [[ "$ad_machines" =~ "DYNBE," ]]; then echo "true."; else echo "false."; fi
-
-echo -n "   ADM Joined: "
-if [[ "$ad_machines" =~ "DYNADM," ]]; then echo "true."; else echo "false."; fi
-
 echo "    SQL Ready: ${sql_ready}."
 echo "     FE Ready: ${fe_ready}."
 echo "   SSRS Ready: ${ssrs_ready}."

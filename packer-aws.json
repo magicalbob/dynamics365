@@ -75,6 +75,9 @@
     },
     {
       "inline": [
+        "icacls c:\\ProgramData\\Puppetlabs /grant everyone:F /Q /C /T",
+        "icacls \"c:\\Program Files\\Puppet Labs\" /grant everyone:F /Q /C /T",
+        "icacls c:\\Scripts /grant everyone:F /Q /C /T",
         "c:\\windows\\system32\\sysprep\\sysprep /generalize /quiet /oobe /shutdown /unattend:c:\\scripts\\unattend.xml"
       ],
       "type": "windows-shell"

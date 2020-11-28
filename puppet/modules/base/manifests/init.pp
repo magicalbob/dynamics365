@@ -45,9 +45,20 @@ class base(
 {
   $choco_packages = [ '7zip', 'powershell-core', 'netcat' ]
 
-  exec { 'Set time zone to UTC':
-    command => "Powershell -Command \"Set-TimeZone -Id 'UTC'\"",
+  user { $admin_user:
+    ensure => 'present',
+    groups => 'administrators'
+  }
+
+  -> group { 'Remote Desktop Users':
+    ensure  => 'present',
+    members => $admin_user
+  }
+
+  -> exec { 'Set time zone to UTC':
+    command => "Set-TimeZone -Id 'UTC'",
     path    => $::path,
+    provider=> powershell,
   }
 
   -> package { $choco_packages:
@@ -114,8 +125,7 @@ class base(
     path    => $::path,
   }
 
-
-  exec { 'backup sysprep unattend file':
+  -> exec { 'backup sysprep unattend file':
     command => 'cmd.exe /c copy /y c:\scripts\unattend.xml c:\scripts\unattend.xml.backup',
     unless  => 'c:\windows\system32\cmd.exe /c dir c:\scripts\unattend.xml.backup',
     path    => $::path,
@@ -182,13 +192,15 @@ class base(
 
   # enable windows search service
   -> exec { 'set windows search service to auto':
-    command => 'c:\windows\system32\cmd.exe /c powershell -Command Set-Service WSearch -StartupType Automatic',
+    command => 'Set-Service WSearch -StartupType Automatic',
+    provider=> powershell,
     path    => $::path
   }
 
   -> exec { 'start windows search service':
-    command => 'c:\windows\system32\cmd.exe /c powershell -Command Start-Service WSearch',
-    path    => $::path
+    command  => 'Start-Service WSearch',
+    provider => powershell,
+    path     => $::path
   }
 
   # disable the puppet service, apply_puppet.ps1 will run it
