@@ -89,6 +89,12 @@ class profile::dynadir(
       path     => $::path
     }
 
+    -> exec { 'add admin user to AD administrators group':
+      command  => "Add-ADGroupMember -Identity 'Domain Admins' -Members ${admin_user}",
+      provider => powershell,
+      path     => $::path
+    }
+
     -> exec { "Add ${crm_system_group} Group":
       command  => "New-ADGroup -Name \"${crm_system_group}\" -GroupScope Global",
       provider => powershell,
