@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v4.0.0](https://github.com/puppetlabs/puppetlabs-powershell/tree/v4.0.0) (2020-07-07)
+## [v4.1.0](https://github.com/puppetlabs/puppetlabs-powershell/tree/v4.1.0) (2020-12-07)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-powershell/compare/v4.0.0...v4.1.0)
+
+### Added
+
+- Add support for Puppet 7 [\#322](https://github.com/puppetlabs/puppetlabs-powershell/pull/322) ([daianamezdrea](https://github.com/daianamezdrea))
+- \(MODULES-10722\) Inherit pipe\_timeout from timeout [\#321](https://github.com/puppetlabs/puppetlabs-powershell/pull/321) ([michaeltlombardi](https://github.com/michaeltlombardi))
+
+## [v4.0.0](https://github.com/puppetlabs/puppetlabs-powershell/tree/v4.0.0) (2020-07-09)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-powershell/compare/v3.0.1...v4.0.0)
 
@@ -218,7 +227,7 @@ All notable changes to this project will be documented in this file. The format 
 
 - Fixed issue with metadata and PE version requirement
 
-[Unreleased]: https://github.com/puppetlabs/puppetlabs-powershell/compare/2.3.0...master
+[Unreleased]: https://github.com/puppetlabs/puppetlabs-powershell/compare/2.3.0...main
 [2.3.0]: https://github.com/puppetlabs/puppetlabs-powershell/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/puppetlabs/puppetlabs-powershell/compare/2.1.5...2.2.0
 [2.1.5]: https://github.com/puppetlabs/puppetlabs-powershell/compare/2.1.4...2.1.5
