@@ -113,3 +113,5 @@ The `build-packer-aws.sh` builds an AWS AMI.
 The `terraform-allinone-aws` dir contains the terraform to stand up a t2.medium EC2 instance (free-tier t2.micro is too small). Script `build-terraform-allinone-aws.sh` stands up the AMI & builds successfully.
 
 The `terraform-aws` dir contains the terraform for the full stack. Script `build-terraform.aws.sh` stands up the AMI & builds successfully.
+
+From the `terraform-aws` directory you can use `../scripts/xfree.dynamics.sh` to connect to the machines by name. To test the dynamics installation use this script to RDP to `dynadir` and from there use RDP to get to (say) `dynadm` to test out Dynamics 365.
