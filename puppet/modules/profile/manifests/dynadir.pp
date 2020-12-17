@@ -35,7 +35,8 @@ class profile::dynadir(
 
   if $facts['identity']['user'] != $new_user {
     exec { 'Install Windows Features':
-      command => 'powershell -Command Install-WindowsFeature -Name AD-Domain-Services,DNS,Web-Server,Web-Filtering,Web-Basic-Auth,Web-Windows-Auth,Web-Mgmt-Console,Web-Mgmt-Compat,Windows-Identity-Foundation -IncludeManagementTools -Restart',
+      command => 'Install-WindowsFeature -Name AD-Domain-Services,DNS,Web-Server,Web-Filtering,Web-Basic-Auth,Web-Windows-Auth,Web-Mgmt-Console,Web-Mgmt-Compat,Windows-Identity-Foundation -IncludeManagementTools -Restart',
+      provider => powershell,
       timeout => 0,
       path    => $::path
     }
@@ -56,13 +57,15 @@ class profile::dynadir(
     }
 
     -> exec { 'Wait for restart':
-      command => 'powershell -Command Start-Sleep -Seconds 180',
+      command => 'Start-Sleep -Seconds 180',
+      provider => powershell,
       timeout => 0,
       path    => $::path
     }
 
     -> exec { 'Post forest restart':
-      command => 'powershell -Command Restart-Computer -Force',
+      command => 'Restart-Computer -Force',
+      provider => powershell,
       timeout => 0,
       path    => $::path
     }
@@ -76,7 +79,7 @@ class profile::dynadir(
     $dynamics_sandbox = $service_users['sandbox']['username']
 
     exec { 'Wait before New AD Organizational Unit':
-      command  => 'powershell -Command Start-Sleep -Seconds 120',
+      command  => 'Start-Sleep -Seconds 120',
       provider => powershell,
       timeout  => 0,
       path     => $::path
@@ -156,7 +159,8 @@ class profile::dynadir(
 
       if ($crmgroup == true) {
         exec { "add crm system user ${username} to ${crm_system_group} group":
-          command => "powershell -Command Add-ADGroupMember -Identity 'CN=${crm_system_group},CN=Users,${dc_string}' -Members ${username}",
+          command => "Add-ADGroupMember -Identity 'CN=${crm_system_group},CN=Users,${dc_string}' -Members ${username}",
+          provider => powershell,
           path    => $::path
         }
       }
@@ -181,7 +185,8 @@ class profile::dynadir(
       }
 
       -> exec { "add auto test user ${username} to ${crm_user_group} group":
-        command => "powershell -Command Add-ADGroupMember -Identity 'CN=${crm_user_group},CN=Users,${dc_string}' -Members ${username}",
+        command => "Add-ADGroupMember -Identity 'CN=${crm_user_group},CN=Users,${dc_string}' -Members ${username}",
+        provider => powershell,
         path    => $::path
       }
     }

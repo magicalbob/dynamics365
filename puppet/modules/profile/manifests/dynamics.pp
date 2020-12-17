@@ -98,17 +98,19 @@ class profile::dynamics(
   }
 
   -> exec { 'add DYNAPP to local performance log users':
-    command => "powershell -Command \"Add-LocalGroupMember -Group 'Performance Log Users' -Member ${dynamics_user}\"",
-    returns => [0, 1],
-    timeout => 0,
-    path    => $::path
+    command  => "Add-LocalGroupMember -Group 'Performance Log Users' -Member ${dynamics_user}",
+    provider => powershell,
+    returns  => [0, 1],
+    timeout  => 0,
+    path     => $::path
   }
 
   -> exec { 'add DYNASYNC to local performance log users':
-    command => "powershell -Command \"Add-LocalGroupMember -Group 'Performance Log Users' -Member DYNAsync\"",
-    returns => [0, 1],
-    timeout => 0,
-    path    => $::path
+    command  => "Add-LocalGroupMember -Group 'Performance Log Users' -Member DYNAsync",
+    provider => powershell,
+    returns  => [0, 1],
+    timeout  => 0,
+    path     => $::path
   }
 
   -> exec { 'install dynamics':

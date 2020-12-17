@@ -60,9 +60,10 @@ class profile::allinone(
 
   if $facts['identity']['user'] != $new_user {
     exec { 'Install Windows Features':
-      command => 'powershell -Command Install-WindowsFeature -Name AD-Domain-Services,DNS,Web-Server,Web-Filtering,Web-Basic-Auth,Web-Windows-Auth,Web-Mgmt-Console,Web-Mgmt-Compat,Windows-Identity-Foundation -IncludeManagementTools -Restart',
-      timeout => 0,
-      path    => $::path
+      command  => 'Install-WindowsFeature -Name AD-Domain-Services,DNS,Web-Server,Web-Filtering,Web-Basic-Auth,Web-Windows-Auth,Web-Mgmt-Console,Web-Mgmt-Compat,Windows-Identity-Foundation -IncludeManagementTools -Restart',
+      provider => powershell,
+      timeout  => 0,
+      path     => $::path
     }
   
     -> file { 'Script to create new forest':
@@ -81,15 +82,17 @@ class profile::allinone(
     }
 
     -> exec { 'Wait for restart':
-      command => 'powershell -Command Start-Sleep -Seconds 180',
-      timeout => 0,
-      path    => $::path
+      command  => 'Start-Sleep -Seconds 180',
+      provider => powershell,
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { 'Post forest restart':
-      command => 'powershell -Command Restart-Computer -Force',
-      timeout => 0,
-      path    => $::path
+      command  => 'Restart-Computer -Force',
+      provider => powershell,
+      timeout  => 0,
+      path     => $::path
     }
   } else {
     $service_users=lookup('service_users')
@@ -101,31 +104,35 @@ class profile::allinone(
     $dynamics_sandbox = $service_users['sandbox']['username']
 
     exec { 'Wait before New AD Organizational Unit':
-      command => 'powershell -Command Start-Sleep -Seconds 120',
-      unless  => "powershell -Command Get-ADOrganizationalUnit '${ou_string}'",
-      timeout => 0,
-      path    => $::path
+      command  => 'Start-Sleep -Seconds 120',
+      provider => powershell,
+      unless   => "Get-ADOrganizationalUnit '${ou_string}'",
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { 'Add New AD Organizational Unit':
-      command => "powershell -Command New-ADOrganizationalUnit -Name 'ServiceAccounts' -ProtectedFromAccidentalDeletion:\$true",
-      unless  => "powershell -Command Get-ADOrganizationalUnit '${ou_string}'",
-      timeout => 0,
-      path    => $::path
+      command  => "New-ADOrganizationalUnit -Name 'ServiceAccounts' -ProtectedFromAccidentalDeletion:\$true",
+      provider => powershell,
+      unless   => "Get-ADOrganizationalUnit '${ou_string}'",
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { "Add ${crm_system_group} Group":
-      command => "powershell -Command New-ADGroup -Name \"${crm_system_group}\" -GroupScope Global",
-      returns => [0, 1],
-      timeout => 0,
-      path    => $::path
+      command  => "New-ADGroup -Name \"${crm_system_group}\" -GroupScope Global",
+      provider => powershell,
+      returns  => [0, 1],
+      timeout  => 0,
+      path     => $::path
     }
 
     -> exec { "Add ${crm_user_group} Group":
-      command => "powershell -Command New-ADGroup -Name \"${crm_user_group}\" -GroupScope Global",
-      returns => [0, 1],
-      timeout => 0,
-      path    => $::path
+      command  => "New-ADGroup -Name \"${crm_user_group}\" -GroupScope Global",
+      provider => powershell,
+      returns  => [0, 1],
+      timeout  => 0,
+      path     => $::path
     }
 
     -> file { 'Script to add service user':
@@ -173,8 +180,9 @@ class profile::allinone(
 
       if ($crmgroup == true) {
         exec { "add crm system user ${username} to ${crm_system_group} group":
-          command => "powershell -Command Add-ADGroupMember -Identity 'CN=${crm_system_group},CN=Users,${dc_string}' -Members ${username}",
-          path    => $::path
+          command  => "Add-ADGroupMember -Identity 'CN=${crm_system_group},CN=Users,${dc_string}' -Members ${username}",
+          provider => powershell,
+          path     => $::path
         }
       }
     }
@@ -198,8 +206,9 @@ class profile::allinone(
       }
 
       -> exec { "add auto test user ${username} to ${crm_user_group} group":
-        command => "powershell -Command Add-ADGroupMember -Identity 'CN=${crm_user_group},CN=Users,${dc_string}' -Members ${username}",
-        path    => $::path
+        command  => "Add-ADGroupMember -Identity 'CN=${crm_user_group},CN=Users,${dc_string}' -Members ${username}",
+        provider => powershell,
+        path     => $::path
       }
     }
 
@@ -311,17 +320,19 @@ class profile::allinone(
     }
   
     -> exec { 'add DYNAPP to local performance log users':
-      command => "powershell -Command \"Add-LocalGroupMember -Group 'Performance Log Users' -Member ${dynamics_user}\"",
-      returns => [0, 1],
-      timeout => 0,
-      path    => $::path
+      command  => "Add-LocalGroupMember -Group 'Performance Log Users' -Member ${dynamics_user}",
+      provider => powershell,
+      returns  => [0, 1],
+      timeout  => 0,
+      path     => $::path
     }
   
     -> exec { 'add DYNASYNC to local performance log users':
-      command => "powershell -Command \"Add-LocalGroupMember -Group 'Performance Log Users' -Member DYNAsync\"",
-      returns => [0, 1],
-      timeout => 0,
-      path    => $::path
+      command  => "Add-LocalGroupMember -Group 'Performance Log Users' -Member DYNAsync",
+      provider => powershell,
+      returns  => [0, 1],
+      timeout  => 0,
+      path     => $::path
     }
   
     -> exec { 'install dynamics':
