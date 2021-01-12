@@ -3,7 +3,7 @@ resource "virtualbox_vm" "allinone" {
   name   = join("", ["allinone", formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())])
   image  = "./dynamics-windows-virtualbox.box"
   cpus   = 4
-  memory = "8192 mib"
+  memory = "16384 mib"
 
   network_adapter {
     type           = "bridged"
