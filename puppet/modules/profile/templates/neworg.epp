@@ -6,10 +6,31 @@ param($OrgName)
 add-pssnapin microsoft.crm.powershell
 
 # tell crm to create the org
+Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Create New Org"
 new-crmorganization -DisplayName "$OrgName" -SqlServer "<%= $sql_server %>" -SrsUrl "http://<%= $sql_server %>/reportserver/"
 
-# wait for a minute to give crm time to create the org
-sleep 60
+# wait until get-crmorganization is available
+do {
+  $cmdname=(Get-Command -Name Get-CrmOrganization 2>$null).Name
+
+  if ("$cmdname" -eq "") {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Get-CrmOrganization not available yet"
+    sleep 10
+  } else { 
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Get-CrmOrganization is now available"
+  }
+} Until ("$cmdname" -ne "")
+
+# wait until org is pending
+do {
+  $org_state=(Get-CrmOrganization -Name "$OrgName").State
+  if ("$org_state" -ne "Pending") {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "New Org is not Pending yet ($org_state)"
+    sleep 10
+  } else {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "New Org is now Pending"
+  }
+} until (("$org_state" -eq "Pending") -Or ("$org_state" -eq "Failed"))
 
 # crm creates the org as pending, enable it
 enable-crmorganization -Name "$OrgName"

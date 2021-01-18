@@ -30,8 +30,10 @@ class vcredist (
   }
 
   -> exec { 'execute script to install vcredist':
-    command => 'powershell -File c:/scripts/vcredist.ps1',
-    timeout => 0,
-    path    => $::path
+    command   => 'powershell -File c:/scripts/vcredist.ps1',
+    timeout   => 0,
+    tries     => 5,
+    try_sleep => 2,
+    path      => $::path
   }
 }
