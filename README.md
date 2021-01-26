@@ -116,3 +116,32 @@ The `terraform-allinone-aws` dir contains the terraform to stand up a t2.medium 
 The `terraform-aws` dir contains the terraform for the full stack. Script `build-terraform.aws.sh` stands up the AMI & builds successfully.
 
 From the `terraform-aws` directory you can use `../scripts/xfree.dynamics.sh` to connect to the machines by name. To test the dynamics installation use this script to RDP to `dynadir` and from there use RDP to get to (say) `dynadm` to test out Dynamics 365.
+
+Azure
+=====
+
+The `build-packer-azure.sh` builds an Azure image.
+
+You'll need these environment variables setting with your credentials for packer:
+
+```
+	export AZURE_CLIENT_ID=....
+	export AZURE_CLIENT_SECRET=....
+	export AZURE_TENANT_ID=....
+	export AZURE_SUBSCRIPTION_ID=....
+```
+
+And these for terraform:
+
+```
+	export TF_VAR_client_id=${AZURE_CLIENT_ID}
+	export TF_VAR_client_secret=${AZURE_CLIENT_SECRET}
+	export TF_VAR_tenant_id=${AZURE_TENANT_ID}
+	export TF_VAR_subscription_id=${AZURE_SUBSCRIPTION_ID}
+```
+
+I had to import my azure resource group into terraform:
+
+```
+	terraform import azurerm_resource_group.allinonerg /subscriptions/{your-subscription-id}/resourceGroups/NetworkWatcherRG
+```

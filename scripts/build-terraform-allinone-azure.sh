@@ -83,6 +83,9 @@ echo ${prefix} > ../prefix
 
 ../scripts/clear-flags-for-build-allinone.sh ${prefix} ${redis_ip} ${redis_pass}
 
+export TF_VAR_admin_user=$(grep admin_username ../puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
+export TF_VAR_admin_pass=$(grep admin_password ../puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
+
 LOCK=$(date +"%s")
 resp=1
 while [ $resp -ne 0 ]

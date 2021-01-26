@@ -30,7 +30,7 @@ if (!(Test-Path c:\users\<%= $admin_user %>.<%= $ad_domain %><%= $ad_suffix %>\.
     echo "      - account/account.yaml" >> .\hiera.yaml
     echo "      - common.yaml" >> .\hiera.yaml
 
-    $admincred=New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName="$computername\administrator"; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
+    $admincred=New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName="$computername\<%= $admin_user %>"; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
 
     Invoke-Command -ScriptBlock { Restart-Computer -Force } -Credential $admincred -ComputerName (hostname)
   }

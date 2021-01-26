@@ -67,7 +67,7 @@ if (($machine_name -Like "ALLINONE*") -Or ($machine_name -Like "<%= $ad_domain %
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "User is already in administrators"
   } else {
     Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Adding user to administrators"
-    $admincred=New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName="$computername\administrator"; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
+    $admincred=New-Object pscredential -ArgumentList ([pscustomobject]@{ UserName="$computername\<%= $admin_user %>"; Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0] })
 
     Invoke-Command -ScriptBlock { Add-LocalGroupMember -Group administrators -Member <%= $ad_domain %><%= $ad_suffix %>\<%= $admin_user %> } -Credential $admincred -ComputerName (hostname)
 

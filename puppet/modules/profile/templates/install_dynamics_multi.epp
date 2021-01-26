@@ -92,7 +92,7 @@ else
 
   # Install dynamics
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics start dynamics install"
-  $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\server\amd64\SetupServer.exe <%= $quiet_install %> /config <%= $config_file %> /L c:\Windows\Temp\dynamics_setup.log')
+  $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\server\amd64\SetupServer.exe <%= $quiet_install %> /InstallAlways /config <%= $config_file %> /L c:\Windows\Temp\dynamics_setup.log')
   Invoke-Expression $install_command
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics completed dynamics install"
 
