@@ -145,3 +145,5 @@ I had to import my azure resource group into terraform:
 ```
 	terraform import azurerm_resource_group.allinonerg /subscriptions/{your-subscription-id}/resourceGroups/NetworkWatcherRG
 ```
+
+The script `./scripts/build-terraform-allinone-azure.sh` stands up the allinone instance in azure. Multi-tier has not been attempted in azure yet.
