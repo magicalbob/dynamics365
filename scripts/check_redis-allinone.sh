@@ -20,8 +20,8 @@ allinone_ssrs_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ssrs
 
 echo "          Prefix is: ${prefix}."
 echo "           AD IP is: ${ad_ip}."
-echo "   Allinone Started: ${allinone_started}."
 echo "          SQL Ready: ${sql_ready}."
+echo "   Allinone Started: ${allinone_started}."
 echo "     Allinone Ready: ${allinone_ready}."
 echo " Allinone 365 Start: ${allinone_365_start}."
 echo "  Allinone 365 Done: ${allinone_365_done}."

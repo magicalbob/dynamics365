@@ -25,6 +25,7 @@ display_lock_msg=1
 display_msg1=1
 display_msg2=1
 display_msg3=1
+display_msg4=1
 display_msg5=1
 display_msg6=1
 display_msg7=1
@@ -62,21 +63,39 @@ do
     MSG1="SQL Server Not Installed"
   fi
   
-  allinone_ready=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ready\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
-  if [[ ${allinone_ready} =~ 'true' ]]
+  allinone_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
+  if [[ ${allinone_started} =~ 'true' ]]
   then
-    MSG3="Dynamics AllInOne Installed at $(date)"
+    MSG3="Dynamics AllInOne Started Install at $(date)"
     if [ ${display_msg3} -eq 1 ]
     then
       echo ${MSG3}
       display_msg3=0
     fi
   else
-    MSG3="Dynamics AllInOne Not Installed"
+    MSG3="Dynamics AllInOne Not Started"
+  fi
+  if [[ ${allinone_started} =~ 'error' ]]
+  then
+    MSG3="Dynamics AllInOne Install Failed at $(date)"
+    failed='true'
+  fi
+
+  allinone_ready=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_allinone_ready\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
+  if [[ ${allinone_ready} =~ 'true' ]]
+  then
+    MSG4="Dynamics AllInOne Installed at $(date)"
+    if [ ${display_msg4} -eq 1 ]
+    then
+      echo ${MSG4}
+      display_msg4=0
+    fi
+  else
+    MSG4="Dynamics AllInOne Not Installed"
   fi
   if [[ ${allinone_ready} =~ 'error' ]]
   then
-    MSG3="Dynamics AllInOne Failed at $(date)"
+    MSG4="Dynamics AllInOne Failed at $(date)"
     failed='true'
   fi
 
@@ -140,6 +159,7 @@ do
     echo ${MSG1}
     echo ${MSG2}
     echo ${MSG3}
+    echo ${MSG4}
     echo ${MSG5}
     echo ${MSG6}
     echo ${MSG7}
@@ -153,6 +173,7 @@ do
     echo ${MSG1}
     echo ${MSG2}
     echo ${MSG3}
+    echo ${MSG4}
     echo ${MSG5}
     echo ${MSG6}
     echo ${MSG7}

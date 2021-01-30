@@ -301,6 +301,7 @@ class profile::allinone(
       content => epp('profile/install_dynamics_multi.epp',{
         config_file   => 'c:\scripts\dynamics_config.xml',
         sql_server    => $sql_server,
+        admin_user    => $admin_user,
         admin_pass    => $admin_pass,
         fe_server     => $fe_server,
         be_server     => $be_server,

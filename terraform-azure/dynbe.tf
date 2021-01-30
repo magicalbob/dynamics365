@@ -1,29 +1,29 @@
-resource "azurerm_public_ip" "allinone" {
-  name                    = "allinone"
+resource "azurerm_public_ip" "dynbe" {
+  name                    = "dynbe"
   location                = azurerm_resource_group.allinonerg.location
   resource_group_name     = azurerm_resource_group.allinonerg.name
   allocation_method       = "Dynamic"
   idle_timeout_in_minutes = 30
 }
 
-resource "azurerm_network_interface" "allinonenetwork" {
-  name                = "allinone-nic"
+resource "azurerm_network_interface" "dynbenetwork" {
+  name                = "dynbe-nic"
   location            = azurerm_resource_group.allinonerg.location
   resource_group_name = azurerm_resource_group.allinonerg.name
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.allinonesubnet.id
+    subnet_id                     = azurerm_subnet.dynamicssubnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.allinone.id
+    public_ip_address_id          = azurerm_public_ip.dynbe.id
   }
 }
 
-resource "azurerm_windows_virtual_machine" "allinone" {
-  name                  = "allinone"
+resource "azurerm_windows_virtual_machine" "dynbe" {
+  name                  = "dynbe"
   location              = azurerm_resource_group.allinonerg.location
   resource_group_name   = azurerm_resource_group.allinonerg.name
-  network_interface_ids = [azurerm_network_interface.allinonenetwork.id]
+  network_interface_ids = [azurerm_network_interface.dynbenetwork.id]
   size                  = "Standard_B2s"
 
   os_disk {
@@ -31,7 +31,7 @@ resource "azurerm_windows_virtual_machine" "allinone" {
     storage_account_type = "Standard_LRS"
   }
 
-  computer_name  = "allinone"
+  computer_name  = "dynbe"
   admin_username = "${var.admin_user}"
   admin_password = "${var.admin_pass}"
 

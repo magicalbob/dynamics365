@@ -2,7 +2,7 @@
 
 # make sure we are in right dir
 BASE_PATH=$(dirname $0)
-cd ${BASE_PATH}/../terraform-allinone-azure
+cd ${BASE_PATH}/../terraform-azure
 
 if [ "$OS" == "Windows_NT" ]
 then
@@ -61,7 +61,7 @@ prefix=$(date +%s)
 echo ${prefix} > prefix
 echo ${prefix} > ../prefix
 
-../scripts/clear-flags-for-build-allinone.sh ${prefix} ${redis_ip} ${redis_pass}
+../scripts/clear-flags-for-build.sh ${prefix} ${redis_ip} ${redis_pass}
 
 export TF_VAR_admin_user=$(grep admin_username ../puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 export TF_VAR_admin_pass=$(grep admin_password ../puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
