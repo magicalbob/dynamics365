@@ -61,7 +61,8 @@ class Puppet::Provider::DscBaseProvider
           downcased_result = recursively_downcase(canonicalized)
           downcased_resource = recursively_downcase(r)
           downcased_result.each do |key, value|
-            canonicalized[key] = r[key] unless downcased_resource[key] == value
+            is_same = value.is_a?(Enumerable) ? downcased_resource[key].sort == value.sort : downcased_resource[key] == value
+            canonicalized[key] = r[key] unless is_same
             canonicalized.delete(key) unless downcased_resource.keys.include?(key)
           end
           # Cache the actually canonicalized resource separately
@@ -143,7 +144,8 @@ class Puppet::Provider::DscBaseProvider
         # HACK: If the DSC Resource is ensurable but doesn't report a default value
         # for ensure, we assume it to be `Present` - this is the most common pattern.
         should_ensure = should[:dsc_ensure].nil? ? 'Present' : should[:dsc_ensure].to_s
-        is_ensure = is[:dsc_ensure].to_s
+        # HACK: Sometimes dsc_ensure is removed???? If it's gone, pretend it's absent??
+        is_ensure = is[:dsc_ensure].nil? ? 'Absent' : is[:dsc_ensure].to_s
 
         if is_ensure == 'Absent' && should_ensure == 'Present'
           context.creating(name) do
@@ -357,15 +359,47 @@ class Puppet::Provider::DscBaseProvider
     # Because Puppet adds all of the modules to the LOAD_PATH we can be sure that the appropriate module lives here during an apply;
     # PROBLEM: This currently uses the downcased name, we need to capture the module name in the metadata I think.
     # During a Puppet agent run, the code lives in the cache so we can use the file expansion to discover the correct folder.
-    root_module_path = $LOAD_PATH.select { |path| path.match?(%r{#{resource[:dscmeta_module_name].downcase}/lib}) }.first
+    # This handles setting the vendored_modules_path to include the puppet module name; we now add the puppet module name into the
+    # path to allow multiple modules to with shared dsc_resources to be installed side by side
+    # The old vendored_modules_path: puppet_x/dsc_resources
+    # The new vendored_modules_path: puppet_x/<module_name>/dsc_resources
+    root_module_path = $LOAD_PATH.select { |path| path.match?(%r{#{puppetize_name(resource[:dscmeta_module_name])}/lib}) }.first
     resource[:vendored_modules_path] = if root_module_path.nil?
-                                         File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + 'puppet_x/dsc_resources') # rubocop:disable Style/StringConcatenation
+                                         File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + "puppet_x/#{puppetize_name(resource[:dscmeta_module_name])}/dsc_resources") # rubocop:disable Style/StringConcatenation
                                        else
-                                         File.expand_path("#{root_module_path}/puppet_x/dsc_resources")
+                                         File.expand_path("#{root_module_path}/puppet_x/#{puppetize_name(resource[:dscmeta_module_name])}/dsc_resources")
                                        end
+
+    # Check for the old vendored_modules_path second - if there is a mix of modules with the old and new pathing,
+    # checking for this first will always work and so the more specific search will never run.
+    unless File.exist? resource[:vendored_modules_path]
+      resource[:vendored_modules_path] = if root_module_path.nil?
+                                           File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + 'puppet_x/dsc_resources') # rubocop:disable Style/StringConcatenation
+                                         else
+                                           File.expand_path("#{root_module_path}/puppet_x/dsc_resources")
+                                         end
+    end
+
+    # A warning is thrown if the something went wrong and the file was not created
+    raise "Unable to find expected vendored DSC Resource #{resource[:vendored_modules_path]}" unless File.exist? resource[:vendored_modules_path]
+
     resource[:attributes] = nil
+
     context.debug("should_to_resource: #{resource.inspect}")
     resource
+  end
+
+  # Return a String containing a puppetized name. A puppetized name is a string that only
+  # includes lowercase letters, digits, underscores and cannot start with a digit.
+  #
+  # @return [String] with a puppeized module name
+  def puppetize_name(name)
+    # Puppet module names must be lower case
+    name = name.downcase
+    # Puppet module names must only include lowercase letters, digits and underscores
+    name = name.gsub(/[^a-z0-9_]/, '_')
+    # Puppet module names must not start with a number so if it does, append the letter 'a' to the name. Eg: '7zip' becomes 'a7zip'
+    name = name.match?(/^\d/) ? "a#{name}" : name # rubocop:disable Lint/UselessAssignment
   end
 
   # Return a UUID with the dashes turned into underscores to enable the specifying of guaranteed-unique
@@ -504,8 +538,8 @@ class Puppet::Provider::DscBaseProvider
         'user' => property_hash[:value]['user'],
         'password' => escape_quotes(property_hash[:value]['password'].unwrap)
       }
-      instantiated_variables.merge!(variable_name => credential_hash)
       credentials_block << format_pscredential(variable_name, credential_hash)
+      instantiated_variables.merge!(variable_name => credential_hash)
     end
     credentials_block.join("\n")
     credentials_block == [] ? '' : credentials_block
@@ -532,6 +566,7 @@ class Puppet::Provider::DscBaseProvider
     cim_instances_block = []
     resource[:parameters].each do |_property_name, property_hash|
       next unless property_hash[:mof_is_embedded]
+      next if property_hash[:mof_type] == 'PSCredential' # Credentials are handled separately
 
       # strip dsc_ from the beginning of the property name declaration
       # name = property_name.to_s.gsub(/^dsc_/, '').to_sym
@@ -542,10 +577,10 @@ class Puppet::Provider::DscBaseProvider
       unless cim_instance_hashes.count.zero?
         cim_instance_hashes.each do |instance|
           variable_name = random_variable_name
-          instantiated_variables.merge!(variable_name => instance)
           class_name = instance['cim_instance_type']
           properties = instance.reject { |k, _v| k == 'cim_instance_type' }
           cim_instances_block << format_ciminstance(variable_name, class_name, properties)
+          instantiated_variables.merge!(variable_name => instance)
         end
       end
       # We have to handle arrays of CIM instances slightly differently
@@ -553,14 +588,14 @@ class Puppet::Provider::DscBaseProvider
         class_name = property_hash[:mof_type].gsub('[]', '')
         property_hash[:value].each do |hash|
           variable_name = random_variable_name
-          instantiated_variables.merge!(variable_name => hash)
           cim_instances_block << format_ciminstance(variable_name, class_name, hash)
+          instantiated_variables.merge!(variable_name => hash)
         end
       else
         variable_name = random_variable_name
-        instantiated_variables.merge!(variable_name => property_hash[:value])
         class_name = property_hash[:mof_type]
         cim_instances_block << format_ciminstance(variable_name, class_name, property_hash[:value])
+        instantiated_variables.merge!(variable_name => property_hash[:value])
       end
     end
     cim_instances_block == [] ? '' : cim_instances_block.join("\n")
@@ -643,7 +678,7 @@ class Puppet::Provider::DscBaseProvider
     params_block = params_block.gsub("'[DateTime]", "[DateTime]'")
     # HACK: Handle intentionally empty arrays - need to strongly type them because
     # CIM instances do not do a consistent job of casting an empty array properly.
-    empty_array_parameters = resource[:parameters].select { |_k, v| v[:value].empty? }
+    empty_array_parameters = resource[:parameters].select { |_k, v| v[:value].is_a?(Array) && v[:value].empty? }
     empty_array_parameters.each do |name, properties|
       param_block_name = name.to_s.gsub(/^dsc_/, '')
       params_block = params_block.gsub("#{param_block_name} = @()", "#{param_block_name} = [#{properties[:mof_type]}]@()")

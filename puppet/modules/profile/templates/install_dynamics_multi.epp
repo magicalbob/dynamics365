@@ -1,5 +1,6 @@
 <%- | String $config_file,
       String $sql_server,
+      String $admin_user,
       String $admin_pass,
       String $fe_server,
       String $be_server,
@@ -50,6 +51,26 @@ else
       Start-Sleep 60
     }
   } Until ($sqlReady -eq "true")
+
+#  $sqlHost=[System.Net.Dns]::GetHostAddresses('<%= $sql_server %>').IPAddressToString+' <%= $sql_server %>'
+#  Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value $sqlHost
+  $joinCred=New-Object pscredential -ArgumentList ([pscustomobject]@{
+    UserName='<%= $admin_user %>'
+    Password=(ConvertTo-SecureString -String '<%= $admin_pass %>' -AsPlainText -Force)[0]
+  })
+  do {
+    $sess = New-PSSession -Computername <%= $sql_server %> -Credential $joinCred
+    try {
+      $status = (Invoke-Command -Session $sess -ScriptBlock { Get-Service -Name SQLSERVERAGENT }).Status
+    }
+    catch {
+      $status = $null
+    }
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics waiting for SQL server"
+    if ($status -ne "Running") {
+      Start-Sleep 60
+    }
+  } while ($status -ne "Running")
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics SQL server is available"
 <% } %>
 
