@@ -11,9 +11,9 @@ class Puppet::Provider::DscBaseProvider
   # - query results
   # - logon failures
   def initialize
-    @@cached_canonicalized_resource = []
-    @@cached_query_results = []
-    @@logon_failures = []
+    @@cached_canonicalized_resource ||= []
+    @@cached_query_results ||= []
+    @@logon_failures ||= []
     super
   end
 
@@ -44,7 +44,10 @@ class Puppet::Provider::DscBaseProvider
   def canonicalize(context, resources)
     canonicalized_resources = []
     resources.collect do |r|
-      if fetch_cached_hashes(@@cached_canonicalized_resource, [r]).empty?
+      # During RSAPI refresh runs mandatory parameters are stripped and not available;
+      # Instead of checking again and failing, search the cache for a namevar match.
+      namevarized_r = r.select { |k, _v| namevar_attributes(context).include?(k) }
+      if fetch_cached_hashes(@@cached_canonicalized_resource, [namevarized_r]).empty?
         canonicalized = invoke_get_method(context, r)
         if canonicalized.nil?
           canonicalized = r.dup
@@ -61,7 +64,7 @@ class Puppet::Provider::DscBaseProvider
           downcased_result = recursively_downcase(canonicalized)
           downcased_resource = recursively_downcase(r)
           downcased_result.each do |key, value|
-            is_same = value.is_a?(Enumerable) ? downcased_resource[key].sort == value.sort : downcased_resource[key] == value
+            is_same = value.is_a?(Enumerable) & !downcased_resource[key].nil? ? downcased_resource[key].sort == value.sort : downcased_resource[key] == value
             canonicalized[key] = r[key] unless is_same
             canonicalized.delete(key) unless downcased_resource.keys.include?(key)
           end
@@ -158,6 +161,12 @@ class Puppet::Provider::DscBaseProvider
         elsif is_ensure == 'Present' && should_ensure == 'Absent'
           context.deleting(name) do
             delete(context, name_hash)
+          end
+        else
+          # In this case we are not sure if the resource is being created/updated/removed
+          # as with ensure "latest" or a specific version number, so default to update.
+          context.updating(name) do
+            update(context, name_hash, should)
           end
         end
       else
