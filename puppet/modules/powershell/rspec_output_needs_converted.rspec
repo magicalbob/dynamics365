@@ -1,0 +1,37 @@
+/Users/paula/.rbenv/versions/2.3.1/bin/ruby -I/Users/paula/workspace/puppetlabs-powershell/.bundle/gems/ruby/2.3.0/gems/rspec-core-3.6.0/lib:/Users/paula/workspace/puppetlabs-powershell/.bundle/gems/ruby/2.3.0/gems/rspec-support-3.6.0/lib /Users/paula/workspace/puppetlabs-powershell/.bundle/gems/ruby/2.3.0/gems/rspec-core-3.6.0/exe/rspec spec/acceptance --color
+[00;34mBeaker::Hypervisor, found some vmpooler boxes to create
+[00;00m[00;34mRequesting VM set from vmpooler (with authentication token)
+[00;00m[00;34mUsing available host 'y3vde14k7yrhdti.delivery.puppetlabs.net' (windows2008r2-64-1)
+[00;00m[00;34mUsing available host 'ln65ambrj48xc7a.delivery.puppetlabs.net' (redhat7-64-1)
+[00;00m[00;34mSpent 0.31 seconds grabbing VMs
+[00;00m[00;34mTagging vmpooler VMs
+[00;00m[00;34mSpent 0.62 seconds tagging VMs
+[00;00m[00;34mDisabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on y3vde14k7yrhdti.delivery.puppetlabs.net
+[00;00m[00;34mDisabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on ln65ambrj48xc7a.delivery.puppetlabs.net
+[00;00m[00;34m
+* Installing PE on a generic set of hosts
+[00;00m
+An error occurred while loading ./spec/acceptance/exec_powershell_spec.rb.
+[31mFailure/Error: [0mrun_puppet_install_helper[0m
+[31mRuntimeError:[0m
+[31m  attempting installation on ln65ambrj48xc7a.delivery.puppetlabs.net, http://enterprise.delivery.puppetlabs.net/2017.2/ci-ready/puppet-enterprise-2017.2.2-rc0-9-ge3556b6-el-7-x86_64.tar does not exist[0m
+[31m  [0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:249:in `fetch_pe_on_unix'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:293:in `block in fetch_pe'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:284:in `each'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:284:in `fetch_pe'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:525:in `generic_install'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:393:in `do_install'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:1075:in `block in install_pe_on'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-3.18.0/lib/beaker/dsl/structure.rb:234:in `confine_block'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-pe-1.17.0/lib/beaker-pe/install/pe_utils.rb:1058:in `install_pe_on'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-puppet_install_helper-0.7.1/lib/beaker/puppet_install_helper.rb:49:in `run_puppet_install_helper_on'[0m
+[36m# ./.bundle/gems/ruby/2.3.0/gems/beaker-puppet_install_helper-0.7.1/lib/beaker/puppet_install_helper.rb:6:in `run_puppet_install_helper'[0m
+[36m# ./spec/spec_helper_acceptance.rb:8:in `<top (required)>'[0m
+[36m# ./spec/acceptance/exec_powershell_spec.rb:1:in `require'[0m
+[36m# ./spec/acceptance/exec_powershell_spec.rb:1:in `<top (required)>'[0m
+No examples found.
+
+Finished in 0.00032 seconds (files took 31.65 seconds to load)
+[31m0 examples, 0 failures, 1 error occurred outside of examples[0m
+
