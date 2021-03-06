@@ -7,6 +7,8 @@ pipeline {
     cron(env.BRANCH_NAME == 'develop' ? 'H H(1-5) * * 1-7' : '')
   }
 
+  options { disableConcurrentBuilds() }
+
   stages {
 
     stage('packer build dynamics vagrant box') {
