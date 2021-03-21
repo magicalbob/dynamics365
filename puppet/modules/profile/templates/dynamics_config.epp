@@ -114,13 +114,8 @@
   <ServiceAccountPassword><%= $monitor_pass %></ServiceAccountPassword>
 </MonitoringServiceAccount>
 
-<% if $fe_server == '' { %>
 <SQM optin="true"/>
 <muoptin optin="true"/>
-<% } else { %>
-<SQM optin="false"/>
-<muoptin optin="false"/>
-<% } %>
 
  <Email>
   <IncomingExchangeServer name=""/>
