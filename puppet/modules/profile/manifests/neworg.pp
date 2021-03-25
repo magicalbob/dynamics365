@@ -32,21 +32,8 @@ class profile::neworg(
     })
   }
 
-  -> file { 'script to check state of new org':
-    ensure  => present,
-    path    => 'c:\scripts\checkorg.ps1',
-    content => epp('profile/checkorg.epp',{
-    })
-  }
-
   -> exec { 'run neworg script':
     command => "powershell -file c:\\scripts\\neworg.ps1 ${default_org}",
-    path    => $::path,
-    timeout => 0
-  }
-
-  -> exec { 'set flag for neworg state':
-    command => "powershell -file c:\\scripts\\checkorg.ps1 ${default_org}",
     path    => $::path,
     timeout => 0
   }

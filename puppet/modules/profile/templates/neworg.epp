@@ -5,6 +5,9 @@ param($OrgName)
 # enable crm powershell commands
 add-pssnapin microsoft.crm.powershell
 
+# set redis neworg_ready to false
+/scripts/flagmanset.ps1 -name neworg_ready -value false
+
 # tell crm to create the org
 Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "Create New Org"
 new-crmorganization -DisplayName "$OrgName" -SqlServer "<%= $sql_server %>" -SrsUrl "http://<%= $sql_server %>/reportserver/"
@@ -33,4 +36,15 @@ do {
 } until (("$org_state" -eq "Pending") -Or ("$org_state" -eq "Failed"))
 
 # crm creates the org as pending, enable it
-enable-crmorganization -Name "$OrgName"
+do {
+  # check whether org exists & is enabled
+  $orgEnabled=(get-crmorganization $OrgName).State
+
+  if ( "$orgEnabled" -eq "Enabled" ) {
+    /scripts/flagmanset.ps1 -name neworg_ready -value true
+  } else {
+    /scripts/flagmanset.ps1 -name neworg_ready -value $orgEnabled
+    enable-crmorganization -Name "$OrgName"
+    sleep 10
+  }
+} until ("$orgEnabled" -eq "Enabled")
