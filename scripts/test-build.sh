@@ -74,52 +74,6 @@ do
     done
   fi
 
-#  ad_machines=$($(dirname $0)/check_winrm.py)
-#  if [[ "$ad_machines" =~ "DYNADIR," ]]
-#  then
-#    if [ ${display_msgAD} -eq 1 ]
-#    then
-#      echo "Domain set up on DYNADIR at $(date)"
-#      display_msgAD=0
-#    fi
-#  fi
-#
-#  if [[ "$ad_machines" =~ "DYNSQL," ]]
-#  then
-#    if [ ${display_msgSQL} -eq 1 ]
-#    then
-#      echo "Domain joined by DYNSQL at $(date)"
-#      display_msgSQL=0
-#    fi
-#  fi
-#
-#  if [[ "$ad_machines" =~ "DYNFE," ]]
-#  then
-#    if [ ${display_msgFE} -eq 1 ]
-#    then
-#      echo "Domain joined by DYNFE at $(date)"
-#      display_msgFE=0
-#    fi
-#  fi
-#
-#  if [[ "$ad_machines" =~ "DYNBE," ]]
-#  then
-#    if [ ${display_msgBE} -eq 1 ]
-#    then
-#      echo "Domain joined by DYNBE at $(date)"
-#      display_msgBE=0
-#    fi
-#  fi
-#
-#  if [[ "$ad_machines" =~ "DYNADM," ]]
-#  then
-#    if [ ${display_msgADM} -eq 1 ]
-#    then
-#      echo "Domain joined by DYNADM at $(date)"
-#      display_msgADM=0
-#    fi
-#  fi
-
   sql_ready=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_sql_ready\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1)
   if [[ ${sql_ready} =~ 'true' ]]
   then
