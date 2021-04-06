@@ -22,6 +22,11 @@ prefix=$(cat prefix)
 failed='false'
 
 display_lock_msg=1
+display_msg0adir=1
+display_msg0sql=1
+display_msg0fe=1
+display_msg0be=1
+display_msg0adm=1
 display_msg1=1
 display_msg2=1
 display_msg3=1
@@ -47,6 +52,46 @@ do
   fe_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   be_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
   adm_started=$(echo -e "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_started\r\n" | nc -w1 ${redis_ip} 6379 2>/dev/null|tail -n1|tr -d "[:cntrl:]")
+  if [ "${ad_started}" == "true" ]
+  then
+    if [ ${display_msg0adir} -eq 1 ]
+    then
+      echo "Active Directory started at $(date)"
+      display_msg0adir=0
+    fi
+  fi
+  if [ "${sql_started}" == "true" ]
+  then
+    if [ ${display_msg0sql} -eq 1 ]
+    then
+      echo "SQL Server started at $(date)"
+      display_msg0sql=0
+    fi
+  fi
+  if [ "${fe_started}" == "true" ]
+  then
+    if [ ${display_msg0fe} -eq 1 ]
+    then
+      echo "Dynamics Front End started at $(date)"
+      display_msg0fe=0
+    fi
+  fi
+  if [ "${be_started}" == "true" ]
+  then
+    if [ ${display_msg0be} -eq 1 ]
+    then
+      echo "Dynamics Back End started at $(date)"
+      display_msg0be=0
+    fi
+  fi
+  if [ "${adm_started}" == "true" ]
+  then
+    if [ ${display_msg0adm} -eq 1 ]
+    then
+      echo "Dynamics Adm started at $(date)"
+      display_msg0adm=0
+    fi
+  fi
   if [ "${ad_started}" == "true" ] && \
      [ "${sql_started}" == "true" ] && \
      [ "${fe_started}" == "true" ] && \
