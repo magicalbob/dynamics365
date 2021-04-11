@@ -120,6 +120,40 @@ class base(
     data  => 0,
   }
 
+  -> registry::value { 'disable lock workstation':
+    key   => 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',
+    value => 'DisableAutomaticRestartSignOn',
+    type  => 'dword',
+    data  => 0,
+  }
+
+  -> registry::value { 'set auto admin logon':
+    key => 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon',
+    value => 'AutoAdminLogon',
+    type => dword,
+    data => 1
+  }
+
+  -> registry::value { 'set default user to log in as':
+    key => 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon',
+    value => 'DefaultUsername',
+    type => string,
+    data => "${admin_user}"
+  }
+
+  -> registry::value { 'set default password to log in word':
+    key => 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon',
+    value => 'DefaultPassword',
+    type => string,
+    data => "${admin_pass}"
+  }
+
+  -> exec { 'stop screen timeout':
+    command => 'powercfg -change -monitor-timeout-ac 0',
+    provider=> powershell,
+    path    => $::path
+  }
+
   -> exec { 'run ieesc script':
     command => 'cmd.exe /c powershell -File c:\scripts\disable_ieesc.ps1',
     path    => $::path,
