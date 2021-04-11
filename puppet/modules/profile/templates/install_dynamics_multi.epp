@@ -112,6 +112,13 @@ else
   Invoke-Expression $install_command
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics completed dynamics install"
 
+  if (Test-Path 'c:\program files\microsoft dynamics crm') {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics Dynamics 2016 Installed"
+  } else {
+    Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics Dynamics 2016 Failed Install"
+    Restart-Computer -Force
+  }
+
   # set flag to say dynamics installed on this machine now
   c:\scripts\flagmanset.ps1 -Name "$(hostname)_ready" -Value "true"
 
@@ -132,6 +139,8 @@ else
   c:\windows\system32\cmd.exe /r start /b /wait c:\scripts\<%= $kb4046795_exe %> CRM.PATCH.ARGS="<%= $quiet_install %> /norestart"
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics completed dynamics 365 upgrade"
   c:\scripts\flagmanset.ps1 -Name "$(hostname)_365_done" -Value "true"
+
+  Sleep 60
 
   # Restart computer post-install
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_dynamics restart computer"
