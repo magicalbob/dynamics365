@@ -12,7 +12,7 @@ Import-Module SQLPS -DisableNameChecking
 
 $instanceName = "<%= $sql_server %>"
 
-$loginName = "<%= $ad_domain %><%= $ad_suffix %>\<%= $smin_user %>"
+$loginName = "<%= $ad_domain %><%= $ad_suffix %>\<%= $admin_user %>"
 $dbUserName = $Username
 $sqlPassword = (ConvertTo-SecureString $Password -AsPlainText -Force)
 $roleName = "db_owner"
