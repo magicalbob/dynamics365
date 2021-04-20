@@ -36,4 +36,6 @@ do
   fi
 
   echo -n .
+
+  sleep 10
 done
