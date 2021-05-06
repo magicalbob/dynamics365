@@ -12,6 +12,9 @@ Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Inf
 # Check if SQL Server already installed
 if (where.exe sqlcmd) {
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "SQL Server already installed"
+
+  # Set flag to show that sql server ready on this node
+  c:\scripts\flagmanset.ps1 -Name sql_ready -Value "true"
 }
 else
 {
@@ -44,9 +47,6 @@ else
   $install_command=('c:\windows\system32\cmd.exe /r start /b /wait '+$install_drive+':\setup.exe <%= $quiet_install %> /IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=install /FEATURES=SQLEngine,FullText,RS /INSTANCENAME=MSSQLSERVER /SQLSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /SQLSVCPASSWORD="<%= $sql_svc_pass %>" /SQLSYSADMINACCOUNTS="<%= $ad_domain %><%= $ad_suffix %>\<%= $admin_user %>" /AGTSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /AGTSVCPASSWORD="<%= $sql_svc_pass %>" /AGTSVCSTARTUPTYPE=Automatic /ASSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /ASSVCPASSWORD="<%= $sql_svc_pass %>" /RSSVCACCOUNT="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /RSSVCPASSWORD="<%= $sql_svc_pass %>" /ISSVCAccount="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /ISSVCPASSWORD="<%= $sql_svc_pass %>" /ASSYSADMINACCOUNTS="<%= $ad_domain %><%= $ad_suffix %>\SQLSvc" /NPENABLED=1 /SAPWD=<%= $sql_svc_pass %>')
   Invoke-Expression $install_command > c:\windows\temp\sql_install.log
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server sql server install complete $LastExitCode"
-
-  # Set flag to show that sql server ready on this node
-  c:\scripts\flagmanset.ps1 -Name sql_ready -Value "true"
 
   # Install sql server management tools
   Write-EventLog -LogName "Application" -Source "Puppet" -EventID 1 -EntryType Information -Message "install_sql_server start sql server management tools install"
