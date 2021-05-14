@@ -115,7 +115,7 @@ The `terraform-allinone-aws` dir contains the terraform to stand up a t2.medium 
 
 The `terraform-aws` dir contains the terraform for the full stack. Script `build-terraform.aws.sh` stands up the AMI & builds successfully.
 
-From the `terraform-aws` directory you can use `../scripts/xfree.dynamics.sh` to connect to the machines by name. To test the dynamics installation use this script to RDP to `dynadir` and from there use RDP to get to (say) `dynadm` to test out Dynamics 365.
+From the `terraform-aws` or `terraform-allinone-aws` directory you can use `../scripts/xfree.dynamics.sh` to connect to the machines by name. To test the dynamics installation use this script to RDP to `dynadir` and from there use RDP to get to (say) `dynadm` to test out Dynamics 365. Just run `../scripts/xfree.dynamics.sh allinone` to test out the allinone variant.
 
 Azure
 =====
