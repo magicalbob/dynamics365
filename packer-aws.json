@@ -20,10 +20,12 @@
           "windows_password_timeout": "60m",
           "source_ami_filter": {
               "filters": {
-                "name": "Windows_Server-2019-English-Full-Base-2021.02.10"
+                  "virtualization-type": "hvm",
+                  "name": "Windows_Server-2019-English-Full-Base-*",
+                  "root-device-type": "ebs"
               },
-              "owners": ["801119661308"],
-              "most_recent": true
+              "owners": ["amazon"],
+              "most_recent": "true"
           },
           "launch_block_device_mappings": [
             {
