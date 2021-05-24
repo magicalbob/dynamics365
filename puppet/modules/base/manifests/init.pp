@@ -43,7 +43,7 @@ class base(
   $ou_string=join(['OU=ServiceAccounts,',$dc_string])
 )
 {
-  $choco_packages = [ '7zip', 'powershell-core', 'netcat' ]
+  $choco_packages = [ '7zip', 'powershell-core', 'netcat', 'sql2008r2.nativeclient' ]
 
   user { $admin_user:
     ensure => 'present',
