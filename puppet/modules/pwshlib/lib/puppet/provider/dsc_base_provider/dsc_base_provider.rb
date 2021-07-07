@@ -13,8 +13,13 @@ class Puppet::Provider::DscBaseProvider
   def initialize
     @@cached_canonicalized_resource ||= []
     @@cached_query_results ||= []
+    @@cached_test_results ||= []
     @@logon_failures ||= []
     super
+  end
+
+  def cached_test_results
+    @@cached_test_results
   end
 
   # Look through a cache to retrieve the hashes specified, if they have been cached.
@@ -47,31 +52,50 @@ class Puppet::Provider::DscBaseProvider
       # During RSAPI refresh runs mandatory parameters are stripped and not available;
       # Instead of checking again and failing, search the cache for a namevar match.
       namevarized_r = r.select { |k, _v| namevar_attributes(context).include?(k) }
-      if fetch_cached_hashes(@@cached_canonicalized_resource, [namevarized_r]).empty?
-        canonicalized = invoke_get_method(context, r)
-        if canonicalized.nil?
+      cached_result = fetch_cached_hashes(@@cached_canonicalized_resource, [namevarized_r]).first
+      if cached_result.nil?
+        # If the resource is meant to be absent, skip canonicalization and rely on the manifest
+        # value; there's no reason to compare system state to desired state for casing if the
+        # resource is being removed.
+        if r[:dsc_ensure] == 'absent'
           canonicalized = r.dup
           @@cached_canonicalized_resource << r.dup
         else
-          parameters = r.select { |name, _properties| parameter_attributes(context).include?(name) }
-          canonicalized.merge!(parameters)
-          canonicalized[:name] = r[:name]
-          if r[:dsc_psdscrunascredential].nil?
-            canonicalized.delete(:dsc_psdscrunascredential)
+          canonicalized = invoke_get_method(context, r)
+          # If the resource could not be found or was returned as absent, skip case munging and
+          # treat the manifest values as canonical since the resource is being created.
+          # rubocop:disable Metrics/BlockNesting
+          if canonicalized.nil? || canonicalized[:dsc_ensure] == 'absent'
+            canonicalized = r.dup
+            @@cached_canonicalized_resource << r.dup
           else
-            canonicalized[:dsc_psdscrunascredential] = r[:dsc_psdscrunascredential]
+            parameters = r.select { |name, _properties| parameter_attributes(context).include?(name) }
+            canonicalized.merge!(parameters)
+            canonicalized[:name] = r[:name]
+            if r[:dsc_psdscrunascredential].nil?
+              canonicalized.delete(:dsc_psdscrunascredential)
+            else
+              canonicalized[:dsc_psdscrunascredential] = r[:dsc_psdscrunascredential]
+            end
+            downcased_result = recursively_downcase(canonicalized)
+            downcased_resource = recursively_downcase(r)
+            downcased_result.each do |key, value|
+              # Canonicalize to the manifest value unless the downcased strings match and the attribute is not an enum:
+              # - When the values don't match at all, the manifest value is desired;
+              # - When the values match case insensitively but the attribute is an enum, prefer the casing of the manifest enum.
+              # - When the values match case insensitively and the attribute is not an enum, prefer the casing from invoke_get_method
+              canonicalized[key] = r[key] unless same?(value, downcased_resource[key]) && !enum_attributes(context).include?(key)
+              canonicalized.delete(key) unless downcased_resource.keys.include?(key)
+            end
+            # Cache the actually canonicalized resource separately
+            @@cached_canonicalized_resource << canonicalized.dup
           end
-          downcased_result = recursively_downcase(canonicalized)
-          downcased_resource = recursively_downcase(r)
-          downcased_result.each do |key, value|
-            is_same = value.is_a?(Enumerable) & !downcased_resource[key].nil? ? downcased_resource[key].sort == value.sort : downcased_resource[key] == value
-            canonicalized[key] = r[key] unless is_same
-            canonicalized.delete(key) unless downcased_resource.keys.include?(key)
-          end
-          # Cache the actually canonicalized resource separately
-          @@cached_canonicalized_resource << canonicalized.dup
+          # rubocop:enable Metrics/BlockNesting
         end
       else
+        # The resource has already been canonicalized for the set values and is not being canonicalized for get
+        # In this case, we do *not* want to process anything, just return the resource. We only call canonicalize
+        # so we can get case insensitive but preserving values for _setting_ state.
         canonicalized = r
       end
       canonicalized_resources << canonicalized
@@ -92,7 +116,7 @@ class Puppet::Provider::DscBaseProvider
     # Relies on the get_simple_filter feature to pass the namevars
     # as an array containing the namevar parameters as a hash.
     # This hash is functionally the same as a should hash as
-    # passed to the should_to_resource method.
+    # passed to the invocable_resource method.
     context.debug('Collecting data from the DSC Resource')
 
     # If the resource has already been queried, do not bother querying for it again
@@ -123,27 +147,14 @@ class Puppet::Provider::DscBaseProvider
   # @param changes [Hash] the hash of whose key is the name_hash and value is the is and should hashes
   def set(context, changes)
     changes.each do |name, change|
-      is = change.key?(:is) ? change[:is] : (get(context, [name]) || []).find { |r| r[:name] == name }
-      context.type.check_schema(is) unless change.key?(:is)
-
+      is = change[:is]
       should = change[:should]
 
-      name_hash = if context.type.namevars.length > 1
-                    # pass a name_hash containing the values of all namevars
-                    name_hash = {}
-                    context.type.namevars.each do |namevar|
-                      name_hash[namevar] = change[:should][namevar]
-                    end
-                    name_hash
-                  else
-                    name
-                  end
+      # If should is an array instead of a hash and only has one entry, use that.
+      should = should.first if should.is_a?(Array) && should.length == 1
 
       # for compatibility sake, we use dsc_ensure instead of ensure, so context.type.ensurable? does not work
       if context.type.attributes.key?(:dsc_ensure)
-        is = create_absent(:name, name) if is.nil?
-        should = create_absent(:name, name) if should.nil?
-
         # HACK: If the DSC Resource is ensurable but doesn't report a default value
         # for ensure, we assume it to be `Present` - this is the most common pattern.
         should_ensure = should[:dsc_ensure].nil? ? 'Present' : should[:dsc_ensure].to_s
@@ -152,45 +163,29 @@ class Puppet::Provider::DscBaseProvider
 
         if is_ensure == 'Absent' && should_ensure == 'Present'
           context.creating(name) do
-            create(context, name_hash, should)
+            create(context, name, should)
           end
         elsif is_ensure == 'Present' && should_ensure == 'Present'
           context.updating(name) do
-            update(context, name_hash, should)
+            update(context, name, should)
           end
         elsif is_ensure == 'Present' && should_ensure == 'Absent'
           context.deleting(name) do
-            delete(context, name_hash)
+            delete(context, name)
           end
         else
           # In this case we are not sure if the resource is being created/updated/removed
           # as with ensure "latest" or a specific version number, so default to update.
           context.updating(name) do
-            update(context, name_hash, should)
+            update(context, name, should)
           end
         end
       else
         context.updating(name) do
-          update(context, name_hash, should)
+          update(context, name, should)
         end
       end
     end
-  end
-
-  # Creates a hash with the name / name_hash and sets dsc_ensure to absent for comparison
-  # purposes; this handles cases where the resource isn't found on the node.
-  #
-  # @param namevar [Object] the name of the variable being used for the resource name
-  # @param title [Hash] the hash of namevar properties and their values
-  # @return [Hash] returns a hash representing the absent state of the resource
-  def create_absent(namevar, title)
-    result = if title.is_a? Hash
-               title.dup
-             else
-               { namevar => title }
-             end
-    result[:dsc_ensure] = 'Absent'
-    result
   end
 
   # Attempts to set an instance of the DSC resource, invoking the `Set` method and thinly wrapping
@@ -229,32 +224,40 @@ class Puppet::Provider::DscBaseProvider
     invoke_set_method(context, name, name.merge({ dsc_ensure: 'Absent' }))
   end
 
-  # Invokes the `Get` method, passing the name_hash as the properties to use with `Invoke-DscResource`
-  # The PowerShell script returns a JSON representation of the DSC Resource's CIM Instance munged as
-  # best it can be for Ruby. Once that JSON is parsed into a hash this method further munges it to
-  # fit the expected property definitions. Finally, it returns the object for the Resource API to
-  # compare against and determine what future actions, if any, are needed.
+  # Invokes the given DSC method, passing the name_hash as the properties to use with `Invoke-DscResource`
+  # The PowerShell script returns a JSON hash with key-value pairs indicating the result of the given command.
+  # The hash is left untouched for the most part with any further parsing handled by the methods that call upon it.
   #
   # @param context [Object] the Puppet runtime context to operate in and send feedback to
   # @param name_hash [Hash] the hash of namevars to be passed as properties to `Invoke-DscResource`
-  # @return [Hash] returns a hash representing the DSC resource munged to the representation the Puppet Type expects
-  def invoke_get_method(context, name_hash)
-    context.debug("retrieving #{name_hash.inspect}")
-
+  # @param props [Hash] the properties to be passed to `Invoke-DscResource`
+  # @param method [String] the method to be specified
+  # @return [Hash] returns a hash representing the result of the DSC resource call
+  def invoke_dsc_resource(context, name_hash, props, method)
     # Do not bother running if the logon credentials won't work
-    return name_hash if !name_hash[:dsc_psdscrunascredential].nil? && logon_failed_already?(name_hash[:dsc_psdscrunascredential])
-
-    query_props = name_hash.select { |k, v| mandatory_get_attributes(context).include?(k) || (k == :dsc_psdscrunascredential && !v.nil?) }
-    resource = should_to_resource(query_props, context, 'get')
+    if !name_hash[:dsc_psdscrunascredential].nil? && logon_failed_already?(name_hash[:dsc_psdscrunascredential])
+      context.err('Logon credentials are invalid')
+      return nil
+    end
+    resource = invocable_resource(props, context, method)
     script_content = ps_script_content(resource)
     context.debug("Script:\n #{redact_secrets(script_content)}")
-    output = ps_manager.execute(script_content)[:stdout]
-    context.err('Nothing returned') if output.nil?
+    output = ps_manager.execute(remove_secret_identifiers(script_content))[:stdout]
+    if output.nil?
+      context.err('Nothing returned')
+      return nil
+    end
 
-    data = JSON.parse(output)
+    begin
+      data = JSON.parse(output)
+    rescue => e
+      context.err(e)
+      return nil
+    end
     context.debug("raw data received: #{data.inspect}")
+
     error = data['errormessage']
-    unless error.nil?
+    unless error.nil? || error.empty?
       # NB: We should have a way to stop processing this resource *now* without blowing up the whole Puppet run
       # Raising an error stops processing but blows things up while context.err alerts but continues to process
       if error =~ /Logon failure: the user has not been granted the requested logon type at this computer/
@@ -269,10 +272,47 @@ class Puppet::Provider::DscBaseProvider
       # Either way, something went wrong and we didn't get back a good result, so return nil
       return nil
     end
+    data
+  end
+
+  # Determine if the DSC Resource is in the desired state, invoking the `Test` method unless it's
+  #   already been run for the resource, in which case reuse the result instead of checking for each
+  #   property. This behavior is only triggered if the validation_mode is set to resource; by default
+  #   it is set to property and uses the default property comparison logic in Puppet::Property.
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @param name [String] the name of the resource being tested
+  # @param is_hash [Hash] the current state of the resource on the system
+  # @param should_hash [Hash] the desired state of the resource per the manifest
+  # @return [Boolean, Void] returns true/false if the resource is/isn't in the desired state and
+  #   the validation mode is set to resource, otherwise nil.
+  def insync?(context, name, _property_name, _is_hash, should_hash)
+    return nil if should_hash[:validation_mode] != 'resource'
+
+    prior_result = fetch_cached_hashes(@@cached_test_results, [name])
+    prior_result.empty? ? invoke_test_method(context, name, should_hash) : prior_result.first[:in_desired_state]
+  end
+
+  # Invokes the `Get` method, passing the name_hash as the properties to use with `Invoke-DscResource`
+  # The PowerShell script returns a JSON representation of the DSC Resource's CIM Instance munged as
+  # best it can be for Ruby. Once that JSON is parsed into a hash this method further munges it to
+  # fit the expected property definitions. Finally, it returns the object for the Resource API to
+  # compare against and determine what future actions, if any, are needed.
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @param name_hash [Hash] the hash of namevars to be passed as properties to `Invoke-DscResource`
+  # @return [Hash] returns a hash representing the DSC resource munged to the representation the Puppet Type expects
+  def invoke_get_method(context, name_hash)
+    context.debug("retrieving #{name_hash.inspect}")
+
+    query_props = name_hash.select { |k, v| mandatory_get_attributes(context).include?(k) || (k == :dsc_psdscrunascredential && !v.nil?) }
+    data = invoke_dsc_resource(context, name_hash, query_props, 'get')
+    return nil if data.nil?
+
     # DSC gives back information we don't care about; filter down to only
     # those properties exposed in the type definition.
     valid_attributes = context.type.attributes.keys.collect(&:to_s)
-    parameters = context.type.attributes.select { |_name, properties| [properties[:behaviour]].collect.include?(:parameter) }.keys.collect(&:to_s)
+    parameters = parameter_attributes(context).collect(&:to_s)
     data.select! { |key, _value| valid_attributes.include?("dsc_#{key.downcase}") }
     data.reject! { |key, _value| parameters.include?("dsc_#{key.downcase}") }
     # Canonicalize the results to match the type definition representation;
@@ -281,14 +321,26 @@ class Puppet::Provider::DscBaseProvider
     data.keys.each do |key| # rubocop:disable Style/HashEachMethods
       type_key = "dsc_#{key.downcase}".to_sym
       data[type_key] = data.delete(key)
-      camelcase_hash_keys!(data[type_key]) if data[type_key].is_a?(Enumerable)
+
+      # Special handling for CIM Instances
+      if data[type_key].is_a?(Enumerable)
+        downcase_hash_keys!(data[type_key])
+        munge_cim_instances!(data[type_key])
+      end
+
       # Convert DateTime back to appropriate type
-      data[type_key] = Puppet::Pops::Time::Timestamp.parse(data[type_key]) if context.type.attributes[type_key][:mof_type] =~ /DateTime/i
+      if context.type.attributes[type_key][:mof_type] =~ /DateTime/i && !data[type_key].nil?
+        data[type_key] = begin
+          Puppet::Pops::Time::Timestamp.parse(data[type_key]) if context.type.attributes[type_key][:mof_type] =~ /DateTime/i && !data[type_key].nil?
+        rescue ArgumentError, TypeError => e
+          # Catch any failures in the parse, output them to the context and then return nil
+          context.err("Value returned for DateTime (#{data[type_key].inspect}) failed to parse: #{e}")
+          nil
+        end
+      end
       # PowerShell does not distinguish between a return of empty array/string
       #  and null but Puppet does; revert to those values if specified.
-      if data[type_key].nil? && query_props.keys.include?(type_key) && query_props[type_key].is_a?(Array)
-        data[type_key] = query_props[type_key].empty? ? query_props[type_key] : []
-      end
+      data[type_key] = [] if data[type_key].nil? && query_props.keys.include?(type_key) && query_props[type_key].is_a?(Array)
     end
     # If a resource is found, it's present, so refill this Puppet-only key
     data.merge!({ name: name_hash[:name] })
@@ -301,6 +353,9 @@ class Puppet::Provider::DscBaseProvider
     # We want to throw away all of the empty keys if and only if the manifest
     # declaration is for an absent resource and the resource is actually absent
     data.reject! { |_k, v| v.nil? } if data[:dsc_ensure] == 'Absent' && name_hash[:dsc_ensure] == 'Absent' && !name_hash_has_nil_keys
+
+    # Sort the return for order-insensitive nested enumerable comparison:
+    data = recursively_sort(data)
 
     # Cache the query to prevent a second lookup
     @@cached_query_results << data.dup if fetch_cached_hashes(@@cached_query_results, [data]).empty?
@@ -318,24 +373,36 @@ class Puppet::Provider::DscBaseProvider
   def invoke_set_method(context, name, should)
     context.debug("Invoking Set Method for '#{name}' with #{should.inspect}")
 
-    # Do not bother running if the logon credentials won't work
-    return nil if !should[:dsc_psdscrunascredential].nil? && logon_failed_already?(should[:dsc_psdscrunascredential])
-
     apply_props = should.select { |k, _v| k.to_s =~ /^dsc_/ }
-    resource = should_to_resource(apply_props, context, 'set')
-    script_content = ps_script_content(resource)
-    context.debug("Script:\n #{redact_secrets(script_content)}")
+    invoke_dsc_resource(context, should, apply_props, 'set')
 
-    output = ps_manager.execute(script_content)[:stdout]
-    context.err('Nothing returned') if output.nil?
-
-    data = JSON.parse(output)
-    context.debug(data)
-
-    context.err(data['errormessage']) unless data['errormessage'].empty?
     # TODO: Implement this functionality for notifying a DSC reboot?
     # notify_reboot_pending if data['rebootrequired'] == true
-    data
+  end
+
+  # Invokes the `Test` method, passing the should hash as the properties to use with `Invoke-DscResource`
+  #   The PowerShell script returns a JSON hash with key-value pairs indicating whether or not the resource
+  #   is in the desired state and any error messages captured.
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @param should [Hash] the desired state represented definition to pass as properties to Invoke-DscResource
+  # @return [Boolean] returns true if the resource is in the desired state, otherwise false
+  def invoke_test_method(context, name, should)
+    context.debug("Relying on DSC Test method for validating if '#{name}' is in the desired state")
+    context.debug("Invoking Test Method for '#{name}' with #{should.inspect}")
+
+    test_props = should.select { |k, _v| k.to_s =~ /^dsc_/ }
+    data = invoke_dsc_resource(context, name, test_props, 'test')
+    # Something went wrong with Invoke-DscResource; fall back on property state comparisons
+    return nil if data.nil?
+
+    in_desired_state = data['indesiredstate']
+    @@cached_test_results << name.merge({ in_desired_state: in_desired_state })
+
+    return in_desired_state if in_desired_state
+
+    change_log = 'DSC reported that this resource is not in the desired state; treating all properties as out-of-sync'
+    [in_desired_state, change_log]
   end
 
   # Converts a Puppet resource hash into a hash with the information needed to call Invoke-DscResource,
@@ -346,10 +413,10 @@ class Puppet::Provider::DscBaseProvider
   # @param context [Object] the Puppet runtime context to operate in and send feedback to
   # @param dsc_invoke_method [String] the method to pass to Invoke-DscResource: get, set, or test
   # @return [Hash] a hash with the information needed to run `Invoke-DscResource`
-  def should_to_resource(should, context, dsc_invoke_method)
+  def invocable_resource(should, context, dsc_invoke_method)
     resource = {}
     resource[:parameters] = {}
-    %i[name dscmeta_resource_friendly_name dscmeta_resource_name dscmeta_module_name dscmeta_module_version].each do |k|
+    %i[name dscmeta_resource_friendly_name dscmeta_resource_name dscmeta_resource_implementation dscmeta_module_name dscmeta_module_version].each do |k|
       resource[k] = context.type.definition[k]
     end
     should.each do |k, v|
@@ -365,6 +432,15 @@ class Puppet::Provider::DscBaseProvider
     end
     resource[:dsc_invoke_method] = dsc_invoke_method
 
+    resource[:vendored_modules_path] = vendored_modules_path(resource[:dscmeta_module_name])
+
+    resource[:attributes] = nil
+
+    context.debug("invocable_resource: #{resource.inspect}")
+    resource
+  end
+
+  def vendored_modules_path(module_name)
     # Because Puppet adds all of the modules to the LOAD_PATH we can be sure that the appropriate module lives here during an apply;
     # PROBLEM: This currently uses the downcased name, we need to capture the module name in the metadata I think.
     # During a Puppet agent run, the code lives in the cache so we can use the file expansion to discover the correct folder.
@@ -372,36 +448,41 @@ class Puppet::Provider::DscBaseProvider
     # path to allow multiple modules to with shared dsc_resources to be installed side by side
     # The old vendored_modules_path: puppet_x/dsc_resources
     # The new vendored_modules_path: puppet_x/<module_name>/dsc_resources
-    root_module_path = $LOAD_PATH.select { |path| path.match?(%r{#{puppetize_name(resource[:dscmeta_module_name])}/lib}) }.first
-    resource[:vendored_modules_path] = if root_module_path.nil?
-                                         File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + "puppet_x/#{puppetize_name(resource[:dscmeta_module_name])}/dsc_resources") # rubocop:disable Style/StringConcatenation
-                                       else
-                                         File.expand_path("#{root_module_path}/puppet_x/#{puppetize_name(resource[:dscmeta_module_name])}/dsc_resources")
-                                       end
+    root_module_path = load_path.select { |path| path.match?(%r{#{puppetize_name(module_name)}/lib}) }.first
+    vendored_path = if root_module_path.nil?
+                      File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + "puppet_x/#{puppetize_name(module_name)}/dsc_resources") # rubocop:disable Style/StringConcatenation
+                    else
+                      File.expand_path("#{root_module_path}/puppet_x/#{puppetize_name(module_name)}/dsc_resources")
+                    end
 
     # Check for the old vendored_modules_path second - if there is a mix of modules with the old and new pathing,
     # checking for this first will always work and so the more specific search will never run.
-    unless File.exist? resource[:vendored_modules_path]
-      resource[:vendored_modules_path] = if root_module_path.nil?
-                                           File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + 'puppet_x/dsc_resources') # rubocop:disable Style/StringConcatenation
-                                         else
-                                           File.expand_path("#{root_module_path}/puppet_x/dsc_resources")
-                                         end
+    unless File.exist? vendored_path
+      vendored_path = if root_module_path.nil?
+                        File.expand_path(Pathname.new(__FILE__).dirname + '../../../' + 'puppet_x/dsc_resources') # rubocop:disable Style/StringConcatenation
+                      else
+                        File.expand_path("#{root_module_path}/puppet_x/dsc_resources")
+                      end
     end
 
     # A warning is thrown if the something went wrong and the file was not created
-    raise "Unable to find expected vendored DSC Resource #{resource[:vendored_modules_path]}" unless File.exist? resource[:vendored_modules_path]
+    raise "Unable to find expected vendored DSC Resource #{vendored_path}" unless File.exist? vendored_path
 
-    resource[:attributes] = nil
+    vendored_path
+  end
 
-    context.debug("should_to_resource: #{resource.inspect}")
-    resource
+  # Return the ruby $LOAD_PATH variable; this method exists to make testing vendored
+  # resource path discovery easier.
+  #
+  # @return [Array] The absolute file paths to available/known ruby code paths
+  def load_path
+    $LOAD_PATH
   end
 
   # Return a String containing a puppetized name. A puppetized name is a string that only
   # includes lowercase letters, digits, underscores and cannot start with a digit.
   #
-  # @return [String] with a puppeized module name
+  # @return [String] with a puppetized module name
   def puppetize_name(name)
     # Puppet module names must be lower case
     name = name.downcase
@@ -444,20 +525,27 @@ class Puppet::Provider::DscBaseProvider
     end
   end
 
-  # Recursively transforms any enumerable, camelCasing any hash keys it finds
+  # Recursively transforms any enumerable, downcasing any hash keys it finds, changing the passed enumerable.
   #
   # @param enumerable [Enumerable] a string, array, hash, or other object to attempt to recursively downcase
-  # @return [Enumerable] returns the input object with hash keys recursively camelCased
-  def camelcase_hash_keys!(enumerable)
+  def downcase_hash_keys!(enumerable)
     if enumerable.is_a?(Hash)
       enumerable.keys.each do |key| # rubocop:disable Style/HashEachMethods
-        name = key.dup
-        name[0] = name[0].downcase
+        name = key.dup.downcase
         enumerable[name] = enumerable.delete(key)
-        camelcase_hash_keys!(enumerable[name]) if enumerable[name].is_a?(Enumerable)
+        downcase_hash_keys!(enumerable[name]) if enumerable[name].is_a?(Enumerable)
       end
     else
-      enumerable.each { |item| camelcase_hash_keys!(item) if item.is_a?(Enumerable) }
+      enumerable.each { |item| downcase_hash_keys!(item) if item.is_a?(Enumerable) }
+    end
+  end
+
+  def munge_cim_instances!(enumerable)
+    if enumerable.is_a?(Hash)
+      # Delete the cim_instance_type key from a top-level CIM Instance **only**
+      _ = enumerable.delete('cim_instance_type')
+    else
+      enumerable.each { |item| munge_cim_instances!(item) if item.is_a?(Enumerable) }
     end
   end
 
@@ -480,6 +568,34 @@ class Puppet::Provider::DscBaseProvider
     else
       object
     end
+  end
+
+  # Recursively sorts any object to enable order-insensitive comparisons
+  #
+  # @param object [Object] an array, hash, or other object to attempt to recursively downcase
+  # @return [Object] returns the input object recursively downcased
+  def recursively_sort(object)
+    case object
+    when Array
+      object.map { |item| recursively_sort(item) }.sort_by(&:to_s)
+    when Hash
+      transformed = {}
+      object.sort.to_h.each do |key, value|
+        transformed[key] = recursively_sort(value)
+      end
+      transformed
+    else
+      object
+    end
+  end
+
+  # Check equality, sort if necessary
+  #
+  # @param value1 [object] a string, array, hash, or other object to sort and compare to value2
+  # @param value2 [object] a string, array, hash, or other object to sort and compare to value1
+  # @return [bool] returns equality
+  def same?(value1, value2)
+    recursively_sort(value2) == recursively_sort(value1)
   end
 
   # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as mandatory for get operations
@@ -514,6 +630,16 @@ class Puppet::Provider::DscBaseProvider
     context.type.attributes.select { |_name, properties| properties[:behaviour] == :parameter }.keys
   end
 
+  # Parses the DSC resource type definition to retrieve the names of any attributes which are specified as enums
+  # Note that for complex types, especially those that have nested CIM instances, this will return for any data
+  # type which *includes* an Enum, not just for simple `Enum[]` or `Optional[Enum[]]` data types.
+  #
+  # @param context [Object] the Puppet runtime context to operate in and send feedback to
+  # @return [Array] returns an array of attribute names as symbols which are enums
+  def enum_attributes(context)
+    context.type.attributes.select { |_name, properties| properties[:type].match(/Enum\[/) }.keys
+  end
+
   # Look through a fully formatted string, replacing all instances where a value matches the formatted properties
   # of an instantiated variable with references to the variable instead. This allows us to pass complex and nested
   # CIM instances to the Invoke-DscResource parameter hash without constructing them *in* the hash.
@@ -529,7 +655,28 @@ class Puppet::Provider::DscBaseProvider
     modified_string
   end
 
-  # Parses a resource definition (as from `should_to_resource`) for any properties which are PowerShell
+  # Parses a resource definition (as from `invocable_resource`) and, if the resource is implemented
+  # as a PowerShell class, ensures the System environment variable for PSModulePath is munged to
+  # include the vendored PowerShell modules. Due to a bug in PSDesiredStateConfiguration, class-based
+  # DSC Resources cannot be called via Invoke-DscResource by path, only by module name, *and* the
+  # module must be discoverable in the system-level PSModulePath. The postscript for invocation has
+  # logic to reset the system PSModulePath as stored in the script lines returned by this method.
+  #
+  # @param resource [Hash] a hash with the information needed to run `Invoke-DscResource`
+  # @return [String] A multi-line string which sets the PSModulePath at the system level
+  def munge_psmodulepath(resource)
+    return unless resource[:dscmeta_resource_implementation] == 'Class'
+
+    vendor_path = resource[:vendored_modules_path].gsub('/', '\\')
+    <<~MUNGE_PSMODULEPATH.strip
+      $UnmungedPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath','machine')
+      $MungedPSModulePath = $env:PSModulePath + ';#{vendor_path}'
+      [System.Environment]::SetEnvironmentVariable('PSModulePath', $MungedPSModulePath, [System.EnvironmentVariableTarget]::Machine)
+      $env:PSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath','machine')
+    MUNGE_PSMODULEPATH
+  end
+
+  # Parses a resource definition (as from `invocable_resource`) for any properties which are PowerShell
   # Credentials. As these values need to be serialized into PSCredential objects, return an array of
   # PowerShell lines, each of which instantiates a variable which holds the value as a PSCredential.
   # These credential variables can then be simply assigned in the parameter hash where needed.
@@ -560,10 +707,10 @@ class Puppet::Provider::DscBaseProvider
   # @param credential_hash [Hash] the Properties which define the PSCredential Object
   # @return [String] A line of PowerShell which defines the PSCredential object and stores it to a variable
   def format_pscredential(variable_name, credential_hash)
-    "$#{variable_name} = New-PSCredential -User #{credential_hash['user']} -Password '#{credential_hash['password']}' # PuppetSensitive"
+    "$#{variable_name} = New-PSCredential -User #{credential_hash['user']} -Password '#{credential_hash['password']}#{SECRET_POSTFIX}'"
   end
 
-  # Parses a resource definition (as from `should_to_resource`) for any properties which are CIM instances
+  # Parses a resource definition (as from `invocable_resource`) for any properties which are CIM instances
   # whether at the top level or nested inside of other CIM instances, and, where they are discovered, adds
   # those objects to the instantiated_variables hash as well as returning a line of PowerShell code which
   # will create the CIM object and store it in a variable. This then allows the CIM instances to be assigned
@@ -644,7 +791,7 @@ class Puppet::Provider::DscBaseProvider
     interpolate_variables(definition)
   end
 
-  # Munge a resource definition (as from `should_to_resource`) into valid PowerShell which represents
+  # Munge a resource definition (as from `invocable_resource`) into valid PowerShell which represents
   # the `InvokeParams` hash which will be splatted to `Invoke-DscResource`, interpolating all previously
   # defined variables into the hash.
   #
@@ -658,7 +805,11 @@ class Puppet::Provider::DscBaseProvider
     }
     if resource.key?(:dscmeta_module_version)
       params[:ModuleName] = {}
-      params[:ModuleName][:ModuleName] = "#{resource[:vendored_modules_path]}/#{resource[:dscmeta_module_name]}/#{resource[:dscmeta_module_name]}.psd1"
+      params[:ModuleName][:ModuleName] = if resource[:dscmeta_resource_implementation] == 'Class'
+                                           resource[:dscmeta_module_name]
+                                         else
+                                           "#{resource[:vendored_modules_path]}/#{resource[:dscmeta_module_name]}/#{resource[:dscmeta_module_name]}.psd1"
+                                         end
       params[:ModuleName][:RequiredVersion] = resource[:dscmeta_module_version]
     else
       params[:ModuleName] = resource[:dscmeta_module_name]
@@ -700,7 +851,7 @@ class Puppet::Provider::DscBaseProvider
     params_block
   end
 
-  # Given a resource definition (as from `should_to_resource`), return a PowerShell script which has
+  # Given a resource definition (as from `invocable_resource`), return a PowerShell script which has
   # all of the appropriate function and variable definitions, which will call Invoke-DscResource, and
   # will correct munge the results for returning to Puppet as a JSON object.
   #
@@ -715,13 +866,14 @@ class Puppet::Provider::DscBaseProvider
     # The postscript defines the invocation error and result handling; expects `$InvokeParams` to be defined
     postscript    = File.new("#{template_path}/invoke_dsc_resource_postscript.ps1").read
     # The blocks define the variables to define for the postscript.
+    module_path_block = munge_psmodulepath(resource)
     credential_block = prepare_credentials(resource)
     cim_instances_block = prepare_cim_instances(resource)
     parameters_block = invoke_params(resource)
     # clean them out of the temporary cache now that they're not needed; failure to do so can goof up future executions in this run
     clear_instantiated_variables!
 
-    [functions, preamble, credential_block, cim_instances_block, parameters_block, postscript].join("\n")
+    [functions, preamble, module_path_block, credential_block, cim_instances_block, parameters_block, postscript].join("\n")
   end
 
   # Convert a Puppet/Ruby value into a PowerShell representation. Requires some slight additional
@@ -735,19 +887,18 @@ class Puppet::Provider::DscBaseProvider
   rescue RuntimeError => e
     raise unless e.message =~ /Sensitive \[value redacted\]/
 
-    string = Pwsh::Util.format_powershell_value(unwrap(value))
-    string.gsub(/#PuppetSensitive'}/, "'} # PuppetSensitive")
+    Pwsh::Util.format_powershell_value(unwrap(value))
   end
 
-  # Unwrap sensitive strings for formatting, even inside an enumerable, appending '#PuppetSensitive'
-  # to the end of the string in preparation for gsub cleanup.
+  # Unwrap sensitive strings for formatting, even inside an enumerable, appending the
+  # the secret postfix to the end of the string in preparation for gsub cleanup.
   #
   # @param value [Object] The object to unwrap sensitive data inside of
   # @return [Object] The object with any sensitive strings unwrapped and annotated
   def unwrap(value)
     case value
     when Puppet::Pops::Types::PSensitiveType::Sensitive
-      "#{value.unwrap}#PuppetSensitive"
+      "#{value.unwrap}#{SECRET_POSTFIX}"
     when Hash
       unwrapped = {}
       value.each do |k, v|
@@ -773,6 +924,47 @@ class Puppet::Provider::DscBaseProvider
     text.gsub("'", "''")
   end
 
+  # In order to avoid having to update the string that indicates when a value came from a sensitive
+  # string in multiple places, use a constant to indicate what the text of the secret identifier
+  # should be. This is used to write, identify, and redact secrets between PowerShell & Puppet.
+  SECRET_POSTFIX = '#PuppetSensitive'
+
+  # With multiple methods which need to discover secrets it is necessary to keep a single regex
+  # which can discover them. This will lazily match everything in a single-quoted string which
+  # ends with the secret postfix id and mark the actual contents of the string as the secret.
+  SECRET_DATA_REGEX = /'(?<secret>[^']+)+?#{Regexp.quote(SECRET_POSTFIX)}'/.freeze
+
+  # Strings containing sensitive data have a secrets postfix. These strings cannot be passed
+  # directly either to debug streams or to PowerShell and must be handled; this method contains
+  # the shared logic for parsing text for secrets and substituting values for them.
+  #
+  # @param text [String] the text to parse and handle for secrets
+  # @param replacement [String] the value to pass to gsub to replace secrets with
+  # @param error_message [String] the error message to raise instead of leaking secrets
+  # @return [String] the modified text
+  def handle_secrets(text, replacement, error_message)
+    # Every secret unwrapped in this module will unwrap as "'secret#{SECRET_POSTFIX}'"
+    # Currently, no known resources specify a SecureString instead of a PSCredential object.
+    return text unless text.match(/#{Regexp.quote(SECRET_POSTFIX)}/)
+
+    # In order to reduce time-to-parse, look at each line individually and *only* attempt
+    # to substitute if a naive match for the secret postfix is found on the line.
+    modified_text = text.split("\n").map do |line|
+      if line.match(/#{Regexp.quote(SECRET_POSTFIX)}/)
+        line.gsub(SECRET_DATA_REGEX, replacement)
+      else
+        line
+      end
+    end
+
+    modified_text = modified_text.join("\n")
+
+    # Something has gone wrong, error loudly
+    raise error_message if modified_text =~ /#{Regexp.quote(SECRET_POSTFIX)}/
+
+    modified_text
+  end
+
   # While Puppet is aware of Sensitive data types, the PowerShell script is not
   # and so for debugging purposes must be redacted before being sent to debug
   # output but must *not* be redacted when sent to the PowerShell code manager.
@@ -780,15 +972,17 @@ class Puppet::Provider::DscBaseProvider
   # @param text [String] the text to redact
   # @return [String] the redacted text
   def redact_secrets(text)
-    # Every secret unwrapped in this module will unwrap as "'secret' # PuppetSensitive" and, currently,
-    # no known resources specify a SecureString instead of a PSCredential object. We therefore only
-    # need to redact strings which look like password declarations.
-    modified_text = text.gsub(/(?<=-Password )'.+' # PuppetSensitive/, "'#<Sensitive [value redacted]>'")
-    if modified_text =~ /'.+' # PuppetSensitive/
-      # Something has gone wrong, error loudly?
-    else
-      modified_text
-    end
+    handle_secrets(text, "'#<Sensitive [value redacted]>'", "Unredacted sensitive data would've been leaked")
+  end
+
+  # While Puppet is aware of Sensitive data types, the PowerShell script is not
+  # and so the helper-id for sensitive data *must* be removed before sending to
+  # the PowerShell code manager.
+  #
+  # @param text [String] the text to strip of secret data identifiers
+  # @return [String] the modified text to pass to the PowerShell code manager
+  def remove_secret_identifiers(text)
+    handle_secrets(text, "'\\k<secret>'", 'Unable to properly format text for PowerShell with sensitive data')
   end
 
   # Instantiate a PowerShell manager via the ruby-pwsh library and use it to invoke PowerShell.
