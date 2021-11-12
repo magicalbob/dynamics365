@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-stdlib",
-  "version": "7.1.0",
+  "version": "8.1.0",
   "author": "puppetlabs",
   "summary": "Standard library of resources for Puppet modules.",
   "license": "Apache-2.0",
@@ -51,9 +51,9 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "8",
         "9",
-        "10"
+        "10",
+        "11"
       ]
     },
     {
@@ -93,6 +93,12 @@
         "6.1",
         "7.1"
       ]
+    },
+    {
+      "operatingsystem": "Rocky",
+      "operatingsystemrelease": [
+        "8"
+      ]
     }
   ],
   "requirements": [
@@ -102,7 +108,7 @@
     }
   ],
   "description": "Standard Library for Puppet Modules",
-  "pdk-version": "2.0.0",
+  "pdk-version": "2.2.0",
   "template-url": "https://github.com/puppetlabs/pdk-templates#main",
-  "template-ref": "heads/main-0-ge04486b"
+  "template-ref": "heads/main-0-g51828b4"
 }

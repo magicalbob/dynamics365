@@ -36,15 +36,15 @@
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "16.04",
-        "18.04"
+        "18.04",
+        "20.04"
       ]
     },
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "9",
-        "10"
+        "10",
+        "11"
       ]
     },
     {
@@ -57,22 +57,12 @@
     {
       "operatingsystem": "Windows",
       "operatingsystemrelease": [
-        "Server 2003",
-        "Server 2003 R2",
-        "Server 2008",
-        "Server 2008 R2",
-        "Server 2012",
-        "Server 2012 R2",
-        "2016",
-        "7",
-        "8"
+        "2016"
       ]
     },
     {
       "operatingsystem": "AIX",
       "operatingsystemrelease": [
-        "5.3",
-        "6.1",
         "7.1"
       ]
     },
@@ -88,7 +78,6 @@
     {
       "operatingsystem": "VirtuozzoLinux",
       "operatingsystemrelease": [
-        "6",
         "7"
       ]
     }
@@ -100,7 +89,7 @@
     }
   ],
   "name": "puppet-archive",
-  "version": "5.0.0",
+  "version": "6.0.1",
   "source": "https://github.com/voxpupuli/puppet-archive",
   "author": "Vox Pupuli",
   "license": "Apache-2.0",
@@ -111,7 +100,7 @@
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 4.18.0 < 8.0.0"
+      "version_requirement": ">= 4.18.0 < 9.0.0"
     }
   ]
 }

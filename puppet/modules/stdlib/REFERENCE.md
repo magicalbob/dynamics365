@@ -180,6 +180,9 @@ in a hash.
 * [`to_bytes`](#to_bytes): Converts the argument into bytes, for example 4 kB becomes 4096.
 * [`to_json`](#to_json): }
 * [`to_json_pretty`](#to_json_pretty): Convert data structure and output to pretty JSON
+* [`to_python`](#to_python): Convert an object into a String containing its Python representation
+* [`to_ruby`](#to_ruby): Convert an object into a String containing its Ruby representation
+* [`to_toml`](#to_toml): Convert a data structure and output to TOML.
 * [`to_yaml`](#to_yaml): }
 * [`try_get_value`](#try_get_value)
 * [`type`](#type): **DEPRECATED:** This function will cease to function on Puppet 4;
@@ -258,7 +261,7 @@ supplied key.
 * [`Stdlib::Compat::Numeric`](#stdlibcompatnumeric): Emulate the is_numeric and validate_numeric functions The regex is what's currently used in is_numeric validate_numeric also allows range che
 * [`Stdlib::Compat::String`](#stdlibcompatstring): Emulate the is_string and validate_string functions
 * [`Stdlib::Datasize`](#stdlibdatasize)
-* [`Stdlib::Email`](#stdlibemail): https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+* [`Stdlib::Email`](#stdlibemail): https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address lint:ignore:140chars
 * [`Stdlib::Ensure::File`](#stdlibensurefile)
 * [`Stdlib::Ensure::File::Directory`](#stdlibensurefiledirectory)
 * [`Stdlib::Ensure::File::File`](#stdlibensurefilefile)
@@ -3158,12 +3161,12 @@ $myhash = loadyaml('no-file.yaml', {'default' => 'val
 Type: Ruby 3.x API
 
 > **Note:** **Deprecated** from Puppet 6.0.0, this function has been replaced with a
-built-in [`max`](https://puppet.com/docs/puppet/latest/function.html#max) function.
+built-in [`lstrip`](https://puppet.com/docs/puppet/latest/function.html#lstrip) function.
 
 #### `lstrip()`
 
 > **Note:** **Deprecated** from Puppet 6.0.0, this function has been replaced with a
-built-in [`max`](https://puppet.com/docs/puppet/latest/function.html#max) function.
+built-in [`lstrip`](https://puppet.com/docs/puppet/latest/function.html#lstrip) function.
 
 Returns: `String` The stripped string
 
@@ -3174,14 +3177,14 @@ Type: Ruby 3.x API
 Requires at least one argument.
 
 > **Note:** **Deprecated** from Puppet 6.0.0, this function has been replaced with a
-built-in [`lstrip`](https://puppet.com/docs/puppet/latest/function.html#lstrip) function.
+built-in [`max`](https://puppet.com/docs/puppet/latest/function.html#max) function.
 
 #### `max()`
 
 Requires at least one argument.
 
 > **Note:** **Deprecated** from Puppet 6.0.0, this function has been replaced with a
-built-in [`lstrip`](https://puppet.com/docs/puppet/latest/function.html#lstrip) function.
+built-in [`max`](https://puppet.com/docs/puppet/latest/function.html#max) function.
 
 Returns: `Any` The highest value among those passed in
 
@@ -3294,15 +3297,15 @@ $merged_hash = merge($hash1, $hash2) # $merged_hash =  {'one' => 1, 'two' => 'do
 ['a', 'b', 'c', 'c', 'd', 'b', 'blah', 'blah'].merge | $hsh, $v | { if $v =~ String[1,1] { { $v => $hsh[$v].lest || { 0 } + 1 } } } # results in { a => 1, b => 2, c => 2, d => 1 }
 ```
 
-#### `merge(Variant[Hash, Undef, String[0,0]] *$args)`
+#### `merge(Variant[Hash[Scalar,Any], Undef, String[0,0]] *$args)`
 
 The merge function.
 
-Returns: `Hash` The merged hash
+Returns: `Hash[Scalar,Any]` The merged hash
 
 ##### `*args`
 
-Data type: `Variant[Hash, Undef, String[0,0]]`
+Data type: `Variant[Hash[Scalar,Any], Undef, String[0,0]]`
 
 Repeated Param - The hashes that are to be merged
 
@@ -4146,7 +4149,7 @@ Type: Puppet Language
 
 function to cast ensure parameter to resource specific value
 
-#### `stdlib::ensure(Variant[Boolean, Enum['present', 'absent']] $ensure, Enum['directory', 'link', 'mounted', 'service', 'file'] $resource)`
+#### `stdlib::ensure(Variant[Boolean, Enum['present', 'absent']] $ensure, Enum['directory', 'link', 'mounted', 'service', 'file', 'package'] $resource)`
 
 The stdlib::ensure function.
 
@@ -4160,7 +4163,7 @@ Data type: `Variant[Boolean, Enum['present', 'absent']]`
 
 ##### `resource`
 
-Data type: `Enum['directory', 'link', 'mounted', 'service', 'file']`
+Data type: `Enum['directory', 'link', 'mounted', 'service', 'file', 'package']`
 
 
 
@@ -4691,6 +4694,146 @@ max_nesting  => Optional[Integer[-1,default]],
 hash-map of settings passed to JSON.pretty_generate, see
 https://ruby-doc.org/stdlib-2.0.0/libdoc/json/rdoc/JSON.html#method-i-generate.
 Note that `max_nesting` doesn't take the value `false`; use `-1` instead.
+
+### <a name="to_python"></a>`to_python`
+
+Type: Ruby 4.x API
+
+Convert an object into a String containing its Python representation
+
+#### Examples
+
+##### how to output Python
+
+```puppet
+# output Python to a file
+$listen = '0.0.0.0'
+$port = 8000
+file { '/opt/acme/etc/settings.py':
+  content => inline_epp(@("SETTINGS")),
+    LISTEN = <%= $listen.to_python %>
+    PORT = <%= $mailserver.to_python %>
+    | SETTINGS
+}
+```
+
+#### `to_python(Any $object)`
+
+The to_python function.
+
+Returns: `Any`
+
+##### Examples
+
+###### how to output Python
+
+```puppet
+# output Python to a file
+$listen = '0.0.0.0'
+$port = 8000
+file { '/opt/acme/etc/settings.py':
+  content => inline_epp(@("SETTINGS")),
+    LISTEN = <%= $listen.to_python %>
+    PORT = <%= $mailserver.to_python %>
+    | SETTINGS
+}
+```
+
+##### `object`
+
+Data type: `Any`
+
+
+
+### <a name="to_ruby"></a>`to_ruby`
+
+Type: Ruby 4.x API
+
+Convert an object into a String containing its Ruby representation
+
+#### Examples
+
+##### how to output Ruby
+
+```puppet
+# output Ruby to a file
+$listen = '0.0.0.0'
+$port = 8000
+file { '/opt/acme/etc/settings.rb':
+  content => inline_epp(@("SETTINGS")),
+    LISTEN = <%= $listen.to_ruby %>
+    PORT = <%= $mailserver.to_ruby %>
+    | SETTINGS
+}
+```
+
+#### `to_ruby(Any $object)`
+
+The to_ruby function.
+
+Returns: `Any`
+
+##### Examples
+
+###### how to output Ruby
+
+```puppet
+# output Ruby to a file
+$listen = '0.0.0.0'
+$port = 8000
+file { '/opt/acme/etc/settings.rb':
+  content => inline_epp(@("SETTINGS")),
+    LISTEN = <%= $listen.to_ruby %>
+    PORT = <%= $mailserver.to_ruby %>
+    | SETTINGS
+}
+```
+
+##### `object`
+
+Data type: `Any`
+
+
+
+### <a name="to_toml"></a>`to_toml`
+
+Type: Ruby 4.x API
+
+Convert a data structure and output to TOML.
+
+#### Examples
+
+##### How to output TOML to a file
+
+```puppet
+file { '/tmp/config.toml':
+  ensure  => file,
+  content => to_toml($myhash),
+}
+```
+
+#### `to_toml(Hash $data)`
+
+The to_toml function.
+
+Returns: `String` Converted data as TOML string
+
+##### Examples
+
+###### How to output TOML to a file
+
+```puppet
+file { '/tmp/config.toml':
+  ensure  => file,
+  content => to_toml($myhash),
+}
+```
+
+##### `data`
+
+Data type: `Hash`
+
+Data structure which needs to be converted into TOML
 
 ### <a name="to_yaml"></a>`to_yaml`
 
@@ -6649,6 +6792,7 @@ Pattern[/^\d+(?i:[kmgt]b?|b)$/]
 ### <a name="stdlibemail"></a>`Stdlib::Email`
 
 https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+lint:ignore:140chars
 
 Alias of
 
