@@ -23,6 +23,7 @@ apply_job:
 
 test_build_job:
   stage: test_build
+  timeout: 3 hours
   script:
     - ./scripts/test-build.sh
 
