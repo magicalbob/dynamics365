@@ -1,0 +1,33 @@
+stages:
+  - tidy
+  - build
+  - apply
+  - test_build
+  - test_org
+
+tidy_job:
+  stage: tidy
+  script:
+    - sh ./scripts/rmvm.sh ${CI_COMMIT_BRANCH}
+
+build_job:
+  stage: build
+  script:
+    - ./scripts/build-packer.sh
+
+apply_job:
+  stage: apply
+  timeout: 3 hours
+  script:
+    - ./scripts/build-terraform.sh
+
+test_build_job:
+  stage: test_build
+  script:
+    - ./scripts/test-build.sh
+
+test_org_job:
+  stage: test_org
+  script:
+    - sh './scripts/test-org.sh'
+

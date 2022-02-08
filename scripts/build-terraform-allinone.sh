@@ -74,15 +74,7 @@ done
 chmod +x ./terraform-provider-virtualbox
 
 # Get rid of old box, in case it already exists
-rm -rvf *.box ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
-
-# Download the box image
-resp=1
-while [ $resp -ne 0 ]
-do
-  curl -fL -o ./dynamics-windows-virtualbox.box https://dev.ellisbs.co.uk/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
-  resp=$?
-done
+rm -rvf ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
 
 # Terraform initialise
 terraform init

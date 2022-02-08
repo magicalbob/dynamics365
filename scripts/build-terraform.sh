@@ -76,15 +76,8 @@ done
 chmod +x ./terraform-provider-virtualbox
 
 # Get rid of old box, in case it already exists
-rm -rvf *.box ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
-
-# Download the box image
-resp=1
-while [ $resp -ne 0 ]
-do
-  curl -fL -o ./dynamics-windows-virtualbox.box https://dev.ellisbs.co.uk/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
-  resp=$?
-done
+rm -rvf ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
+mv /tmp/dynamics-windows-virtualbox.box .
 
 # Terraform initialise
 terraform init
@@ -161,6 +154,8 @@ fi
 
 # Get primary network device
 export TF_VAR_netdev=$(VBoxManage list bridgedifs|head -n1|cut -d: -f2|sed 's/^[ ]*//g')
+export TF_VAR_branch=${CI_COMMIT_BRANCH}
+
 
 # Bring up the cluster
 terraform apply --auto-approve

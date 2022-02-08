@@ -8,7 +8,7 @@ redis_ip=$(nslookup -querytype=A ${redis_name} 2>/dev/null | grep ^Address:|tail
 redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 
 # read prefix for redis keys for this build
-prefix=$(cat prefix)
+prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
 
 while [ true ]
 do

@@ -6,7 +6,12 @@ redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 
 export admin_password=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 
-prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
+if [ -f ./prefix ]
+then
+  prefix=$(cat prefix)
+else
+  prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
+fi
 
 export ad_ip=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_ad_ip\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 

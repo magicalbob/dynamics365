@@ -1,6 +1,6 @@
 resource "virtualbox_vm" "dynadir" {
   count  = 1
-  name   = join("", ["dynadir", formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())])
+  name   = join("", ["dynadir", var.branch])
   image  = "./dynamics-windows-virtualbox.box"
   cpus   = 1
   memory = "1024 mib"

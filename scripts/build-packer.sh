@@ -41,12 +41,11 @@ packer build -force packer-vbox.json
 # Forcibly add the base box
 vagrant box add -f dynamics-windows-virtualbox.box dynamics-windows-virtualbox.box
 
-# Publish box to jenkins files
+# Check box was produced
 if [ -f dynamics-windows-virtualbox.box ]
 then
-  scp dynamics-windows-virtualbox.box xeon:/opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box
-  echo "sudo chmod a+rwx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
-  echo "sudo chown nginx:nginx /opt/ellisbs/files/boxes/${box_name}-windows-virtualbox-${BRANCH_NAME}.box" | ssh xeon
+  mv dynamics-windows-virtualbox.box /tmp
+  echo "dynamics-windows-virtualbox.box was produced."
 else
   echo "dynamics-windows-virtualbox.box was not produced. Fail!"
   exit -1
