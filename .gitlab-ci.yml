@@ -4,31 +4,66 @@ stages:
   - apply
   - test_build
   - test_org
+  - tidy_windows
+  - build_windows
+  - apply_windows
 
 tidy_job:
   stage: tidy
+  tags:
+    - linux
   script:
     - sh ./scripts/rmvm.sh ${CI_COMMIT_BRANCH}
 
 build_job:
   stage: build
+  tags:
+    - linux
   script:
     - ./scripts/build-packer.sh
 
 apply_job:
   stage: apply
+  tags:
+    - linux
   timeout: 3 hours
   script:
     - ./scripts/build-terraform.sh
 
 test_build_job:
   stage: test_build
+  tags:
+    - linux
   timeout: 3 hours
   script:
     - ./scripts/test-build.sh
 
 test_org_job:
   stage: test_org
+  tags:
+    - linux
   script:
     - sh './scripts/test-org.sh'
 
+tidy_windows_job:
+  stage: tidy_windows
+  tags: 
+    - windows
+  script:
+    - bash ./scripts/rmvm.sh ${CI_COMMIT_BRANCH}
+
+build_windows_job:
+  stage: build_windows
+  tags: 
+    - windows
+  script:
+    - bash ./scripts/build-packer.sh
+
+apply_windows_job:
+  stage: apply_windows
+  tags: 
+    - windows
+  timeout: 3 hours
+  script:
+    - bash ./scripts/build-terraform-allinone.sh
+    - bash ./scripts/test-build-allinone.sh

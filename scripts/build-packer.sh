@@ -44,7 +44,7 @@ vagrant box add -f dynamics-windows-virtualbox.box dynamics-windows-virtualbox.b
 # Check box was produced
 if [ -f dynamics-windows-virtualbox.box ]
 then
-  mv dynamics-windows-virtualbox.box /tmp
+  cp -v dynamics-windows-virtualbox.box /tmp
   echo "dynamics-windows-virtualbox.box was produced."
 else
   echo "dynamics-windows-virtualbox.box was not produced. Fail!"

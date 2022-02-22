@@ -17,7 +17,7 @@ redis_pass=$(grep redis_pass puppet/hieradata/common.yaml |cut -d: -f2)
 export admin_password=$(grep admin_password ./puppet/hieradata/account/account.yaml |cut -d: -f2|sed 's/ //g')
 
 # read prefix for redis keys for this build
-prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
+prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc -w1 ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
 
 failed='false'
 

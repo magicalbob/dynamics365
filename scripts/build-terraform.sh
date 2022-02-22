@@ -77,7 +77,7 @@ chmod +x ./terraform-provider-virtualbox
 
 # Get rid of old box, in case it already exists
 rm -rvf ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
-mv /tmp/dynamics-windows-virtualbox.box .
+cp -v /tmp/dynamics-windows-virtualbox.box .
 
 # Terraform initialise
 terraform init

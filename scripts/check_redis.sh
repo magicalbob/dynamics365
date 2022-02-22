@@ -10,38 +10,38 @@ if [ -f ./prefix ]
 then
   prefix=$(cat prefix)
 else
-  prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
+  prefix=$(echo -e  "AUTH ${redis_pass}\r\nGET prefix\r\n" | nc -w1 ${redis_ip} 6379|tail -n1|grep -o [0-9][0-9]*|tr -d "[:cntrl:]")
 fi
 
-export ad_ip=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_ad_ip\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+export ad_ip=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_ad_ip\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-ad_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadir_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+ad_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadir_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-sql_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynsql_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+sql_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynsql_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-sql_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_sql_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+sql_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_sql_ready\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-fe_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+fe_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-fe_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-fe_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_365_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-fe_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_365_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+fe_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_ready\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+fe_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_365_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+fe_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynfe_365_done\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-ssrs_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_ssrs_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+ssrs_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_ssrs_ready\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-be_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+be_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-be_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-be_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_365_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-be_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_365_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+be_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_ready\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+be_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_365_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+be_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynbe_365_done\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-adm_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+adm_started=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-adm_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-adm_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_365_started\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
-adm_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_365_done\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+adm_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_ready\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+adm_365_start=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_365_started\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+adm_365_done=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_dynadm_365_done\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
-org_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_neworg_ready\r\n" | nc ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
+org_ready=$(echo -e  "AUTH ${redis_pass}\r\nGET ${prefix}_neworg_ready\r\n" | nc -w1 ${redis_ip} 6379 |tail -n1|tr -d "[:cntrl:]")
 
 echo "    Prefix is: ${prefix}."
 echo "     AD IP is: ${ad_ip}."
