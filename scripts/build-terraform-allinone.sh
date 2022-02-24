@@ -152,6 +152,7 @@ fi
 
 # Get primary network device
 export TF_VAR_netdev=$(VBoxManage list bridgedifs|head -n1|cut -d: -f2|sed 's/^[ ]*//g')
+export TF_VAR_branch=${CI_COMMIT_BRANCH}
 
 # Bring up the cluster
 terraform apply --auto-approve

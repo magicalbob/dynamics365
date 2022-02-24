@@ -1,6 +1,6 @@
 resource "virtualbox_vm" "allinone" {
   count  = 1
-  name   = join("", ["allinone", formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())])
+  name   = join("", ["allinone", var.branch])
   image  = "./dynamics-windows-virtualbox.box"
   cpus   = 4
   memory = "16384 mib"
