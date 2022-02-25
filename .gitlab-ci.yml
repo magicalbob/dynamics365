@@ -7,6 +7,8 @@ stages:
   - tidy_windows
   - build_windows
   - apply_windows
+  - test_build_windows
+  - test_org_windows
 
 tidy_job:
   stage: tidy
@@ -42,6 +44,7 @@ test_org_job:
   stage: test_org
   tags:
     - linux
+  allow_failure: true
   script:
     - sh './scripts/test-org.sh'
 
@@ -66,4 +69,19 @@ apply_windows_job:
   timeout: 3 hours
   script:
     - bash ./scripts/build-terraform-allinone.sh
-    - bash ./scripts/test-build-allinone.sh
+
+test_build_windows_job:
+  stage: test_build_windows
+  tags:
+    - windows
+  timeout: 3 hours
+  script:
+    - ./scripts/test-build-allinone.sh
+
+test_org_windows_job:
+  stage: test_org_windows
+  tags:
+    - windows
+  allow_failure: true
+  script:
+    - sh './scripts/test-org.sh'
