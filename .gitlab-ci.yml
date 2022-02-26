@@ -8,7 +8,6 @@ stages:
   - build_windows
   - apply_windows
   - test_build_windows
-  - test_org_windows
 
 tidy_job:
   stage: tidy
@@ -77,11 +76,3 @@ test_build_windows_job:
   timeout: 3 hours
   script:
     - ./scripts/test-build-allinone.sh
-
-test_org_windows_job:
-  stage: test_org_windows
-  tags:
-    - windows
-  allow_failure: true
-  script:
-    - sh './scripts/test-org.sh'
