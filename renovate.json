@@ -1,0 +1,9 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  // Enables Docker major updates, disabled by default
+  "extends": ["config:base", "docker:enableMajor"], 
+  "enabledManagers": ["gitlabci"], // Only 1 manager will be run
+  "requiredStatusChecks": null,
+  // If the update is not major, do the merge automatically
+  "packageRules": [{ "updateTypes": ["minor", "patch", "pin", "digest"], "automerge": true }]
+}
