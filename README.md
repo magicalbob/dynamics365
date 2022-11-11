@@ -37,6 +37,8 @@ The puppet uses "flags" to orchestrate the order of the build. This is done usin
 
 A basic locking system is used by the build scripts, which stops them building if redis is already being used for a previous build. The lock will be released once all the machines have joined the AD.
 
+There is a `Dockerfile` to make building easier. `docker build -t your:image-name .` to set it up, and `docker run -ti -v ~/.ssh:/root/.ssh -v ~/.aws:/root/.aws -v ${PWD}:/opt/pwd your:imagename` to run it.
+
 Building
 ========
 

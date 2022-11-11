@@ -13,6 +13,7 @@ terraform*/terraform-provider-virtualbox*
 terraform*/terraform.tfstate
 terraform*/terraform.tfstate.backup
 terraform*/terraform.tfstate.d
+terraform*/.terraform.lock.hcl
 answer_files/AutoUnattend.xml
 answer_files/AutoUnattend.data.yml
 .py/

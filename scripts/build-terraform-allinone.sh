@@ -64,15 +64,6 @@ then
   export BRANCH_NAME=local
 fi
 
-# Download terraform provider for virtualbox
-resp=1
-while [ $resp -ne 0 ]
-do
-  curl -fLO https://dev.ellisbs.co.uk/files/software/terraform-provider-virtualbox${PROVIDER_EXT}
-  resp=$?
-done
-chmod +x ./terraform-provider-virtualbox
-
 # Get rid of old box, in case it already exists
 rm -rvf ~/.terraform/virtualbox/gold/dynamics-windows-virtualbox
 cp -v /tmp/dynamics-windows-virtualbox.box .
