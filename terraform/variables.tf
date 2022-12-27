@@ -1,9 +1,9 @@
-variable netdev {
+variable "netdev" {
   type        = string
   description = "Default network adapter to use"
 }
 
-variable branch {
+variable "branch" {
   type        = string
   description = "Git branch in use"
 }
